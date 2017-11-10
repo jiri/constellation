@@ -7,15 +7,16 @@
 
 #include <fmt/format.h>
 
+namespace fs = boost::filesystem;
+
 class Shader {
 public:
   Shader(const char *path);
-  Shader(const boost::filesystem::path &path);
-  Shader(const boost::filesystem::path &path, GLenum type);
+  Shader(const fs::path &path);
+  Shader(const fs::path &path, GLenum type);
 
   Shader(const Shader &) = delete;
-  Shader(Shader &&other);
-
+  Shader(Shader &&other) noexcept;
   ~Shader();
 
   Shader& operator=(Shader other);
@@ -30,10 +31,10 @@ private:
 
 class Program {
 public:
-  Program(boost::filesystem::path vpath, boost::filesystem::path fpath);
+  Program(fs::path vpath, fs::path fpath);
 
   Program(const Program &) = delete;
-  Program(Program &&other);
+  Program(Program &&other) noexcept;
 
   ~Program();
 
@@ -42,7 +43,7 @@ public:
   void reload();
 
   template<typename T>
-  void setUniform(std::string name, const T &val) {
+  void setUniform(const std::string& name, const T& val) {
     setUniform(location(name), val);
   }
 
@@ -52,12 +53,12 @@ public:
 
 private:
   template <typename T>
-  static void setUniform(GLint location, const T &val);
+  static void setUniform(GLint location, const T& val);
 
-  GLint location(const std::string &name);
+  GLint location(const std::string& name);
 
   GLuint id;
 
-  boost::filesystem::path vertex_path;
-  boost::filesystem::path fragment_path;
+  fs::path vertex_path;
+  fs::path fragment_path;
 };
