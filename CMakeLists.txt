@@ -3,6 +3,7 @@ project(Wiring)
 
 set(CMAKE_CXX_STANDARD 17)
 
+# Common libraries
 find_package(Boost REQUIRED COMPONENTS system graph filesystem)
 find_package(fmt REQUIRED)
 find_package(glfw3 REQUIRED)
@@ -29,12 +30,24 @@ link_libraries(
         glm
 )
 
+# Graphics library
+set(GRAPHICS_SOURCE_FILES
+        src/Graphics/Program.cpp
+)
+add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
+
+# Main
 set(SOURCE_FILES
         src/main.cpp
-        src/Graphics/Program.cpp
 )
 add_executable(Wiring ${SOURCE_FILES})
 
+target_link_libraries(
+        ${PROJECT_NAME} PUBLIC
+        ${PROJECT_NAME}_Graphics
+)
+
+# Link shaders
 add_custom_target(
         link_shaders
         ${CMAKE_COMMAND} -E create_symlink
@@ -42,5 +55,4 @@ add_custom_target(
         ${CMAKE_CURRENT_BINARY_DIR}/shd
         COMMENT "Linking shaders" VERBATIM
 )
-
 add_dependencies(${PROJECT_NAME} link_shaders)
