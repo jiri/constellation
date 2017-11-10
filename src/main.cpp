@@ -180,22 +180,42 @@ struct Monitor : public Component {
   std::string picture;
 
   Monitor()
-      : Component() {
+    : Component()
+  {
     this->port.vertex = this->vertex;
   }
 
   void update() override {
     this->picture = this->port.data;
     if (this->picture.empty()) {
-      this->picture = "askjnsdgdsae";
+      this->picture = gen_random(12);
     }
   }
 
   void render() const override {
-    fmt::print("{}\n", this->picture);
+    ImGui::Begin("Monitor");
+    ImGui::Text("%s", this->picture.c_str());
+    ImGui::End();
   }
 
-  Port port { Properties { true, 1.0f }};
+  Port port { Properties { true, 1.0f } };
+
+private:
+  std::string gen_random(int len) {
+    std::string s;
+    s.reserve(len);
+
+    static const char alphanum[] =
+        "0123456789"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "abcdefghijklmnopqrstuvwxyz";
+
+    for (int i = 0; i < len; ++i) {
+      s.append(1, alphanum[rand() % (sizeof(alphanum) - 1)]);
+    }
+
+    return s;
+  }
 };
 
 struct Camera : public Component {
@@ -303,6 +323,17 @@ int main() {
 
   Program prog { "shd/basic.vert", "shd/basic.frag" };
 
+  /* Components */
+  Monitor monitor;
+  Camera camera;
+  Cable cable { Properties { true, 1.0f } };
+
+  std::vector<std::pair<std::string, Node&>> nodes {
+          { "Monitor", monitor.port },
+          { "Camera", camera.port },
+          { "Cable", cable },
+  };
+
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -312,14 +343,43 @@ int main() {
     glClearColor(0.17f, 0.24f, 0.31f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    glUseProgram(prog);
-    glBindVertexArray(vao);
-    glDrawArrays(GL_TRIANGLES, 0, 3);
-    glBindVertexArray(0);
-    glUseProgram(0);
+//    glUseProgram(prog);
+//    glBindVertexArray(vao);
+//    glDrawArrays(GL_TRIANGLES, 0, 3);
+//    glBindVertexArray(0);
+//    glUseProgram(0);
 
-    ImGui::Begin("Hello");
-    ImGui::Text("world");
+    monitor.update();
+    camera.update();
+
+    monitor.render();
+    camera.render();
+
+    update();
+
+    ImGui::Begin("Nodes");
+    for (int i = 0; i < nodes.size(); i++) {
+      ImGui::Text("%d: %s", i, nodes[i].first.c_str());
+    }
+    ImGui::End();
+
+    ImGui::Begin("Console");
+    char buf[64];
+    bool flag = ImGui::InputText("Command", buf, 64, ImGuiInputTextFlags_EnterReturnsTrue);
+    if (flag) {
+      char cmd[64];
+      int a;
+      int b;
+      sscanf(buf, "%s %d %d", cmd, &a, &b);
+
+      std::string command(cmd);
+
+      if (a < nodes.size() && b < nodes.size()) {
+        if (command == "c") {
+          connect(nodes[a].second, nodes[b].second);
+        }
+      }
+    }
     ImGui::End();
 
     ImGui::Render();
