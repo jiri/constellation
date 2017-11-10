@@ -9,6 +9,7 @@ find_package(glfw3 REQUIRED)
 
 add_subdirectory(libraries/gsl)
 add_subdirectory(libraries/glad)
+add_subdirectory(libraries/imgui)
 
 include_directories(
         ${Boost_INCLUDE_DIRS}
@@ -21,6 +22,7 @@ link_libraries(
         glfw
         GSL
         glad
+        imgui
 )
 
 set(SOURCE_FILES

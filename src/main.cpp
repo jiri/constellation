@@ -1,11 +1,13 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <fmt/format.h>
+#include <gsl/gsl>
 
 #define GLFW_INCLUDE_NONE
 #include <GLFW/glfw3.h>
 #include <glad.h>
 
-#include <gsl/gsl>
+#include <imgui.h>
+#include <imgui_impl_glfw_gl3.h>
 
 struct Component;
 struct Port;
@@ -248,14 +250,24 @@ int main() {
   /* Enable VSync */
   glfwSwapInterval(0);
 
+  /* Initialise ImGui */
+  ImGui_ImplGlfwGL3_Init(window, true);
+  auto shutdownImgui = gsl::finally([] { ImGui_ImplGlfwGL3_Shutdown(); });
+
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
+    ImGui_ImplGlfwGL3_NewFrame();
 
     /* Rendering */
     glClearColor(0.17f, 0.24f, 0.31f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
+    ImGui::Begin("Hello");
+    ImGui::Text("world");
+    ImGui::End();
+
+    ImGui::Render();
     glfwSwapBuffers(window);
   }
 
