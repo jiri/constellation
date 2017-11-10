@@ -1,3 +1,4 @@
+#include <optional>
 #include <boost/graph/adjacency_list.hpp>
 #include <fmt/format.h>
 #include <gsl/gsl>
@@ -46,11 +47,21 @@ typedef boost::adjacency_list<boost::vecS,
     boost::property<edge_property_t, EdgeProperties>> CommunicationGraph;
 static CommunicationGraph G;
 
+class Port;
+
 struct Node {
   explicit Node(Properties properties)
-      : properties(properties) {}
+    : properties(properties) {}
 
   virtual ~Node() = default;
+
+  virtual Port* findPort(Node* prev = nullptr) = 0;
+
+  virtual bool free() const = 0;
+
+  virtual void addNeighbour(Node* node) = 0;
+
+  virtual std::optional<Properties> fold(Node* prev = nullptr) = 0;
 
   Properties properties;
 };
@@ -60,12 +71,94 @@ struct Port : public Node {
   CommunicationGraph::vertex_descriptor vertex;
   Node* neighbour = nullptr;
   std::string data;
+
+  Port* findPort(Node*) override {
+    return this;
+  }
+
+  bool free() const override {
+    return neighbour == nullptr;
+  }
+
+  void addNeighbour(Node* node) override {
+    assert(free());
+    neighbour = node;
+  }
+
+  std::optional<Properties> fold(Node* prev = nullptr) override {
+    if (prev == nullptr) {
+      if (neighbour == nullptr) {
+        return std::nullopt;
+      }
+      else if (auto other = neighbour->fold(this)) {
+        return combine(properties, *other);
+      }
+      else {
+        return std::nullopt;
+      }
+    }
+    else {
+      return { properties };
+    }
+  }
 };
 
 struct Cable : public Node {
   using Node::Node;
   Node* neighbours[2] {};
   uint8_t neighbourCount = 0;
+
+  Port* findPort(Node* prev = nullptr) override {
+    assert(prev != nullptr &&
+           (neighbours[0] == prev || neighbours[1] == prev));
+
+    if (neighbours[0] == nullptr || neighbours[1] == nullptr) {
+      return nullptr;
+    }
+
+    if (prev == neighbours[0]) {
+      return neighbours[1]->findPort(this);
+    }
+    else {
+      return neighbours[0]->findPort(this);
+    }
+  }
+
+  bool free() const override {
+    return neighbourCount < 2;
+  }
+
+  void addNeighbour(Node *node) override {
+    assert(free());
+    neighbours[neighbourCount++] = node;
+  }
+
+  std::optional<Properties> fold(Node *prev) override {
+    assert(prev == nullptr || prev == neighbours[0] || prev == neighbours[1]);
+
+    if (neighbourCount < 2) {
+      return std::nullopt;
+    }
+
+    auto ra = neighbours[0]->fold(this);
+    auto rb = neighbours[1]->fold(this);
+
+    if (prev == nullptr) {
+      if (ra && rb) {
+        return combine(properties, combine(*ra, *rb));
+      } else {
+        return std::nullopt;
+      }
+    }
+    else {
+      if (prev == neighbours[0]) {
+        return combine(properties, *rb);
+      }
+      else {
+        return combine(properties, *ra);
+      }
+    }
+  }
 };
 
 struct Component {
@@ -118,99 +211,29 @@ struct Camera : public Component {
 
   void render() const override {}
 
-  Port port { Properties { true, 1.0f }};
+  Port port { Properties { true, 1.0f } };
 };
 
-bool connect(Node* a, Node* b) {
-  if (auto* pa = dynamic_cast<Port*>(a)) {
-    if (pa->neighbour) {
-      return false;
-    }
-    if (auto* pb = dynamic_cast<Port*>(b)) {
-      return false;
-    }
-    else if (auto* cb = dynamic_cast<Cable*>(b)) {
-      if (cb->neighbourCount >= 2) {
-        return false;
-      }
-      pa->neighbour = cb;
-      cb->neighbours[cb->neighbourCount++] = pa;
-      goto end;
-    }
-    throw;
-  }
-  else if (auto* ca = dynamic_cast<Cable*>(a)) {
-    if (ca->neighbourCount >= 2) {
-      return false;
-    }
-    if (auto* pb = dynamic_cast<Port*>(b)) {
-      if (pb->neighbour) {
-        return false;
-      }
-      pb->neighbour = ca;
-      ca->neighbours[ca->neighbourCount++] = pb;
-      goto end;
-    }
-    else if (auto* cb = dynamic_cast<Cable*>(b)) {
-      if (cb->neighbourCount >= 2) {
-        return false;
-      }
-      ca->neighbours[ca->neighbourCount++] = cb;
-      cb->neighbours[cb->neighbourCount++] = ca;
-      goto end;
-    }
-    throw;
-  }
-  throw;
-  end:
-  Port* left = nullptr;
-  Port* right = nullptr;
-  Properties result {};
+void connect(Node* a, Node* b) {
+  assert(a != b);
+  assert(a->free() && b->free());
 
-  Node* index = a;
-  Node* prev = b;
+  a->addNeighbour(b);
+  b->addNeighbour(a);
 
-  while (index) {
-    result = combine(result, index->properties);
-    if (auto* pi = dynamic_cast<Port*>(index)) {
-      left = pi;
-      break;
-    }
-    else if (auto* ci = dynamic_cast<Cable*>(index)) {
-      index = ci->neighbours[0] == prev ? ci->neighbours[1] : ci->neighbours[0];
-      prev = ci;
-      continue;
-    }
-    break;
-  }
-
-  index = b;
-  prev = a;
-
-  while (index) {
-    result = combine(result, index->properties);
-    if (auto* pi = dynamic_cast<Port*>(index)) {
-      right = pi;
-      break;
-    }
-    else if (auto* ci = dynamic_cast<Cable*>(index)) {
-      index = ci->neighbours[0] == prev ? ci->neighbours[1] : ci->neighbours[0];
-      prev = ci;
-      continue;
-    }
-    throw;
-  }
+  Port* left = a->findPort(b);
+  Port* right = b->findPort(a);
 
   if (left && right) {
-    boost::add_edge(left->vertex, right->vertex, boost::property<edge_property_t, EdgeProperties>{
-        EdgeProperties { result.picture, result.power, left, right }}, G);
+    Properties result = *left->fold();
+    boost::add_edge(left->vertex, right->vertex, boost::property<edge_property_t, EdgeProperties> {
+        EdgeProperties { result.picture, result.power, left, right }
+    }, G);
   }
-
-  return true;
 }
 
-bool connect(Node& a, Node &b) {
-  return connect(&a, &b);
+void connect(Node& a, Node &b) {
+  connect(&a, &b);
 }
 
 void update() {
