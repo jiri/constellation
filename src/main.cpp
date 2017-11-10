@@ -1,6 +1,12 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <fmt/format.h>
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+#include <glad.h>
+
+#include <gsl/gsl>
+
 struct Component;
 struct Port;
 
@@ -215,29 +221,42 @@ void update() {
 }
 
 int main() {
-  Monitor monitor;
-  Cable cableA { Properties { true, 0.5f }};
-  Cable cableB { Properties { true, 1.0f }};
-  Cable cableC { Properties { true, 0.2f }};
-  Camera camera;
+  glfwSetErrorCallback([](int, const char* message) {
+    fmt::print("{}\n", message);
+  });
 
-  connect(monitor.port, cableA);
-  connect(cableA, cableB);
-//  connect(cableB, cableC);
-  connect(cableC, camera.port);
+  glfwInit();
+  auto terminateGlfw = gsl::finally([] { glfwTerminate(); });
 
-  for (uint8_t i = 0; i < 10; ++i) {
-    camera.update();
-    monitor.update();
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 
-    camera.render();
-    monitor.render();
+  GLFWwindow* window = glfwCreateWindow(800, 600, "", nullptr, nullptr);
+  glfwMakeContextCurrent(window);
 
-    if (i > 3) {
-      connect(cableB, cableC);
-    }
+  if(!gladLoadGL()) {
+    printf("Something went wrong!\n");
+    exit(-1);
+  }
 
-    update();
+  glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int w, int h) {
+    glViewport(0, 0, w, h);
+  });
+
+  /* Enable VSync */
+  glfwSwapInterval(0);
+
+  /* Main loop */
+  while (!glfwWindowShouldClose(window)) {
+    glfwPollEvents();
+
+    /* Rendering */
+    glClearColor(0.17f, 0.24f, 0.31f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    glfwSwapBuffers(window);
   }
 
   return 0;
