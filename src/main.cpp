@@ -1,0 +1,244 @@
+#include <boost/graph/adjacency_list.hpp>
+#include <fmt/format.h>
+
+struct Component;
+struct Port;
+
+struct Vertex {
+  Component* component = nullptr;
+};
+
+struct Properties {
+  bool picture = true;
+  float power = std::numeric_limits<float>::max();
+};
+
+struct EdgeProperties : public Properties {
+  Port* a;
+  Port* b;
+};
+
+Properties combine(const Properties& a, const Properties& b) {
+  return { a.picture && b.picture, std::min(a.power, b.power) };
+}
+
+struct vertex_property_t {
+  typedef boost::edge_property_tag kind;
+};
+struct edge_property_t {
+  typedef boost::edge_property_tag kind;
+};
+
+typedef boost::adjacency_list<boost::vecS,
+    boost::vecS,
+    boost::undirectedS,
+    boost::property<vertex_property_t, Vertex>,
+    boost::property<edge_property_t, EdgeProperties>> CommunicationGraph;
+static CommunicationGraph G;
+
+struct Node {
+  explicit Node(Properties properties)
+      : properties(properties) {}
+
+  virtual ~Node() = default;
+
+  Properties properties;
+};
+
+struct Port : public Node {
+  using Node::Node;
+  CommunicationGraph::vertex_descriptor vertex;
+  Node* neighbour = nullptr;
+  std::string data;
+};
+
+struct Cable : public Node {
+  using Node::Node;
+  Node* neighbours[2] {};
+  uint8_t neighbourCount = 0;
+};
+
+struct Component {
+  Component()
+      : vertex(boost::add_vertex(G)) {}
+
+  virtual ~Component() {
+    boost::remove_vertex(this->vertex, G);
+  }
+
+  virtual void update() = 0;
+
+  virtual void render() const = 0;
+
+  CommunicationGraph::vertex_descriptor vertex;
+};
+
+struct Monitor : public Component {
+  std::string picture;
+
+  Monitor()
+      : Component() {
+    this->port.vertex = this->vertex;
+  }
+
+  void update() override {
+    this->picture = this->port.data;
+    if (this->picture.empty()) {
+      this->picture = "askjnsdgdsae";
+    }
+  }
+
+  void render() const override {
+    fmt::print("{}\n", this->picture);
+  }
+
+  Port port { Properties { true, 1.0f }};
+};
+
+struct Camera : public Component {
+  Camera()
+      : Component() {
+    this->port.vertex = this->vertex;
+  }
+
+  void update() override {
+    static uint32_t counter = 0;
+    this->port.data = fmt::format("HELLO {}", counter++);
+  }
+
+  void render() const override {}
+
+  Port port { Properties { true, 1.0f }};
+};
+
+bool connect(Node* a, Node* b) {
+  if (auto* pa = dynamic_cast<Port*>(a)) {
+    if (pa->neighbour) {
+      return false;
+    }
+    if (auto* pb = dynamic_cast<Port*>(b)) {
+      return false;
+    }
+    else if (auto* cb = dynamic_cast<Cable*>(b)) {
+      if (cb->neighbourCount >= 2) {
+        return false;
+      }
+      pa->neighbour = cb;
+      cb->neighbours[cb->neighbourCount++] = pa;
+      goto end;
+    }
+    throw;
+  }
+  else if (auto* ca = dynamic_cast<Cable*>(a)) {
+    if (ca->neighbourCount >= 2) {
+      return false;
+    }
+    if (auto* pb = dynamic_cast<Port*>(b)) {
+      if (pb->neighbour) {
+        return false;
+      }
+      pb->neighbour = ca;
+      ca->neighbours[ca->neighbourCount++] = pb;
+      goto end;
+    }
+    else if (auto* cb = dynamic_cast<Cable*>(b)) {
+      if (cb->neighbourCount >= 2) {
+        return false;
+      }
+      ca->neighbours[ca->neighbourCount++] = cb;
+      cb->neighbours[cb->neighbourCount++] = ca;
+      goto end;
+    }
+    throw;
+  }
+  throw;
+  end:
+  Port* left = nullptr;
+  Port* right = nullptr;
+  Properties result {};
+
+  Node* index = a;
+  Node* prev = b;
+
+  while (index) {
+    result = combine(result, index->properties);
+    if (auto* pi = dynamic_cast<Port*>(index)) {
+      left = pi;
+      break;
+    }
+    else if (auto* ci = dynamic_cast<Cable*>(index)) {
+      index = ci->neighbours[0] == prev ? ci->neighbours[1] : ci->neighbours[0];
+      prev = ci;
+      continue;
+    }
+    break;
+  }
+
+  index = b;
+  prev = a;
+
+  while (index) {
+    result = combine(result, index->properties);
+    if (auto* pi = dynamic_cast<Port*>(index)) {
+      right = pi;
+      break;
+    }
+    else if (auto* ci = dynamic_cast<Cable*>(index)) {
+      index = ci->neighbours[0] == prev ? ci->neighbours[1] : ci->neighbours[0];
+      prev = ci;
+      continue;
+    }
+    throw;
+  }
+
+  if (left && right) {
+    boost::add_edge(left->vertex, right->vertex, boost::property<edge_property_t, EdgeProperties>{
+        EdgeProperties { result.picture, result.power, left, right }}, G);
+  }
+
+  return true;
+}
+
+bool connect(Node& a, Node &b) {
+  return connect(&a, &b);
+}
+
+void update() {
+  boost::property_map<CommunicationGraph, edge_property_t>::type EdgePropertyMap = boost::get(edge_property_t(), G);
+
+  for (auto edgePair = boost::edges(G); edgePair.first != edgePair.second; ++edgePair.first) {
+    auto& prop = EdgePropertyMap[*edgePair.first];
+    if (prop.picture) {
+      std::swap(prop.a->data, prop.b->data);
+    }
+  }
+}
+
+int main() {
+  Monitor monitor;
+  Cable cableA { Properties { true, 0.5f }};
+  Cable cableB { Properties { true, 1.0f }};
+  Cable cableC { Properties { true, 0.2f }};
+  Camera camera;
+
+  connect(monitor.port, cableA);
+  connect(cableA, cableB);
+//  connect(cableB, cableC);
+  connect(cableC, camera.port);
+
+  for (uint8_t i = 0; i < 10; ++i) {
+    camera.update();
+    monitor.update();
+
+    camera.render();
+    monitor.render();
+
+    if (i > 3) {
+      connect(cableB, cableC);
+    }
+
+    update();
+  }
+
+  return 0;
+}
