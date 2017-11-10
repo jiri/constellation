@@ -34,3 +34,13 @@ set(SOURCE_FILES
         src/Graphics/Program.cpp
 )
 add_executable(Wiring ${SOURCE_FILES})
+
+add_custom_target(
+        link_shaders
+        ${CMAKE_COMMAND} -E create_symlink
+        ${CMAKE_CURRENT_SOURCE_DIR}/shd
+        ${CMAKE_CURRENT_BINARY_DIR}/shd
+        COMMENT "Linking shaders" VERBATIM
+)
+
+add_dependencies(${PROJECT_NAME} link_shaders)
