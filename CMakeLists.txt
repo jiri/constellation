@@ -8,6 +8,8 @@ find_package(fmt REQUIRED)
 find_package(glfw3 REQUIRED)
 
 add_subdirectory(libraries/gsl)
+add_subdirectory(libraries/glad)
+
 include_directories(
         ${Boost_INCLUDE_DIRS}
         ${fmt_INCLUDE_DIRS}
@@ -18,6 +20,7 @@ link_libraries(
         fmt
         glfw
         GSL
+        glad
 )
 
 set(SOURCE_FILES
