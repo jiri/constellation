@@ -1,4 +1,6 @@
 #include <optional>
+#include <random>
+
 #include <boost/graph/adjacency_list.hpp>
 #include <fmt/format.h>
 #include <gsl/gsl>
@@ -9,6 +11,9 @@
 
 #include <imgui.h>
 #include <imgui_impl_glfw_gl3.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <Graphics/Program.hpp>
 
@@ -56,11 +61,10 @@ struct Node {
   virtual ~Node() = default;
 
   virtual Port* findPort(Node* prev = nullptr) = 0;
-
   virtual bool free() const = 0;
-
   virtual void addNeighbour(Node* node) = 0;
-
+  virtual void removeNeighbour(Node* node) = 0;
+  virtual bool isNeighbourOf(Node* node) const = 0;
   virtual std::optional<Properties> fold(Node* prev = nullptr) = 0;
 
   Properties properties;
@@ -70,7 +74,7 @@ struct Port : public Node {
   using Node::Node;
   CommunicationGraph::vertex_descriptor vertex;
   Node* neighbour = nullptr;
-  std::string data;
+  glm::vec3 data;
 
   Port* findPort(Node*) override {
     return this;
@@ -80,9 +84,22 @@ struct Port : public Node {
     return neighbour == nullptr;
   }
 
+  bool connected() {
+    return neighbour && neighbour->findPort(this);
+  }
+
   void addNeighbour(Node* node) override {
     assert(free());
     neighbour = node;
+  }
+
+  void removeNeighbour(Node* node) override {
+    assert(neighbour == node);
+    neighbour = nullptr;
+  }
+
+  bool isNeighbourOf(Node* node) const override {
+    return neighbour == node;
   }
 
   std::optional<Properties> fold(Node* prev = nullptr) override {
@@ -133,6 +150,24 @@ struct Cable : public Node {
     neighbours[neighbourCount++] = node;
   }
 
+  void removeNeighbour(Node* node) override {
+    assert(neighbours[0] == node || neighbours[1] == node);
+
+    if (neighbours[1] == node) {
+      neighbours[1] = nullptr;
+      neighbourCount--;
+    }
+    else {
+      neighbours[0] = neighbours[1];
+      neighbours[1] = nullptr;
+      neighbourCount--;
+    }
+  }
+
+  bool isNeighbourOf(Node* node) const override {
+    return neighbours[0] == node || neighbours[1] == node;
+  }
+
   std::optional<Properties> fold(Node *prev) override {
     assert(prev == nullptr || prev == neighbours[0] || prev == neighbours[1]);
 
@@ -170,14 +205,13 @@ struct Component {
   }
 
   virtual void update() = 0;
-
   virtual void render() const = 0;
 
   CommunicationGraph::vertex_descriptor vertex;
 };
 
 struct Monitor : public Component {
-  std::string picture;
+  glm::vec3 color;
 
   Monitor()
     : Component()
@@ -186,36 +220,26 @@ struct Monitor : public Component {
   }
 
   void update() override {
-    this->picture = this->port.data;
-    if (this->picture.empty()) {
-      this->picture = gen_random(12);
+    static thread_local std::default_random_engine generator;
+    static thread_local std::uniform_int_distribution<float> distribution(0.0f, 1.0);
+    static thread_local auto value = std::bind(distribution, generator);
+
+    if (this->port.connected()) {
+      color = port.data;
+    } else {
+      color = 0.5f * glm::vec3 { value(), value(), value() };
     }
   }
 
   void render() const override {
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(color.r, color.g, color.b));
+    ImGui::SetNextWindowContentSize({ 128, 128 });
     ImGui::Begin("Monitor");
-    ImGui::Text("%s", this->picture.c_str());
     ImGui::End();
+    ImGui::PopStyleColor();
   }
 
   Port port { Properties { true, 1.0f } };
-
-private:
-  std::string gen_random(int len) {
-    std::string s;
-    s.reserve(len);
-
-    static const char alphanum[] =
-        "0123456789"
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz";
-
-    for (int i = 0; i < len; ++i) {
-      s.append(1, alphanum[rand() % (sizeof(alphanum) - 1)]);
-    }
-
-    return s;
-  }
 };
 
 struct Camera : public Component {
@@ -225,16 +249,25 @@ struct Camera : public Component {
   }
 
   void update() override {
-    static uint32_t counter = 0;
-    this->port.data = fmt::format("HELLO {}", counter++);
+    this->port.data = color;
   }
 
-  void render() const override {}
+  void render() const override {
+    ImGui::SetNextWindowSize({ 256, 256 });
+    ImGui::Begin("Camera");
+    ImGui::ColorPicker3("Color", (float*)&color);
+    ImGui::End();
+  }
 
+  glm::vec3 color;
   Port port { Properties { true, 1.0f } };
 };
 
 void connect(Node* a, Node* b) {
+  if (a->isNeighbourOf(b) && b->isNeighbourOf(a)) {
+    return;
+  }
+
   assert(a != b);
   assert(a->free() && b->free());
 
@@ -252,20 +285,47 @@ void connect(Node* a, Node* b) {
   }
 }
 
+void disconnect(Node* a, Node* b) {
+  assert(a != b);
+  assert(a->isNeighbourOf(b) && b->isNeighbourOf(a));
+
+  Port* left = a->findPort(b);
+  Port* right = b->findPort(a);
+
+  if (left && right) {
+    auto edge = boost::edge(left->vertex, right->vertex, G);
+    assert(edge.second);
+    boost::remove_edge(edge.first, G);
+  }
+
+  a->removeNeighbour(b);
+  b->removeNeighbour(a);
+}
+
 void connect(Node& a, Node &b) {
   connect(&a, &b);
 }
 
-void update() {
-  boost::property_map<CommunicationGraph, edge_property_t>::type EdgePropertyMap = boost::get(edge_property_t(), G);
+void disconnect(Node& a, Node&b ) {
+  disconnect(&a, &b);
+}
 
-  for (auto edgePair = boost::edges(G); edgePair.first != edgePair.second; ++edgePair.first) {
-    auto& prop = EdgePropertyMap[*edgePair.first];
-    if (prop.picture) {
-      std::swap(prop.a->data, prop.b->data);
+struct PictureSystem {
+  static void update() {
+    boost::property_map<CommunicationGraph, edge_property_t>::type EdgePropertyMap = boost::get(edge_property_t(), G);
+
+    for (auto edgePair = boost::edges(G); edgePair.first != edgePair.second; ++edgePair.first) {
+      auto& prop = EdgePropertyMap[*edgePair.first];
+      if (prop.picture) {
+        swap(prop.a, prop.b);
+      }
     }
   }
-}
+
+  static void swap(Port* a, Port* b) {
+    std::swap(a->data, b->data);
+  }
+};
 
 int main() {
   glfwSetErrorCallback([](int, const char* message) {
@@ -355,7 +415,7 @@ int main() {
     monitor.render();
     camera.render();
 
-    update();
+    PictureSystem::update();
 
     ImGui::Begin("Nodes");
     for (int i = 0; i < nodes.size(); i++) {
@@ -366,17 +426,24 @@ int main() {
     ImGui::Begin("Console");
     char buf[64];
     bool flag = ImGui::InputText("Command", buf, 64, ImGuiInputTextFlags_EnterReturnsTrue);
+    if (ImGui::IsRootWindowOrAnyChildFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0))
+      ImGui::SetKeyboardFocusHere(0);
     if (flag) {
       char cmd[64];
       int a;
       int b;
-      sscanf(buf, "%s %d %d", cmd, &a, &b);
+      int r = sscanf(buf, "%s %d %d", cmd, &a, &b);
 
-      std::string command(cmd);
+      if (r == 3) {
+        std::string command(cmd);
 
-      if (a < nodes.size() && b < nodes.size()) {
-        if (command == "c") {
-          connect(nodes[a].second, nodes[b].second);
+        if (a < nodes.size() && b < nodes.size()) {
+          if (command == "c") {
+            connect(nodes[a].second, nodes[b].second);
+          }
+          if (command == "d") {
+            disconnect(nodes[a].second, nodes[b].second);
+          }
         }
       }
     }
