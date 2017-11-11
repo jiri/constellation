@@ -305,7 +305,11 @@ void connect(Node* a, Node* b) {
 
 void disconnect(Node* a, Node* b) {
   assert(a != b);
-  assert(a->isNeighbourOf(b) && b->isNeighbourOf(a));
+  assert(a->isNeighbourOf(b) == b->isNeighbourOf(a));
+
+  if (!a->isNeighbourOf(b) || b->isNeighbourOf(a)) {
+    return;
+  }
 
   Port* left = a->findPort(b);
   Port* right = b->findPort(a);
