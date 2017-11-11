@@ -39,6 +39,7 @@ add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
 # Main
 set(SOURCE_FILES
         src/main.cpp
+        src/Util/Random.hpp
 )
 add_executable(Wiring ${SOURCE_FILES})
 

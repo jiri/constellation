@@ -1,5 +1,4 @@
 #include <optional>
-#include <random>
 
 #include <boost/graph/adjacency_list.hpp>
 #include <fmt/format.h>
@@ -16,6 +15,7 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <Graphics/Program.hpp>
+#include <Util/Random.hpp>
 
 struct Component;
 struct Port;
@@ -220,14 +220,11 @@ struct Monitor : public Component {
   }
 
   void update() override {
-    static thread_local std::default_random_engine generator;
-    static thread_local std::uniform_int_distribution<float> distribution(0.0f, 1.0);
-    static thread_local auto value = std::bind(distribution, generator);
 
     if (this->port.connected()) {
       color = port.data;
     } else {
-      color = 0.5f * glm::vec3 { value(), value(), value() };
+      color = 0.5f * randomColor();
     }
   }
 
