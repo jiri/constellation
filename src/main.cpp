@@ -82,7 +82,8 @@ static CommunicationGraph G;
 
 struct Node {
   explicit Node(Capabilities c)
-    : capabilities(c) {}
+    : capabilities(c)
+  { }
 
   virtual ~Node() = default;
 
