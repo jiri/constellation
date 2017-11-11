@@ -22,6 +22,10 @@ struct Capabilities {
     bool enabled = false;
     float errorRate = 0.0f;
   } picture;
+  struct {
+    bool enabled = false;
+    float throughput = 0.0f;
+  } energy;
 };
 
 Capabilities combine(const Capabilities& a, const Capabilities& b) {
@@ -29,11 +33,15 @@ Capabilities combine(const Capabilities& a, const Capabilities& b) {
       {
           a.picture.enabled && b.picture.enabled,
           a.picture.errorRate + b.picture.errorRate,
-      }
+      },
+      {
+          a.energy.enabled && b.energy.enabled,
+          std::min(a.energy.throughput, b.energy.throughput),
+      },
   };
 }
 
-struct Buffer {
+struct PictureBuffer {
   std::optional<glm::vec3> pictureData;
 
   void send(const glm::vec3& v) {
@@ -48,6 +56,25 @@ struct Buffer {
 
   void clear() {
     pictureData = std::nullopt;
+  }
+};
+
+struct EnergyBuffer {
+  float energyOffer = 0.0f;
+  float energyPool = 0.0f;
+
+  void offer(float energy) {
+    energyOffer += energy;
+  }
+
+  float request(float req) {
+    float res = std::min(energyPool, req);
+    energyPool -= res;
+    return res;
+  }
+
+  void clear() {
+    energyOffer = 0.0f;
   }
 };
 
@@ -143,7 +170,9 @@ struct Port : public Node {
 
   Component* component = nullptr;
   Node* neighbour = nullptr;
-  Buffer buffer;
+
+  PictureBuffer pictureBuffer;
+  EnergyBuffer energyBuffer;
 };
 
 struct Cable : public Node {
@@ -242,7 +271,7 @@ struct Monitor : public Component {
   { }
 
   void update() override {
-    if (auto data = port.buffer.receive()) {
+    if (auto data = port.pictureBuffer.receive()) {
       color = *data;
     }
     else {
@@ -253,7 +282,7 @@ struct Monitor : public Component {
   void render() const override {
     ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(color.r, color.g, color.b));
     ImGui::SetNextWindowContentSize({ 128, 128 });
-    ImGui::Begin("Monitor");
+    ImGui::Begin("Monitor", nullptr, ImGuiWindowFlags_NoResize);
     ImGui::End();
     ImGui::PopStyleColor();
   }
@@ -268,7 +297,7 @@ struct Camera : public Component {
   { }
 
   void update() override {
-    this->port.buffer.send(color);
+    this->port.pictureBuffer.send(color);
   }
 
   void render() const override {
@@ -279,6 +308,49 @@ struct Camera : public Component {
   }
 
   glm::vec3 color;
+  Port port;
+};
+
+struct Generator : public Component {
+  Generator()
+    : Component()
+    , port(this, { { false, 0.0f }, { true, 100.0f } })
+  { }
+
+  void update() override {
+    this->port.energyBuffer.offer(power);
+  }
+
+  void render() const override {
+    ImGui::Begin("Generator");
+    ImGui::SliderFloat("Power", &power, 0.0f, 100.0f);
+    ImGui::End();
+  }
+
+  mutable float power = 50.0f;
+  Port port;
+};
+
+struct Lamp : public Component {
+  Lamp()
+    : Component()
+    , port(this, { { false, 0.0f }, { true, 10.0f } })
+  { }
+
+  void update() override {
+    float energy = port.energyBuffer.request(10.0f);
+    satisfaction = energy / 10.0f;
+  }
+
+  void render() const override {
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(satisfaction, satisfaction, 0.0f));
+    ImGui::SetNextWindowContentSize({ 64, 64 });
+    ImGui::Begin("Lamp", nullptr, ImGuiWindowFlags_NoResize);
+    ImGui::End();
+    ImGui::PopStyleColor();
+  }
+
+  float satisfaction = 0.0f;
   Port port;
 };
 
@@ -308,7 +380,7 @@ void disconnect(Node* a, Node* b) {
   assert(a != b);
   assert(a->isNeighbourOf(b) == b->isNeighbourOf(a));
 
-  if (!a->isNeighbourOf(b) || b->isNeighbourOf(a)) {
+  if (!a->isNeighbourOf(b) || !b->isNeighbourOf(a)) {
     return;
   }
 
@@ -347,10 +419,30 @@ struct PictureSystem {
 
   static void swap(Port* a, Port* b, float errorRate) {
     if (randomFloat() < errorRate) {
-      a->buffer.pictureData = randomColor();
-      b->buffer.pictureData = randomColor();
+      a->pictureBuffer.pictureData = randomColor();
+      b->pictureBuffer.pictureData = randomColor();
     }
-    std::swap(a->buffer, b->buffer);
+    std::swap(a->pictureBuffer, b->pictureBuffer);
+  }
+};
+
+struct EnergySystem {
+  static void update() {
+    boost::property_map<CommunicationGraph, edge_property_t>::type EdgePropertyMap = boost::get(edge_property_t(), G);
+
+    for (auto edgePair = boost::edges(G); edgePair.first != edgePair.second; ++edgePair.first) {
+      auto& prop = EdgePropertyMap[*edgePair.first];
+      if (prop.capabilities.energy.enabled) {
+        swap(prop.a, prop.b, prop.capabilities.energy.throughput);
+      }
+    }
+  }
+
+  static void swap(Port* a, Port* b, float throughput) {
+    a->energyBuffer.energyPool = std::min(throughput, b->energyBuffer.energyOffer);
+    b->energyBuffer.energyOffer = 0.0f;
+    b->energyBuffer.energyPool = std::min(throughput, a->energyBuffer.energyOffer);
+    a->energyBuffer.energyOffer = 0.0f;
   }
 };
 
@@ -389,12 +481,20 @@ int main() {
   /* Components */
   Monitor monitor;
   Camera camera;
-  Cable cable { { true, 0.1f } };
+  Generator generator;
+  Lamp lamp;
+  Cable cable1({ { true, 0.1f }, { false, 0.0f } });
+  Cable cable2({ { false, 0.0f }, { true, 100.0f } });
+  Cable cable3({ { false, 0.0f }, { true, 5.0f } });
 
   std::vector<std::pair<std::string, Node&>> nodes {
           { "Monitor", monitor.port },
           { "Camera", camera.port },
-          { "Cable", cable },
+          { "Generator", generator.port },
+          { "Lamp", lamp.port },
+          { "Cable P", cable1 },
+          { "Cable S", cable2 },
+          { "Cable W", cable3 },
   };
 
   /* Main loop */
@@ -408,19 +508,22 @@ int main() {
 
     monitor.update();
     camera.update();
+    generator.update();
+    lamp.update();
 
     PictureSystem::update();
+    EnergySystem::update();
 
     monitor.render();
     camera.render();
+    generator.render();
+    lamp.render();
 
     ImGui::Begin("Nodes");
     for (int i = 0; i < nodes.size(); i++) {
       ImGui::Text("%d: %s", i, nodes[i].first.c_str());
     }
     ImGui::End();
-
-    ImGui::SliderFloat("Cable errorRate", &cable.capabilities.picture.errorRate, 0.0f, 1.0f);
 
     ImGui::Begin("Console");
     char buf[64] {};
