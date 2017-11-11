@@ -88,7 +88,7 @@ struct Node {
   virtual ~Node() = default;
 
   virtual Port* findPort(Node* prev) = 0;
-  virtual bool free() const = 0;
+  virtual bool isFree() const = 0;
   virtual void addNeighbour(Node* node) = 0;
   virtual void removeNeighbour(Node* node) = 0;
   virtual bool isNeighbourOf(Node* node) const = 0;
@@ -106,11 +106,11 @@ struct Port : public Node {
   Port* findPort(Node*) override {
     return this;
   }
-  bool free() const override {
+  bool isFree() const override {
     return neighbour == nullptr;
   }
   void addNeighbour(Node* node) override {
-    assert(free());
+    assert(isFree());
     neighbour = node;
   }
   void removeNeighbour(Node* node) override {
@@ -164,11 +164,11 @@ struct Cable : public Node {
       return neighbours[0]->findPort(this);
     }
   }
-  bool free() const override {
+  bool isFree() const override {
     return neighbourCount < 2;
   }
   void addNeighbour(Node *node) override {
-    assert(free());
+    assert(isFree());
     neighbours[neighbourCount++] = node;
   }
   void removeNeighbour(Node* node) override {
@@ -288,7 +288,7 @@ void connect(Node* a, Node* b) {
   }
 
   assert(a != b);
-  assert(a->free() && b->free());
+  assert(a->isFree() && b->isFree());
 
   a->addNeighbour(b);
   b->addNeighbour(a);
