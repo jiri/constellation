@@ -16,6 +16,7 @@
 
 #include <Graphics/Program.hpp>
 #include <Util/Random.hpp>
+#include <queue>
 
 struct Capabilities {
   struct {
@@ -26,6 +27,9 @@ struct Capabilities {
     bool enabled = false;
     float throughput = 0.0f;
   } energy;
+  struct {
+    bool enabled = false;
+  } text;
 };
 
 Capabilities combine(const Capabilities& a, const Capabilities& b) {
@@ -37,6 +41,9 @@ Capabilities combine(const Capabilities& a, const Capabilities& b) {
       {
           a.energy.enabled && b.energy.enabled,
           std::min(a.energy.throughput, b.energy.throughput),
+      },
+      {
+          a.text.enabled && b.text.enabled,
       },
   };
 }
@@ -75,6 +82,25 @@ struct EnergyBuffer {
 
   void clear() {
     energyOffer = 0.0f;
+  }
+};
+
+struct TextBuffer {
+  std::queue<std::string> messages;
+
+  void send(const std::string& m) {
+    messages.push(m);
+  }
+
+  std::optional<std::string> receive() {
+    if (messages.empty()) {
+      return std::nullopt;
+    }
+    else {
+      std::string res = messages.front();
+      messages.pop();
+      return res;
+    }
   }
 };
 
@@ -173,6 +199,7 @@ struct Port : public Node {
 
   PictureBuffer pictureBuffer;
   EnergyBuffer energyBuffer;
+  TextBuffer textBuffer;
 };
 
 struct Cable : public Node {
@@ -264,10 +291,11 @@ struct Component {
 
 struct Monitor : public Component {
   glm::vec3 color;
+  std::string message;
 
   Monitor()
     : Component()
-    , port(this, Capabilities { { true, 0.0f } })
+    , port(this, Capabilities { { true, 0.0f }, { false, 0.0f }, { true } })
   { }
 
   void update() override {
@@ -277,14 +305,25 @@ struct Monitor : public Component {
     else {
       color = 0.5f * randomColor();
     }
+
+    while (auto msg = port.textBuffer.receive()) {
+      message += *msg + "\n";
+    }
   }
 
   void render() const override {
-    ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(color.r, color.g, color.b));
+    static bool noise = true;
+    ImGui::Checkbox("Monitor noise", &noise);
+    if (noise) {
+      ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(color.r, color.g, color.b));
+    }
     ImGui::SetNextWindowContentSize({ 128, 128 });
     ImGui::Begin("Monitor", nullptr, ImGuiWindowFlags_NoResize);
+    ImGui::Text("%s", message.c_str());
     ImGui::End();
-    ImGui::PopStyleColor();
+    if (noise) {
+      ImGui::PopStyleColor();
+    }
   }
 
   Port port;
@@ -293,7 +332,7 @@ struct Monitor : public Component {
 struct Camera : public Component {
   Camera()
     : Component()
-    , port(this, { { true, 0.0f } })
+    , port(this, { { true, 0.0f }, { false, 0.0f } })
   { }
 
   void update() override {
@@ -353,6 +392,65 @@ struct Lamp : public Component {
   float satisfaction = 0.0f;
   Port port;
 };
+
+struct CPU : public Component {
+  CPU()
+    : Component()
+    , port(this, { { false, 0.0f }, { true, 10.0f }, { true } })
+  { }
+
+  std::stack<int> stack;
+
+  int pop() {
+    int x = stack.top();
+    stack.pop();
+    return x;
+  }
+
+  void run(const std::string& program) {
+    std::istringstream iss(program);
+    std::string word;
+
+    while (iss >> word) {
+      if (word == "push") {
+        int i;
+        iss >> i;
+        stack.push(i);
+      }
+      if (word == "pop") {
+        pop();
+      }
+      if (word == "add") {
+        int a = pop();
+        int b = pop();
+        stack.push(a + b);
+      }
+      if (word == "neg") {
+        stack.push(-pop());
+      }
+      if (word == "mul") {
+        int a = pop();
+        int b = pop();
+        stack.push(a * b);
+      }
+      if (word == "divmod") {
+        int a = pop();
+        int b = pop();
+        stack.push(b / a);
+        stack.push(b % a);
+      }
+      if (word == "write") {
+        port.textBuffer.send(fmt::format("{}", stack.top()));
+      }
+    }
+  }
+
+  void update() override { }
+  void render() const override { }
+
+  Port port;
+};
+
 
 void connect(Node* a, Node* b) {
   if (a->isNeighbourOf(b) && b->isNeighbourOf(a)) {
@@ -446,6 +544,19 @@ struct EnergySystem {
   }
 };
 
+struct MessageSystem {
+  static void update() {
+    boost::property_map<CommunicationGraph, edge_property_t>::type EdgePropertyMap = boost::get(edge_property_t(), G);
+
+    for (auto edgePair = boost::edges(G); edgePair.first != edgePair.second; ++edgePair.first) {
+      auto& prop = EdgePropertyMap[*edgePair.first];
+      if (prop.capabilities.text.enabled) {
+        std::swap(prop.a->textBuffer, prop.b->textBuffer);
+      }
+    }
+  }
+};
+
 int main() {
   glfwSetErrorCallback([](int, const char* message) {
     fmt::print("{}\n", message);
@@ -483,15 +594,17 @@ int main() {
   Camera camera;
   Generator generator;
   Lamp lamp;
-  Cable cable1({ { true, 0.1f }, { false, 0.0f } });
-  Cable cable2({ { false, 0.0f }, { true, 100.0f } });
-  Cable cable3({ { false, 0.0f }, { true, 5.0f } });
+  CPU cpu;
+  Cable cable1({ { true, 0.1f }, { false, 0.0f }, { true } });
+  Cable cable2({ { false, 0.0f }, { true, 100.0f }, { true } });
+  Cable cable3({ { false, 0.0f }, { true, 5.0f }, { true } });
 
   std::vector<std::pair<std::string, Node&>> nodes {
           { "Monitor", monitor.port },
           { "Camera", camera.port },
           { "Generator", generator.port },
           { "Lamp", lamp.port },
+          { "CPU", cpu.port },
           { "Cable P", cable1 },
           { "Cable S", cable2 },
           { "Cable W", cable3 },
@@ -510,14 +623,27 @@ int main() {
     camera.update();
     generator.update();
     lamp.update();
+    cpu.update();
 
     PictureSystem::update();
     EnergySystem::update();
+    MessageSystem::update();
 
     monitor.render();
     camera.render();
     generator.render();
     lamp.render();
+    cpu.render();
+
+    ImGui::Begin("Terminal");
+    char cbuf[512];
+    ImGui::InputTextMultiline("Code", cbuf, 512);
+    if (ImGui::Button("Run")) {
+      while (cpu.stack.size())
+        cpu.stack.pop();
+      cpu.run(cbuf);
+    }
+    ImGui::End();
 
     ImGui::Begin("Nodes");
     for (int i = 0; i < nodes.size(); i++) {
