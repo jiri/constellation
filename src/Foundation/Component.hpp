@@ -7,7 +7,7 @@ struct Component {
   virtual ~Component();
 
   virtual void update() = 0;
-  virtual void render() const = 0;
+  virtual void render() = 0;
 
   Wiring::Graph::vertex_descriptor vertex;
 };

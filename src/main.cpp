@@ -42,7 +42,7 @@ struct Monitor : public Component {
     }
   }
 
-  void render() const override {
+  void render() override {
     static bool noise = true;
     ImGui::Checkbox("Monitor noise", &noise);
     if (noise) {
@@ -70,7 +70,7 @@ struct Camera : public Component {
     this->port.pictureBuffer.send(color);
   }
 
-  void render() const override {
+  void render() override {
     ImGui::SetNextWindowSize({ 256, 256 });
     ImGui::Begin("Camera");
     ImGui::ColorPicker3("Color", (float*)&color);
@@ -91,13 +91,13 @@ struct Generator : public Component {
     this->port.energyBuffer.offer(power);
   }
 
-  void render() const override {
+  void render() override {
     ImGui::Begin("Generator");
     ImGui::SliderFloat("Power", &power, 0.0f, 100.0f);
     ImGui::End();
   }
 
-  mutable float power = 50.0f;
+  float power = 50.0f;
   Wiring::Port port;
 };
 
@@ -112,7 +112,7 @@ struct Lamp : public Component {
     satisfaction = energy / 10.0f;
   }
 
-  void render() const override {
+  void render() override {
     ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(satisfaction, satisfaction, 0.0f));
     ImGui::SetNextWindowContentSize({ 64, 64 });
     ImGui::Begin("Lamp", nullptr, ImGuiWindowFlags_NoResize);
