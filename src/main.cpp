@@ -1,6 +1,5 @@
 #include <optional>
 
-#include <boost/graph/adjacency_list.hpp>
 #include <fmt/format.h>
 #include <gsl/gsl>
 
@@ -18,208 +17,8 @@
 #include <Util/Random.hpp>
 #include <queue>
 
-#include <Foundation/Systems/Picture.hpp>
-#include <Foundation/Systems/Energy.hpp>
-#include <Foundation/Systems/Text.hpp>
-
-struct Capabilities {
-  Picture::Capability picture;
-  Energy::Capability energy;
-  Text::Capability text;
-
-  static Capabilities combine(const Capabilities& a, const Capabilities& b) {
-    return {
-        Picture::Capability::combine(a.picture, b.picture),
-        Energy::Capability::combine(a.energy, b.energy),
-        Text::Capability::combine(a.text, b.text),
-    };
-  }
-};
-
-struct Component;
-
-struct Vertex {
-  Component* component = nullptr;
-};
-
-struct vertex_property_t {
-  typedef boost::edge_property_tag kind;
-};
-
-struct Port;
-
-struct Edge {
-  Port* a;
-  Port* b;
-  Capabilities capabilities;
-};
-
-struct edge_property_t {
-  typedef boost::edge_property_tag kind;
-};
-
-typedef boost::adjacency_list<boost::vecS,
-    boost::vecS,
-    boost::undirectedS,
-    boost::property<vertex_property_t, Vertex>,
-    boost::property<edge_property_t, Edge>> CommunicationGraph;
-static CommunicationGraph G;
-
-struct Node {
-  explicit Node(Capabilities c)
-    : capabilities(c)
-  { }
-
-  virtual ~Node() = default;
-
-  virtual Port* findPort(Node* prev) = 0;
-  virtual bool isFree() const = 0;
-  virtual void addNeighbour(Node* node) = 0;
-  virtual void removeNeighbour(Node* node) = 0;
-  virtual bool isNeighbourOf(Node* node) const = 0;
-  virtual std::optional<Capabilities> fold(Node* prev) = 0;
-
-  Capabilities capabilities;
-};
-
-struct Port : public Node {
-  Port(Component* c, Capabilities cap)
-    : Node(cap)
-    , component(c)
-  { }
-
-  Port* findPort(Node*) override {
-    return this;
-  }
-  bool isFree() const override {
-    return neighbour == nullptr;
-  }
-  void addNeighbour(Node* node) override {
-    assert(isFree());
-    neighbour = node;
-  }
-  void removeNeighbour(Node* node) override {
-    assert(neighbour == node);
-    neighbour = nullptr;
-  }
-  bool isNeighbourOf(Node* node) const override {
-    return neighbour == node;
-  }
-  std::optional<Capabilities> fold(Node* prev) override {
-    if (prev == nullptr) {
-      if (neighbour == nullptr) {
-        return std::nullopt;
-      }
-      else if (auto other = neighbour->fold(this)) {
-        return Capabilities::combine(capabilities, *other);
-      }
-      else {
-        return std::nullopt;
-      }
-    }
-    else {
-      return { capabilities };
-    }
-  }
-
-  bool connected() {
-    return neighbour && neighbour->findPort(this);
-  }
-
-  Component* component = nullptr;
-  Node* neighbour = nullptr;
-
-  Picture::Buffer pictureBuffer;
-  Energy::Buffer energyBuffer;
-  Text::Buffer textBuffer;
-};
-
-struct Cable : public Node {
-  using Node::Node;
-
-  Port* findPort(Node* prev) override {
-    assert(prev != nullptr &&
-           (neighbours[0] == prev || neighbours[1] == prev));
-
-    if (neighbours[0] == nullptr || neighbours[1] == nullptr) {
-      return nullptr;
-    }
-
-    if (prev == neighbours[0]) {
-      return neighbours[1]->findPort(this);
-    }
-    else {
-      return neighbours[0]->findPort(this);
-    }
-  }
-  bool isFree() const override {
-    return neighbourCount < 2;
-  }
-  void addNeighbour(Node *node) override {
-    assert(isFree());
-    neighbours[neighbourCount++] = node;
-  }
-  void removeNeighbour(Node* node) override {
-    assert(neighbours[0] == node || neighbours[1] == node);
-
-    if (neighbours[1] == node) {
-      neighbours[1] = nullptr;
-      neighbourCount--;
-    }
-    else {
-      neighbours[0] = neighbours[1];
-      neighbours[1] = nullptr;
-      neighbourCount--;
-    }
-  }
-  bool isNeighbourOf(Node* node) const override {
-    return neighbours[0] == node || neighbours[1] == node;
-  }
-  std::optional<Capabilities> fold(Node *prev) override {
-    assert(prev == nullptr || prev == neighbours[0] || prev == neighbours[1]);
-
-    if (neighbourCount < 2) {
-      return std::nullopt;
-    }
-
-    auto ra = neighbours[0]->fold(this);
-    auto rb = neighbours[1]->fold(this);
-
-    if (prev == nullptr) {
-      if (ra && rb) {
-        return Capabilities::combine(capabilities, Capabilities::combine(*ra, *rb));
-      } else {
-        return std::nullopt;
-      }
-    }
-    else {
-      if (prev == neighbours[0]) {
-        return Capabilities::combine(capabilities, *rb);
-      }
-      else {
-        return Capabilities::combine(capabilities, *ra);
-      }
-    }
-  }
-
-  Node* neighbours[2] {};
-  uint8_t neighbourCount = 0;
-};
-
-struct Component {
-  Component()
-    : vertex(boost::add_vertex(G))
-  { }
-
-  virtual ~Component() {
-    boost::remove_vertex(this->vertex, G);
-  }
-
-  virtual void update() = 0;
-  virtual void render() const = 0;
-
-  CommunicationGraph::vertex_descriptor vertex;
-};
+#include <Foundation/Wiring.hpp>
+#include <Foundation/Component.hpp>
 
 struct Monitor : public Component {
   glm::vec3 color;
@@ -258,7 +57,7 @@ struct Monitor : public Component {
     }
   }
 
-  Port port;
+  Wiring::Port port;
 };
 
 struct Camera : public Component {
@@ -279,7 +78,7 @@ struct Camera : public Component {
   }
 
   glm::vec3 color;
-  Port port;
+  Wiring::Port port;
 };
 
 struct Generator : public Component {
@@ -299,7 +98,7 @@ struct Generator : public Component {
   }
 
   mutable float power = 50.0f;
-  Port port;
+  Wiring::Port port;
 };
 
 struct Lamp : public Component {
@@ -322,7 +121,7 @@ struct Lamp : public Component {
   }
 
   float satisfaction = 0.0f;
-  Port port;
+  Wiring::Port port;
 };
 
 struct CPU : public Component {
@@ -380,74 +179,20 @@ struct CPU : public Component {
   void update() override { }
   void render() const override { }
 
-  Port port;
+  Wiring::Port port;
 };
-
-
-void connect(Node* a, Node* b) {
-  if (a->isNeighbourOf(b) && b->isNeighbourOf(a)) {
-    return;
-  }
-
-  assert(a != b);
-  assert(a->isFree() && b->isFree());
-
-  a->addNeighbour(b);
-  b->addNeighbour(a);
-
-  Port* left = a->findPort(b);
-  Port* right = b->findPort(a);
-
-  if (left && right) {
-    Capabilities result = *left->fold(nullptr);
-    boost::add_edge(left->component->vertex, right->component->vertex, boost::property<edge_property_t, Edge> {
-        Edge { left, right, result }
-    }, G);
-  }
-}
-
-void disconnect(Node* a, Node* b) {
-  assert(a != b);
-  assert(a->isNeighbourOf(b) == b->isNeighbourOf(a));
-
-  if (!a->isNeighbourOf(b) || !b->isNeighbourOf(a)) {
-    return;
-  }
-
-  Port* left = a->findPort(b);
-  Port* right = b->findPort(a);
-
-  if (left && right) {
-    auto edge = boost::edge(left->component->vertex, right->component->vertex, G);
-    assert(edge.second);
-    boost::remove_edge(edge.first, G);
-  }
-
-  a->removeNeighbour(b);
-  b->removeNeighbour(a);
-}
-
-void connect(Node& a, Node &b) {
-  connect(&a, &b);
-}
-
-void disconnect(Node& a, Node&b ) {
-  disconnect(&a, &b);
-}
 
 struct PictureSystem {
   static void update() {
-    boost::property_map<CommunicationGraph, edge_property_t>::type EdgePropertyMap = boost::get(edge_property_t(), G);
-
-    for (auto edgePair = boost::edges(G); edgePair.first != edgePair.second; ++edgePair.first) {
-      auto& prop = EdgePropertyMap[*edgePair.first];
+    for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
+      auto& prop = Wiring::propertyMap()[ix];
       if (prop.capabilities.picture.enabled) {
         swap(prop.a, prop.b, prop.capabilities.picture.errorRate);
       }
     }
   }
 
-  static void swap(Port* a, Port* b, float errorRate) {
+  static void swap(Wiring::Port* a, Wiring::Port* b, float errorRate) {
     if (randomFloat() < errorRate) {
       a->pictureBuffer.pictureData = randomColor();
       b->pictureBuffer.pictureData = randomColor();
@@ -458,17 +203,15 @@ struct PictureSystem {
 
 struct EnergySystem {
   static void update() {
-    boost::property_map<CommunicationGraph, edge_property_t>::type EdgePropertyMap = boost::get(edge_property_t(), G);
-
-    for (auto edgePair = boost::edges(G); edgePair.first != edgePair.second; ++edgePair.first) {
-      auto& prop = EdgePropertyMap[*edgePair.first];
+    for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
+      auto& prop = Wiring::propertyMap()[ix];
       if (prop.capabilities.energy.enabled) {
         swap(prop.a, prop.b, prop.capabilities.energy.throughput);
       }
     }
   }
 
-  static void swap(Port* a, Port* b, float throughput) {
+  static void swap(Wiring::Port* a, Wiring::Port* b, float throughput) {
     a->energyBuffer.energyPool = std::min(throughput, b->energyBuffer.energyOffer);
     b->energyBuffer.energyOffer = 0.0f;
     b->energyBuffer.energyPool = std::min(throughput, a->energyBuffer.energyOffer);
@@ -478,10 +221,8 @@ struct EnergySystem {
 
 struct MessageSystem {
   static void update() {
-    boost::property_map<CommunicationGraph, edge_property_t>::type EdgePropertyMap = boost::get(edge_property_t(), G);
-
-    for (auto edgePair = boost::edges(G); edgePair.first != edgePair.second; ++edgePair.first) {
-      auto& prop = EdgePropertyMap[*edgePair.first];
+    for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
+      auto& prop = Wiring::propertyMap()[ix];
       if (prop.capabilities.text.enabled) {
         std::swap(prop.a->textBuffer, prop.b->textBuffer);
       }
@@ -527,11 +268,11 @@ int main() {
   Generator generator;
   Lamp lamp;
   CPU cpu;
-  Cable cable1({ { true, 0.1f }, { false, 0.0f }, { true } });
-  Cable cable2({ { false, 0.0f }, { true, 100.0f }, { true } });
-  Cable cable3({ { false, 0.0f }, { true, 5.0f }, { true } });
+  Wiring::Cable cable1({ { true, 0.1f }, { false, 0.0f }, { true } });
+  Wiring::Cable cable2({ { false, 0.0f }, { true, 100.0f }, { true } });
+  Wiring::Cable cable3({ { false, 0.0f }, { true, 5.0f }, { true } });
 
-  std::vector<std::pair<std::string, Node&>> nodes {
+  std::vector<std::pair<std::string, Wiring::Node&>> nodes {
           { "Monitor", monitor.port },
           { "Camera", camera.port },
           { "Generator", generator.port },
@@ -599,10 +340,10 @@ int main() {
 
         if (a < nodes.size() && b < nodes.size()) {
           if (command == "c") {
-            connect(nodes[a].second, nodes[b].second);
+            Wiring::connect(nodes[a].second, nodes[b].second);
           }
           if (command == "d") {
-            disconnect(nodes[a].second, nodes[b].second);
+            Wiring::disconnect(nodes[a].second, nodes[b].second);
           }
         }
       }
