@@ -1,4 +1,5 @@
 #include <optional>
+#include <queue>
 
 #include <fmt/format.h>
 #include <gsl/gsl>
@@ -15,7 +16,6 @@
 
 #include <Graphics/Program.hpp>
 #include <Util/Random.hpp>
-#include <queue>
 
 #include <Foundation/Wiring.hpp>
 #include <Foundation/Component.hpp>
@@ -147,8 +147,8 @@ struct Terminal : public Component {
 
 struct PictureSystem {
   static void update() {
-    for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
-      auto& edge = Wiring::propertyMap()[ix];
+    for (auto& t : Wiring::graph().edges) {
+      auto edge = std::get<2>(t);
       if (edge.capabilities.picture.enabled) {
         swap(edge.a, edge.b, edge.capabilities.picture.errorRate);
       }
@@ -166,8 +166,8 @@ struct PictureSystem {
 
 struct EnergySystem {
   static void update() {
-    for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
-      auto& edge = Wiring::propertyMap()[ix];
+    for (auto& t : Wiring::graph().edges) {
+      auto edge = std::get<2>(t);
       if (edge.capabilities.energy.enabled) {
         swap(edge.a, edge.b, edge.capabilities.energy.throughput);
       }
@@ -184,10 +184,8 @@ struct EnergySystem {
 
 struct MessageSystem {
   static void update() {
-    boost::property_map<Wiring::Graph, Wiring::edge_property_t>::type EdgePropertyMap = boost::get(Wiring::edge_property_t(), Wiring::graph());
-
-    for (auto edgePair = boost::edges(Wiring::graph()); edgePair.first != edgePair.second; ++edgePair.first) {
-      auto& edge = EdgePropertyMap[*edgePair.first];
+    for (auto& t : Wiring::graph().edges) {
+      auto edge = std::get<2>(t);
       if (edge.capabilities.text.enabled) {
         std::swap(edge.a->textBuffer, edge.b->textBuffer);
       }

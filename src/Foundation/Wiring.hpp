@@ -6,13 +6,17 @@
 
 class Component;
 
-namespace Wiring {
+class Wiring {
+  Wiring() = default;
+
+public:
+  static Wiring& instance() {
+    static Wiring w;
+    return w;
+  }
+
   struct Vertex {
     Component* component = nullptr;
-  };
-
-  struct vertex_property_t {
-    typedef boost::edge_property_tag kind;
   };
 
   struct Port;
@@ -23,26 +27,23 @@ namespace Wiring {
     Capabilities capabilities;
   };
 
-  struct edge_property_t {
-    typedef boost::edge_property_tag kind;
+  struct Graph {
+    using vertexHandle = size_t;
+
+    vertexHandle addVertex(const Vertex& v) {
+      vertices.push_back(v);
+      return vertices.size() - 1;
+    }
+
+    std::vector<Vertex> vertices;
+    std::vector<std::tuple<vertexHandle, vertexHandle, Edge>> edges;
   };
 
-  typedef boost::adjacency_list<boost::vecS,
-                                boost::vecS,
-                                boost::undirectedS,
-                                boost::property<vertex_property_t, Vertex>,
-                                boost::property<edge_property_t, Edge>> Graph;
+  Graph g;
 
   static Graph& graph() {
-    static Graph g;
-    return g;
+    return instance().g;
   }
-
-  typedef boost::property_map<Graph, edge_property_t>::type EdgePropertyMap;
-
-  static const EdgePropertyMap& propertyMap() {
-    return boost::get(edge_property_t(), Wiring::graph());
-  };
 
   struct Node {
     explicit Node(Capabilities c)
@@ -95,9 +96,9 @@ namespace Wiring {
     uint8_t neighbourCount = 0;
   };
 
-  void connect(Node& a, Node& b);
-  void connect(Node* a, Node* b);
+  static void connect(Node& a, Node& b);
+  static void connect(Node* a, Node* b);
 
-  void disconnect(Node& a, Node& b);
-  void disconnect(Node* a, Node* b);
-}
+  static void disconnect(Node& a, Node& b);
+  static void disconnect(Node* a, Node* b);
+};

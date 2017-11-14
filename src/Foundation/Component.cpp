@@ -1,9 +1,11 @@
 #include <Foundation/Component.hpp>
 
+#include <algorithm>
+
 Component::Component()
-    : vertex(boost::add_vertex(Wiring::graph()))
+    : vertex(Wiring::graph().addVertex({ this }))
 { }
 
 Component::~Component() {
-  boost::remove_vertex(this->vertex, Wiring::graph());
+  Wiring::graph().vertices.erase(Wiring::graph().vertices.begin() + vertex);
 }

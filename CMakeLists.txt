@@ -4,7 +4,6 @@ project(Wiring)
 set(CMAKE_CXX_STANDARD 17)
 
 # Common libraries
-find_package(Boost REQUIRED COMPONENTS system graph filesystem)
 find_package(fmt REQUIRED)
 find_package(glfw3 REQUIRED)
 find_package(glm REQUIRED)
@@ -15,13 +14,11 @@ add_subdirectory(libraries/imgui)
 
 include_directories(SYSTEM src/)
 include_directories(
-        ${Boost_INCLUDE_DIRS}
         ${fmt_INCLUDE_DIRS}
         ${glfw3_INCLUDE_DIRS}
         ${GLM_LIBRARIES}
 )
 link_libraries(
-        ${Boost_LIBRARIES}
         fmt
         glfw
         GSL

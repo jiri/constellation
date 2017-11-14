@@ -9,5 +9,5 @@ struct Component {
   virtual void update() = 0;
   virtual void render() = 0;
 
-  Wiring::Graph::vertex_descriptor vertex;
+  Wiring::Graph::vertexHandle vertex;
 };

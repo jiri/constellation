@@ -3,37 +3,35 @@
 #include <Foundation/Component.hpp>
 #include <fmt/format.h>
 
-using namespace Wiring;
-
 #pragma mark Port
 
-Port::Port(Component* c, Capabilities cap)
-  : Wiring::Node(cap)
+Wiring::Port::Port(Component* c, Capabilities cap)
+  : Node(cap)
   , component(c)
 { }
 
-Port* Port::findPort(Node*) {
+Wiring::Port* Wiring::Port::findPort(Node*) {
   return this;
 }
 
-bool Port::isFree() const {
+bool Wiring::Port::isFree() const {
   return neighbour == nullptr;
 }
 
-void Port::addNeighbour(Node* node) {
+void Wiring::Port::addNeighbour(Node* node) {
   assert(isFree());
   neighbour = node;
 }
 
-void Port::removeNeighbour(Node* node) {
+void Wiring::Port::removeNeighbour(Node* node) {
   assert(neighbour == node);
   neighbour = nullptr;
 }
-bool Port::isNeighbourOf(Node* node) const {
+bool Wiring::Port::isNeighbourOf(Node* node) const {
   return neighbour == node;
 }
 
-std::optional<Capabilities> Port::fold(Node* prev) {
+std::optional<Capabilities> Wiring::Port::fold(Node* prev) {
   if (prev == nullptr) {
     if (neighbour == nullptr) {
       return std::nullopt;
@@ -50,13 +48,13 @@ std::optional<Capabilities> Port::fold(Node* prev) {
   }
 }
 
-bool Port::connected() {
+bool Wiring::Port::connected() {
   return neighbour && neighbour->findPort(this);
 }
 
 #pragma mark Cable
 
-Port* Cable::findPort(Node* prev) {
+Wiring::Port* Wiring::Cable::findPort(Node* prev) {
   assert(prev != nullptr &&
          (neighbours[0] == prev || neighbours[1] == prev));
 
@@ -72,16 +70,16 @@ Port* Cable::findPort(Node* prev) {
   }
 }
 
-bool Cable::isFree() const {
+bool Wiring::Cable::isFree() const {
   return neighbourCount < 2;
 }
 
-void Cable::addNeighbour(Node* node) {
+void Wiring::Cable::addNeighbour(Node* node) {
   assert(isFree());
   neighbours[neighbourCount++] = node;
 }
 
-void Cable::removeNeighbour(Node* node) {
+void Wiring::Cable::removeNeighbour(Node* node) {
   assert(neighbours[0] == node || neighbours[1] == node);
 
   if (neighbours[1] == node) {
@@ -95,11 +93,11 @@ void Cable::removeNeighbour(Node* node) {
   }
 }
 
-bool Cable::isNeighbourOf(Node* node) const {
+bool Wiring::Cable::isNeighbourOf(Node* node) const {
   return neighbours[0] == node || neighbours[1] == node;
 }
 
-std::optional<Capabilities> Cable::fold(Node* prev) {
+std::optional<Capabilities> Wiring::Cable::fold(Node* prev) {
   assert(prev == nullptr || prev == neighbours[0] || prev == neighbours[1]);
 
   if (neighbourCount < 2) {
@@ -140,14 +138,12 @@ void Wiring::connect(Node* a, Node* b) {
   a->addNeighbour(b);
   b->addNeighbour(a);
 
-  Wiring::Port* left = a->findPort(b);
-  Wiring::Port* right = b->findPort(a);
+  Port* left = a->findPort(b);
+  Port* right = b->findPort(a);
 
   if (left && right) {
     Capabilities result = *left->fold(nullptr);
-    boost::add_edge(left->component->vertex, right->component->vertex, boost::property<edge_property_t, Edge> {
-        Edge { left, right, result }
-    }, Wiring::graph());
+    graph().edges.emplace_back(left->component->vertex, right->component->vertex, Edge { left, right, result });
   }
 }
 
@@ -163,9 +159,11 @@ void Wiring::disconnect(Node* a, Node* b) {
   Port* right = b->findPort(a);
 
   if (left && right) {
-    auto edge = boost::edge(left->component->vertex, right->component->vertex, Wiring::graph());
-    assert(edge.second);
-    boost::remove_edge(edge.first, Wiring::graph());
+    auto it = std::find_if(graph().edges.begin(), graph().edges.end(), [left, right](const auto& e) -> bool {
+      return std::get<0>(e) == left->component->vertex && std::get<1>(e) == right->component->vertex;
+    });
+    assert(it != graph().edges.end());
+    graph().edges.erase(it);
   }
 
   a->removeNeighbour(b);
@@ -177,5 +175,5 @@ void Wiring::connect(Node& a, Node& b) {
 }
 
 void Wiring::disconnect(Node& a, Node& b) {
-  Wiring::disconnect(&a, &b);
+  disconnect(&a, &b);
 }
