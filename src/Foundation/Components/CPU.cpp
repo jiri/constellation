@@ -52,7 +52,7 @@ void CPU::update() {
 void CPU::render() {
   ImGui::Begin("Terminal");
   char cbuf[512];
-  ImGui::InputTextMultiline(nullptr, cbuf, 512);
+  ImGui::InputTextMultiline("", cbuf, 512);
   if (ImGui::Button("Run")) {
     while (stack.size())
       stack.pop();
