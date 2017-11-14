@@ -18,89 +18,21 @@
 #include <Util/Random.hpp>
 #include <queue>
 
+#include <Foundation/Systems/Picture.hpp>
+#include <Foundation/Systems/Energy.hpp>
+#include <Foundation/Systems/Text.hpp>
+
 struct Capabilities {
-  struct {
-    bool enabled = false;
-    float errorRate = 0.0f;
-  } picture;
-  struct {
-    bool enabled = false;
-    float throughput = 0.0f;
-  } energy;
-  struct {
-    bool enabled = false;
-  } text;
-};
+  Picture::Capability picture;
+  Energy::Capability energy;
+  Text::Capability text;
 
-Capabilities combine(const Capabilities& a, const Capabilities& b) {
-  return {
-      {
-          a.picture.enabled && b.picture.enabled,
-          a.picture.errorRate + b.picture.errorRate,
-      },
-      {
-          a.energy.enabled && b.energy.enabled,
-          std::min(a.energy.throughput, b.energy.throughput),
-      },
-      {
-          a.text.enabled && b.text.enabled,
-      },
-  };
-}
-
-struct PictureBuffer {
-  std::optional<glm::vec3> pictureData;
-
-  void send(const glm::vec3& v) {
-    pictureData = v;
-  }
-
-  std::optional<glm::vec3> receive() {
-    std::optional<glm::vec3> res = pictureData;
-    clear();
-    return res;
-  }
-
-  void clear() {
-    pictureData = std::nullopt;
-  }
-};
-
-struct EnergyBuffer {
-  float energyOffer = 0.0f;
-  float energyPool = 0.0f;
-
-  void offer(float energy) {
-    energyOffer += energy;
-  }
-
-  float request(float req) {
-    float res = std::min(energyPool, req);
-    energyPool -= res;
-    return res;
-  }
-
-  void clear() {
-    energyOffer = 0.0f;
-  }
-};
-
-struct TextBuffer {
-  std::queue<std::string> messages;
-
-  void send(const std::string& m) {
-    messages.push(m);
-  }
-
-  std::optional<std::string> receive() {
-    if (messages.empty()) {
-      return std::nullopt;
-    }
-    else {
-      std::string res = messages.front();
-      messages.pop();
-      return res;
-    }
+  static Capabilities combine(const Capabilities& a, const Capabilities& b) {
+    return {
+        Picture::Capability::combine(a.picture, b.picture),
+        Energy::Capability::combine(a.energy, b.energy),
+        Text::Capability::combine(a.text, b.text),
+    };
   }
 };
 
@@ -179,7 +111,7 @@ struct Port : public Node {
         return std::nullopt;
       }
       else if (auto other = neighbour->fold(this)) {
-        return combine(capabilities, *other);
+        return Capabilities::combine(capabilities, *other);
       }
       else {
         return std::nullopt;
@@ -197,9 +129,9 @@ struct Port : public Node {
   Component* component = nullptr;
   Node* neighbour = nullptr;
 
-  PictureBuffer pictureBuffer;
-  EnergyBuffer energyBuffer;
-  TextBuffer textBuffer;
+  Picture::Buffer pictureBuffer;
+  Energy::Buffer energyBuffer;
+  Text::Buffer textBuffer;
 };
 
 struct Cable : public Node {
@@ -255,17 +187,17 @@ struct Cable : public Node {
 
     if (prev == nullptr) {
       if (ra && rb) {
-        return combine(capabilities, combine(*ra, *rb));
+        return Capabilities::combine(capabilities, Capabilities::combine(*ra, *rb));
       } else {
         return std::nullopt;
       }
     }
     else {
       if (prev == neighbours[0]) {
-        return combine(capabilities, *rb);
+        return Capabilities::combine(capabilities, *rb);
       }
       else {
-        return combine(capabilities, *ra);
+        return Capabilities::combine(capabilities, *ra);
       }
     }
   }

@@ -32,20 +32,33 @@ link_libraries(
 
 # Graphics library
 set(GRAPHICS_SOURCE_FILES
+        src/Graphics/Program.hpp
         src/Graphics/Program.cpp
 )
 add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
+
+# Foundation library
+set(FOUNDATION_SOURCE_FILES
+        src/Foundation/Systems/Energy.hpp
+        src/Foundation/Systems/Energy.cpp
+        src/Foundation/Systems/Picture.hpp
+        src/Foundation/Systems/Picture.cpp
+        src/Foundation/Systems/Text.hpp
+        src/Foundation/Systems/Text.cpp
+)
+add_library(${PROJECT_NAME}_Foundation ${FOUNDATION_SOURCE_FILES})
 
 # Main
 set(SOURCE_FILES
         src/main.cpp
         src/Util/Random.hpp
 )
-add_executable(Wiring ${SOURCE_FILES})
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(
         ${PROJECT_NAME} PUBLIC
         ${PROJECT_NAME}_Graphics
+        ${PROJECT_NAME}_Foundation
 )
 
 # Link shaders
