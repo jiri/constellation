@@ -1,6 +1,7 @@
 #include <Foundation/Components/CPU.hpp>
 
 #include <imgui.h>
+#include <imgui_internal.h>
 
 int CPU::pop() {
   int x = stack.top();
@@ -54,6 +55,8 @@ void CPU::eval(std::string program) {
       stack.push(i);
     }
   }
+
+  shouldRun = false;
 }
 
 void CPU::run(const std::string& program) {
@@ -75,8 +78,20 @@ void CPU::render() {
   ImGui::Begin("Programmer");
   static char cbuf[512];
   ImGui::InputTextMultiline("Text", cbuf, 512);
-  if (ImGui::Button("Run")) {
-    run(cbuf);
+
+  if (shouldRun) {
+    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+    ImGui::Button("Running...");
+    ImGui::PopItemFlag();
+    ImGui::SameLine();
+    if (ImGui::Button("Stop")) {
+      shouldRun = false;
+    }
+  }
+  else {
+    if (ImGui::Button("Run")) {
+      run(cbuf);
+    }
   }
   ImGui::End();
 }
