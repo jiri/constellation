@@ -1,5 +1,7 @@
 #include <Graphics/Program.hpp>
 
+#include <fstream>
+
 /* Helper functions */
 namespace {
   GLenum guessTypeFromPath(fs::path p) {
@@ -14,7 +16,7 @@ namespace {
   }
 
   std::string slurp_file(fs::path p) {
-    fs::ifstream file { p };
+    std::ifstream file { p };
 
     if (!file.is_open()) {
       throw std::runtime_error {

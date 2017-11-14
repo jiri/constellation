@@ -1,13 +1,13 @@
 #pragma once
 
 #include <string>
-#include <boost/filesystem.hpp>
+#include <experimental/filesystem>
 
 #include <glad.h>
 
 #include <fmt/format.h>
 
-namespace fs = boost::filesystem;
+namespace fs = std::experimental::filesystem;
 
 class Shader {
 public:
