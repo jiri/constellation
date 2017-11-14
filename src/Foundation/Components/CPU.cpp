@@ -8,11 +8,11 @@ int CPU::pop() {
   return x;
 }
 
-void CPU::run(const std::string& program) {
+void CPU::eval(std::string program) {
   std::istringstream iss(program);
   std::string word;
 
-  while (iss >> word) {
+  while (shouldRun && iss >> word) {
     if (word == "push") {
       int i;
       iss >> i;
@@ -41,21 +41,41 @@ void CPU::run(const std::string& program) {
       stack.push(b % a);
     }
     if (word == "write") {
-      port.textBuffer.send(fmt::format("{}", stack.top()));
+      outPort.textBuffer.send(fmt::format("{}", stack.top()));
+    }
+    if (word == "read") {
+      std::optional<std::string> msg;
+      do {
+        msg = inPort.textBuffer.receive();
+      } while (shouldRun && !msg);
+      std::istringstream ss(*msg);
+      int i;
+      ss >> i;
+      stack.push(i);
     }
   }
+}
+
+void CPU::run(const std::string& program) {
+  shouldRun = false;
+  if (evalThread.joinable()) {
+    evalThread.join();
+  }
+  while (!stack.empty()) {
+    stack.pop();
+  }
+  shouldRun = true;
+  evalThread = std::thread([this, program] { eval(program); });
 }
 
 void CPU::update() {
 }
 
 void CPU::render() {
-  ImGui::Begin("Terminal");
-  char cbuf[512];
-  ImGui::InputTextMultiline("", cbuf, 512);
+  ImGui::Begin("Programmer");
+  static char cbuf[512];
+  ImGui::InputTextMultiline("Text", cbuf, 512);
   if (ImGui::Button("Run")) {
-    while (stack.size())
-      stack.pop();
     run(cbuf);
   }
   ImGui::End();

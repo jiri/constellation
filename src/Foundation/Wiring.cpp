@@ -1,6 +1,7 @@
 #include <Foundation/Wiring.hpp>
 
 #include <Foundation/Component.hpp>
+#include <fmt/format.h>
 
 using namespace Wiring;
 

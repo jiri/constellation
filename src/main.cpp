@@ -125,6 +125,26 @@ struct Lamp : public Component {
   Wiring::Port port;
 };
 
+struct Terminal : public Component {
+  Terminal()
+    : Component()
+    , port(this, { { false, 0.0f }, { false, 0.0f }, { true } })
+  { }
+
+  void update() override { }
+
+  void render() override {
+    ImGui::Begin("Terminal");
+    char buf[256] {};
+    if (ImGui::InputText("Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
+      port.textBuffer.send(buf);
+    }
+    ImGui::End();
+  }
+
+  Wiring::Port port;
+};
+
 struct PictureSystem {
   static void update() {
     for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
@@ -164,8 +184,10 @@ struct EnergySystem {
 
 struct MessageSystem {
   static void update() {
-    for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
-      auto& edge = Wiring::propertyMap()[ix];
+    boost::property_map<Wiring::Graph, Wiring::edge_property_t>::type EdgePropertyMap = boost::get(Wiring::edge_property_t(), Wiring::graph());
+
+    for (auto edgePair = boost::edges(Wiring::graph()); edgePair.first != edgePair.second; ++edgePair.first) {
+      auto& edge = EdgePropertyMap[*edgePair.first];
       if (edge.capabilities.text.enabled) {
         std::swap(edge.a->textBuffer, edge.b->textBuffer);
       }
@@ -211,6 +233,7 @@ int main() {
   Generator generator;
   Lamp lamp;
   CPU cpu;
+  Terminal terminal;
   Wiring::Cable cable1({ { true, 0.1f }, { false, 0.0f }, { true } });
   Wiring::Cable cable2({ { false, 0.0f }, { true, 100.0f }, { true } });
   Wiring::Cable cable3({ { false, 0.0f }, { true, 5.0f }, { true } });
@@ -220,7 +243,9 @@ int main() {
           { "Camera", camera.port },
           { "Generator", generator.port },
           { "Lamp", lamp.port },
-          { "CPU", cpu.port },
+          { "CPU IN", cpu.inPort },
+          { "CPU OUT", cpu.outPort },
+          { "Terminal", terminal.port },
           { "Cable P", cable1 },
           { "Cable S", cable2 },
           { "Cable W", cable3 },
@@ -240,6 +265,7 @@ int main() {
     generator.update();
     lamp.update();
     cpu.update();
+    terminal.update();
 
     PictureSystem::update();
     EnergySystem::update();
@@ -250,6 +276,7 @@ int main() {
     generator.render();
     lamp.render();
     cpu.render();
+    terminal.render();
 
     ImGui::Begin("Nodes");
     for (int i = 0; i < nodes.size(); i++) {
