@@ -185,9 +185,9 @@ struct CPU : public Component {
 struct PictureSystem {
   static void update() {
     for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
-      auto& prop = Wiring::propertyMap()[ix];
-      if (prop.capabilities.picture.enabled) {
-        swap(prop.a, prop.b, prop.capabilities.picture.errorRate);
+      auto& edge = Wiring::propertyMap()[ix];
+      if (edge.capabilities.picture.enabled) {
+        swap(edge.a, edge.b, edge.capabilities.picture.errorRate);
       }
     }
   }
@@ -204,9 +204,9 @@ struct PictureSystem {
 struct EnergySystem {
   static void update() {
     for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
-      auto& prop = Wiring::propertyMap()[ix];
-      if (prop.capabilities.energy.enabled) {
-        swap(prop.a, prop.b, prop.capabilities.energy.throughput);
+      auto& edge = Wiring::propertyMap()[ix];
+      if (edge.capabilities.energy.enabled) {
+        swap(edge.a, edge.b, edge.capabilities.energy.throughput);
       }
     }
   }
@@ -222,9 +222,9 @@ struct EnergySystem {
 struct MessageSystem {
   static void update() {
     for (auto ix : boost::make_iterator_range(boost::edges(Wiring::graph()))) {
-      auto& prop = Wiring::propertyMap()[ix];
-      if (prop.capabilities.text.enabled) {
-        std::swap(prop.a->textBuffer, prop.b->textBuffer);
+      auto& edge = Wiring::propertyMap()[ix];
+      if (edge.capabilities.text.enabled) {
+        std::swap(edge.a->textBuffer, edge.b->textBuffer);
       }
     }
   }
