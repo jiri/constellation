@@ -160,7 +160,8 @@ void Wiring::disconnect(Node* a, Node* b) {
 
   if (left && right) {
     auto it = std::find_if(graph().edges.begin(), graph().edges.end(), [left, right](const auto& e) -> bool {
-      return std::get<0>(e) == left->component->vertex && std::get<1>(e) == right->component->vertex;
+      return (std::get<0>(e) == left->component->vertex && std::get<1>(e) == right->component->vertex)
+          || (std::get<0>(e) == right->component->vertex && std::get<1>(e) == left->component->vertex);
     });
     assert(it != graph().edges.end());
     graph().edges.erase(it);
