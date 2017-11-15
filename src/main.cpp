@@ -145,51 +145,57 @@ struct Terminal : public Component {
   Wiring::Port port;
 };
 
-struct PictureSystem {
-  static void update() {
+struct System {
+  virtual ~System() = default;
+
+  virtual bool filter(const Wiring::Edge& edge) const = 0;
+  virtual void swap(Wiring::Edge& edge) = 0;
+
+  void update() {
     for (auto& t : Wiring::graph().edges) {
-      auto edge = std::get<2>(t);
-      if (edge.capabilities.picture.enabled) {
-        swap(edge.a, edge.b, edge.capabilities.picture.errorRate);
+      auto& edge = std::get<2>(t);
+      if (this->filter(edge)) {
+        this->swap(edge);
       }
     }
-  }
-
-  static void swap(Wiring::Port* a, Wiring::Port* b, float errorRate) {
-    if (randomFloat() < errorRate) {
-      a->pictureBuffer.pictureData = randomColor();
-      b->pictureBuffer.pictureData = randomColor();
-    }
-    std::swap(a->pictureBuffer, b->pictureBuffer);
   }
 };
 
-struct EnergySystem {
-  static void update() {
-    for (auto& t : Wiring::graph().edges) {
-      auto edge = std::get<2>(t);
-      if (edge.capabilities.energy.enabled) {
-        swap(edge.a, edge.b, edge.capabilities.energy.throughput);
-      }
-    }
+struct PictureSystem : public System{
+  bool filter(const Wiring::Edge& edge) const override {
+    return edge.capabilities.picture.enabled;
   }
 
-  static void swap(Wiring::Port* a, Wiring::Port* b, float throughput) {
-    a->energyBuffer.energyPool = std::min(throughput, b->energyBuffer.energyOffer);
-    b->energyBuffer.energyOffer = 0.0f;
-    b->energyBuffer.energyPool = std::min(throughput, a->energyBuffer.energyOffer);
-    a->energyBuffer.energyOffer = 0.0f;
+  void swap(Wiring::Edge& edge) override {
+    if (randomFloat() < edge.capabilities.picture.errorRate) {
+      edge.a->pictureBuffer.pictureData = randomColor();
+      edge.b->pictureBuffer.pictureData = randomColor();
+    }
+    std::swap(edge.a->pictureBuffer, edge.b->pictureBuffer);
   }
 };
 
-struct MessageSystem {
-  static void update() {
-    for (auto& t : Wiring::graph().edges) {
-      auto edge = std::get<2>(t);
-      if (edge.capabilities.text.enabled) {
-        std::swap(edge.a->textBuffer, edge.b->textBuffer);
-      }
-    }
+struct EnergySystem : public System {
+  bool filter(const Wiring::Edge& edge) const override {
+    return edge.capabilities.energy.enabled;
+  }
+
+  void swap(Wiring::Edge& edge) override {
+    auto t = edge.capabilities.energy.throughput;
+    edge.a->energyBuffer.energyPool = std::min(t, edge.b->energyBuffer.energyOffer);
+    edge.b->energyBuffer.energyOffer = 0.0f;
+    edge.b->energyBuffer.energyPool = std::min(t, edge.a->energyBuffer.energyOffer);
+    edge.a->energyBuffer.energyOffer = 0.0f;
+  }
+};
+
+struct MessageSystem : public System {
+  bool filter(const Wiring::Edge& edge) const override {
+    return edge.capabilities.text.enabled;
+  }
+
+  void swap(Wiring::Edge& edge) override {
+    std::swap(edge.a->textBuffer, edge.b->textBuffer);
   }
 };
 
@@ -249,6 +255,11 @@ int main() {
           { "Cable W", cable3 },
   };
 
+  std::vector<std::unique_ptr<System>> systems;
+  systems.emplace_back(new PictureSystem);
+  systems.emplace_back(new EnergySystem);
+  systems.emplace_back(new MessageSystem);
+
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -265,9 +276,9 @@ int main() {
     cpu.update();
     terminal.update();
 
-    PictureSystem::update();
-    EnergySystem::update();
-    MessageSystem::update();
+    for (auto& system : systems) {
+      system->update();
+    }
 
     monitor.render();
     camera.render();
