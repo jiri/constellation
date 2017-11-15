@@ -238,6 +238,16 @@ int main() {
   Lamp lamp;
   CPU cpu;
   Terminal terminal;
+
+  std::vector<Component*> components {
+      &monitor,
+      &camera,
+      &generator,
+      &lamp,
+      &cpu,
+      &terminal,
+  };
+
   Wiring::Cable cable1({ { true, 0.1f }, { false, 0.0f }, { true } });
   Wiring::Cable cable2({ { false, 0.0f }, { true, 100.0f }, { true } });
   Wiring::Cable cable3({ { false, 0.0f }, { true, 5.0f }, { true } });
@@ -269,24 +279,20 @@ int main() {
     glClearColor(0.17f, 0.24f, 0.31f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    monitor.update();
-    camera.update();
-    generator.update();
-    lamp.update();
-    cpu.update();
-    terminal.update();
+    /* Game tick */
+    for (auto& component : components) {
+      component->update();
+    }
 
     for (auto& system : systems) {
       system->update();
     }
 
-    monitor.render();
-    camera.render();
-    generator.render();
-    lamp.render();
-    cpu.render();
-    terminal.render();
+    for (auto& component : components) {
+      component->render();
+    }
 
+    /* ImGui */
     ImGui::Begin("Nodes");
     for (int i = 0; i < nodes.size(); i++) {
       ImGui::Text("%d: %s", i, nodes[i].first.c_str());
