@@ -25,12 +25,16 @@
 #include <Foundation/Systems/Text.hpp>
 
 struct Monitor : public Component {
-  glm::vec3 color;
-  std::string message;
-
   explicit Monitor(Universe* w)
     : Component(w)
-    , port(this, Capabilities { { true, 0.0f }, { false, 0.0f }, { true } })
+    , port {
+          this,
+          Capabilities {
+              .picture = { true, 0.0f },
+              .energy = { false, 0.0f },
+              .text = { true },
+          }
+      }
   { }
 
   void update() override {
@@ -61,13 +65,23 @@ struct Monitor : public Component {
     }
   }
 
+  glm::vec3 color;
+  std::string message;
+
   Wiring::Port port;
 };
 
 struct Camera : public Component {
   explicit Camera(Universe* w)
     : Component(w)
-    , port(this, { { true, 0.0f }, { false, 0.0f } })
+    , port {
+          this,
+          Capabilities {
+              .picture = { true, 0.0f },
+              .energy = { false, 0.0f },
+              .text = { true },
+          },
+      }
   { }
 
   void update() override {
@@ -88,7 +102,14 @@ struct Camera : public Component {
 struct Generator : public Component {
   explicit Generator(Universe* w)
     : Component(w)
-    , port(this, { { false, 0.0f }, { true, 100.0f } })
+    , port {
+          this,
+          Capabilities {
+              .picture = { false, 0.0f },
+              .energy = { true, 100.0f },
+              .text = { true }
+          },
+      }
   { }
 
   void update() override {
@@ -108,7 +129,14 @@ struct Generator : public Component {
 struct Lamp : public Component {
   explicit Lamp(Universe* w)
     : Component(w)
-    , port(this, { { false, 0.0f }, { true, 10.0f } })
+    , port {
+          this,
+          Capabilities {
+              .picture = { false, 0.0f },
+              .energy = { true, 10.0f },
+              .text = { true },
+          },
+      }
   { }
 
   void update() override {
@@ -131,7 +159,14 @@ struct Lamp : public Component {
 struct Terminal : public Component {
   explicit Terminal(Universe* w)
     : Component(w)
-    , port(this, { { false, 0.0f }, { false, 0.0f }, { true } })
+    , port {
+          this,
+          Capabilities {
+              .picture = { false, 0.0f },
+              .energy = { false, 0.0f },
+              .text = { true },
+          },
+      }
   { }
 
   void update() override { }
