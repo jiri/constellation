@@ -2,15 +2,15 @@
 
 #include <Foundation/Wiring.hpp>
 
-class World;
+class Universe;
 
 struct Component {
-  Component(World* world);
+  Component(Universe* world);
   virtual ~Component();
 
   virtual void update() = 0;
   virtual void render() = 0;
 
   Wiring::Graph::vertexHandle vertex;
-  World* world = nullptr;
+  Universe* universe = nullptr;
 };

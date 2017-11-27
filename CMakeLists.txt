@@ -59,7 +59,7 @@ add_library(${PROJECT_NAME}_Foundation ${FOUNDATION_SOURCE_FILES})
 set(SOURCE_FILES
         src/main.cpp
         src/Util/Random.hpp
-)
+        src/Foundation/Universe.cpp src/Foundation/Universe.hpp)
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(

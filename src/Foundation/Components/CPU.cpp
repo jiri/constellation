@@ -3,6 +3,9 @@
 #include <imgui.h>
 #include <imgui_internal.h>
 
+#include <Foundation/Universe.hpp>
+#include <Foundation/Systems/Text.hpp>
+
 enum Op : uint8_t {
   /* Flow */
   HALT = 0x00,
@@ -95,14 +98,14 @@ void CPU::execute(const CPU::ByteCode& code) {
 
       /* I/O */
       case WRITE:
-//        this->world->get<Text::System>().send(fmt::format("{}", pop()));
+        this->universe->get<Text::System>().send(&this->outPort, fmt::format("{}", pop()));
         break;
 
       case READ:
         {
           std::optional<std::string> msg;
           do {
-//            msg = this->world->get<Text::System>().receive();
+            msg = this->universe->get<Text::System>().receive(&this->inPort);
           } while (shouldRun && !msg);
           std::istringstream(*msg) >> a;
           push(a);

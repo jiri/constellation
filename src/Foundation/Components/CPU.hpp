@@ -5,10 +5,11 @@
 #include <thread>
 
 #include <fmt/format.h>
+
 #include <Foundation/Wiring.hpp>
 #include <Foundation/Component.hpp>
 
-class World;
+class Universe;
 
 struct CPU : public Component {
   using ByteCode = std::vector<uint8_t>;
@@ -19,8 +20,8 @@ struct CPU : public Component {
     ILLEGAL,
   };
 
-  CPU(World* w)
-    : Component(w)
+  CPU(Universe* u)
+    : Component(u)
     , inPort(this, { { false, 0.0f }, { false, 0.0f }, { true } })
     , outPort(this, { { false, 0.0f }, { false, 0.0f }, { true } })
   { }

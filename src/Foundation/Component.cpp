@@ -2,9 +2,9 @@
 
 #include <algorithm>
 
-Component::Component(World* w)
+Component::Component(Universe* w)
   : vertex(Wiring::graph().addVertex({ this }))
-  , world { w }
+  , universe { w }
 { }
 
 Component::~Component() {

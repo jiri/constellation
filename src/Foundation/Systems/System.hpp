@@ -2,11 +2,11 @@
 
 #include <Foundation/Wiring.hpp>
 
-class World;
+class Universe;
 
 struct System {
-  System(World* w)
-    : world { w }
+  System(Universe* u)
+    : universe { u }
   { }
 
   virtual ~System() = default;
@@ -23,5 +23,5 @@ struct System {
     }
   }
 
-  World* world;
+  Universe* universe;
 };

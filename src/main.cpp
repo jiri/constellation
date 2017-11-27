@@ -18,6 +18,7 @@
 #include <Util/Random.hpp>
 
 #include <Foundation/Wiring.hpp>
+#include <Foundation/Universe.hpp>
 #include <Foundation/Component.hpp>
 #include <Foundation/Components/CPU.hpp>
 #include <Foundation/Systems/System.hpp>
@@ -25,43 +26,24 @@
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
 
-struct World {
-  // TODO: Destructor
-
-  template <typename T>
-  T& get() {
-    for (System* s : systems) {
-      if (auto t = dynamic_cast<T*>(s)) {
-        return *t;
-      }
-    }
-    throw std::runtime_error {
-        fmt::format("World doesn't own system of type '{}'", typeid(T).name())
-    };
-  }
-
-  std::vector<Component*> components;
-  std::vector<System*> systems;
-};
-
 struct Monitor : public Component {
   glm::vec3 color;
   std::string message;
 
-  explicit Monitor(World* w)
+  explicit Monitor(Universe* w)
     : Component(w)
     , port(this, Capabilities { { true, 0.0f }, { false, 0.0f }, { true } })
   { }
 
   void update() override {
-    if (auto data = world->get<Picture::System>().receive(&this->port)) {
+    if (auto data = universe->get<Picture::System>().receive(&this->port)) {
       color = *data;
     }
     else {
       color = 0.5f * randomColor();
     }
 
-    while (auto msg = this->world->get<Text::System>().receive(&this->port)) {
+    while (auto msg = this->universe->get<Text::System>().receive(&this->port)) {
       message += *msg + "\n";
     }
   }
@@ -85,13 +67,13 @@ struct Monitor : public Component {
 };
 
 struct Camera : public Component {
-  explicit Camera(World* w)
+  explicit Camera(Universe* w)
     : Component(w)
     , port(this, { { true, 0.0f }, { false, 0.0f } })
   { }
 
   void update() override {
-    world->get<Picture::System>().send(&this->port, color);
+    universe->get<Picture::System>().send(&this->port, color);
   }
 
   void render() override {
@@ -106,13 +88,13 @@ struct Camera : public Component {
 };
 
 struct Generator : public Component {
-  explicit Generator(World* w)
+  explicit Generator(Universe* w)
     : Component(w)
     , port(this, { { false, 0.0f }, { true, 100.0f } })
   { }
 
   void update() override {
-    this->world->get<Energy::System>().offer(&this->port, power);
+    this->universe->get<Energy::System>().offer(&this->port, power);
   }
 
   void render() override {
@@ -126,13 +108,13 @@ struct Generator : public Component {
 };
 
 struct Lamp : public Component {
-  explicit Lamp(World* w)
+  explicit Lamp(Universe* w)
     : Component(w)
     , port(this, { { false, 0.0f }, { true, 10.0f } })
   { }
 
   void update() override {
-    float energy = this->world->get<Energy::System>().request(&this->port, 10.0f);
+    float energy = this->universe->get<Energy::System>().request(&this->port, 10.0f);
     satisfaction = energy / 10.0f;
   }
 
@@ -149,7 +131,7 @@ struct Lamp : public Component {
 };
 
 struct Terminal : public Component {
-  explicit Terminal(World* w)
+  explicit Terminal(Universe* w)
     : Component(w)
     , port(this, { { false, 0.0f }, { false, 0.0f }, { true } })
   { }
@@ -160,7 +142,7 @@ struct Terminal : public Component {
     ImGui::Begin("Terminal");
     char buf[256] {};
     if (ImGui::InputText("Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-      this->world->get<Text::System>().send(&this->port, buf);
+      this->universe->get<Text::System>().send(&this->port, buf);
     }
     ImGui::End();
   }
@@ -201,25 +183,25 @@ int main() {
   auto shutdownImgui = gsl::finally([] { ImGui_ImplGlfwGL3_Shutdown(); });
 
   /* Components */
-  World world {
+  Universe universe {
       .components = {
-          new Monitor { &world },
-          new Camera { &world },
-          new Generator { &world },
-          new Lamp { &world },
-          new CPU { &world },
-          new Terminal { &world },
+          new Monitor { &universe },
+          new Camera { &universe },
+          new Generator { &universe },
+          new Lamp { &universe },
+          new CPU { &universe },
+          new Terminal { &universe },
       },
       .systems = {
-          new Picture::System { &world },
-          new Energy::System { &world },
-          new Text::System { &world },
+          new Picture::System { &universe },
+          new Energy::System { &universe },
+          new Text::System { &universe },
       }
   };
 
   Wiring::connect(
-      static_cast<Monitor*>(world.components[0])->port,
-      static_cast<Camera*>(world.components[1])->port
+      static_cast<Monitor*>(universe.components[0])->port,
+      static_cast<Camera*>(universe.components[1])->port
   );
 
   /* Main loop */
@@ -232,15 +214,15 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     /* Game tick */
-    for (auto& component : world.components) {
+    for (auto& component : universe.components) {
       component->update();
     }
 
-    for (auto& system : world.systems) {
+    for (auto& system : universe.systems) {
       system->update();
     }
 
-    for (auto& component : world.components) {
+    for (auto& component : universe.components) {
       component->render();
     }
 
