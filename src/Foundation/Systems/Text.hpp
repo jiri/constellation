@@ -3,18 +3,24 @@
 #include <optional>
 #include <queue>
 #include <string>
+#include <unordered_map>
+
+#include <Foundation/Systems/System.hpp>
 
 namespace Text {
-  struct Capability {
-    bool enabled = false;
-
-    static Capability combine(const Capability& a, const Capability& b);
-  };
-
   struct Buffer {
     std::queue<std::string> messages;
+  };
 
-    void send(const std::string& m);
-    std::optional<std::string> receive();
+  struct System : public ::System {
+    using ::System::System;
+
+    bool filter(const Wiring::Edge& edge) const override;
+    void swap(Wiring::Edge& edge) override;
+
+    void send(Wiring::Port* port, const std::string& m);
+    std::optional<std::string> receive(Wiring::Port* port);
+
+    std::unordered_map<Wiring::Port*, Text::Buffer> buffers;
   };
 };

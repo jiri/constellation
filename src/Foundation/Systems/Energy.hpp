@@ -1,20 +1,24 @@
 #pragma once
 
+#include <unordered_map>
+
+#include <Foundation/Systems/System.hpp>
+
 namespace Energy {
-  struct Capability {
-    bool enabled = false;
-    float throughput = 0.0f;
-
-    static Capability combine(const Capability& a, const Capability& b);
-  };
-
   struct Buffer {
     float energyOffer = 0.0f;
     float energyPool = 0.0f;
+  };
 
-    void offer(float energy);
-    float request(float req);
+  struct System : public ::System {
+    using ::System::System;
 
-    void clear();
+    bool filter(const Wiring::Edge& edge) const override;
+    void swap(Wiring::Edge& edge) override;
+
+    void offer(Wiring::Port* port, float energy);
+    float request(Wiring::Port* port, float req);
+
+    std::unordered_map<Wiring::Port*, Buffer> buffers;
   };
 }

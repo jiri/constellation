@@ -20,25 +20,48 @@
 #include <Foundation/Wiring.hpp>
 #include <Foundation/Component.hpp>
 #include <Foundation/Components/CPU.hpp>
+#include <Foundation/Systems/System.hpp>
+#include <Foundation/Systems/Picture.hpp>
+#include <Foundation/Systems/Energy.hpp>
+#include <Foundation/Systems/Text.hpp>
+
+struct World {
+  // TODO: Destructor
+
+  template <typename T>
+  T& get() {
+    for (System* s : systems) {
+      if (auto t = dynamic_cast<T*>(s)) {
+        return *t;
+      }
+    }
+    throw std::runtime_error {
+        fmt::format("World doesn't own system of type '{}'", typeid(T).name())
+    };
+  }
+
+  std::vector<Component*> components;
+  std::vector<System*> systems;
+};
 
 struct Monitor : public Component {
   glm::vec3 color;
   std::string message;
 
-  Monitor()
-    : Component()
+  explicit Monitor(World* w)
+    : Component(w)
     , port(this, Capabilities { { true, 0.0f }, { false, 0.0f }, { true } })
   { }
 
   void update() override {
-    if (auto data = port.pictureBuffer.receive()) {
+    if (auto data = world->get<Picture::System>().receive(&this->port)) {
       color = *data;
     }
     else {
       color = 0.5f * randomColor();
     }
 
-    while (auto msg = port.textBuffer.receive()) {
+    while (auto msg = this->world->get<Text::System>().receive(&this->port)) {
       message += *msg + "\n";
     }
   }
@@ -62,13 +85,13 @@ struct Monitor : public Component {
 };
 
 struct Camera : public Component {
-  Camera()
-    : Component()
+  explicit Camera(World* w)
+    : Component(w)
     , port(this, { { true, 0.0f }, { false, 0.0f } })
   { }
 
   void update() override {
-    this->port.pictureBuffer.send(color);
+    world->get<Picture::System>().send(&this->port, color);
   }
 
   void render() override {
@@ -83,13 +106,13 @@ struct Camera : public Component {
 };
 
 struct Generator : public Component {
-  Generator()
-    : Component()
+  explicit Generator(World* w)
+    : Component(w)
     , port(this, { { false, 0.0f }, { true, 100.0f } })
   { }
 
   void update() override {
-    this->port.energyBuffer.offer(power);
+    this->world->get<Energy::System>().offer(&this->port, power);
   }
 
   void render() override {
@@ -103,13 +126,13 @@ struct Generator : public Component {
 };
 
 struct Lamp : public Component {
-  Lamp()
-    : Component()
+  explicit Lamp(World* w)
+    : Component(w)
     , port(this, { { false, 0.0f }, { true, 10.0f } })
   { }
 
   void update() override {
-    float energy = port.energyBuffer.request(10.0f);
+    float energy = this->world->get<Energy::System>().request(&this->port, 10.0f);
     satisfaction = energy / 10.0f;
   }
 
@@ -126,8 +149,8 @@ struct Lamp : public Component {
 };
 
 struct Terminal : public Component {
-  Terminal()
-    : Component()
+  explicit Terminal(World* w)
+    : Component(w)
     , port(this, { { false, 0.0f }, { false, 0.0f }, { true } })
   { }
 
@@ -137,66 +160,12 @@ struct Terminal : public Component {
     ImGui::Begin("Terminal");
     char buf[256] {};
     if (ImGui::InputText("Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-      port.textBuffer.send(buf);
+      this->world->get<Text::System>().send(&this->port, buf);
     }
     ImGui::End();
   }
 
   Wiring::Port port;
-};
-
-struct System {
-  virtual ~System() = default;
-
-  virtual bool filter(const Wiring::Edge& edge) const = 0;
-  virtual void swap(Wiring::Edge& edge) = 0;
-
-  void update() {
-    for (auto& t : Wiring::graph().edges) {
-      auto& edge = std::get<2>(t);
-      if (this->filter(edge)) {
-        this->swap(edge);
-      }
-    }
-  }
-};
-
-struct PictureSystem : public System{
-  bool filter(const Wiring::Edge& edge) const override {
-    return edge.capabilities.picture.enabled;
-  }
-
-  void swap(Wiring::Edge& edge) override {
-    if (randomFloat() < edge.capabilities.picture.errorRate) {
-      edge.a->pictureBuffer.pictureData = randomColor();
-      edge.b->pictureBuffer.pictureData = randomColor();
-    }
-    std::swap(edge.a->pictureBuffer, edge.b->pictureBuffer);
-  }
-};
-
-struct EnergySystem : public System {
-  bool filter(const Wiring::Edge& edge) const override {
-    return edge.capabilities.energy.enabled;
-  }
-
-  void swap(Wiring::Edge& edge) override {
-    auto t = edge.capabilities.energy.throughput;
-    edge.a->energyBuffer.energyPool = std::min(t, edge.b->energyBuffer.energyOffer);
-    edge.b->energyBuffer.energyOffer = 0.0f;
-    edge.b->energyBuffer.energyPool = std::min(t, edge.a->energyBuffer.energyOffer);
-    edge.a->energyBuffer.energyOffer = 0.0f;
-  }
-};
-
-struct MessageSystem : public System {
-  bool filter(const Wiring::Edge& edge) const override {
-    return edge.capabilities.text.enabled;
-  }
-
-  void swap(Wiring::Edge& edge) override {
-    std::swap(edge.a->textBuffer, edge.b->textBuffer);
-  }
 };
 
 int main() {
@@ -232,43 +201,26 @@ int main() {
   auto shutdownImgui = gsl::finally([] { ImGui_ImplGlfwGL3_Shutdown(); });
 
   /* Components */
-  Monitor monitor;
-  Camera camera;
-  Generator generator;
-  Lamp lamp;
-  CPU cpu;
-  Terminal terminal;
-
-  std::vector<Component*> components {
-      &monitor,
-      &camera,
-      &generator,
-      &lamp,
-      &cpu,
-      &terminal,
+  World world {
+      .components = {
+          new Monitor { &world },
+          new Camera { &world },
+          new Generator { &world },
+          new Lamp { &world },
+          new CPU { &world },
+          new Terminal { &world },
+      },
+      .systems = {
+          new Picture::System { &world },
+          new Energy::System { &world },
+          new Text::System { &world },
+      }
   };
 
-  Wiring::Cable cable1({ { true, 0.1f }, { false, 0.0f }, { true } });
-  Wiring::Cable cable2({ { false, 0.0f }, { true, 100.0f }, { true } });
-  Wiring::Cable cable3({ { false, 0.0f }, { true, 5.0f }, { true } });
-
-  std::vector<std::pair<std::string, Wiring::Node&>> nodes {
-          { "Monitor", monitor.port },
-          { "Camera", camera.port },
-          { "Generator", generator.port },
-          { "Lamp", lamp.port },
-          { "CPU IN", cpu.inPort },
-          { "CPU OUT", cpu.outPort },
-          { "Terminal", terminal.port },
-          { "Cable P", cable1 },
-          { "Cable S", cable2 },
-          { "Cable W", cable3 },
-  };
-
-  std::vector<std::unique_ptr<System>> systems;
-  systems.emplace_back(new PictureSystem);
-  systems.emplace_back(new EnergySystem);
-  systems.emplace_back(new MessageSystem);
+  Wiring::connect(
+      static_cast<Monitor*>(world.components[0])->port,
+      static_cast<Camera*>(world.components[1])->port
+  );
 
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
@@ -280,50 +232,17 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     /* Game tick */
-    for (auto& component : components) {
+    for (auto& component : world.components) {
       component->update();
     }
 
-    for (auto& system : systems) {
+    for (auto& system : world.systems) {
       system->update();
     }
 
-    for (auto& component : components) {
+    for (auto& component : world.components) {
       component->render();
     }
-
-    /* ImGui */
-    ImGui::Begin("Nodes");
-    for (int i = 0; i < nodes.size(); i++) {
-      ImGui::Text("%d: %s", i, nodes[i].first.c_str());
-    }
-    ImGui::End();
-
-    ImGui::Begin("Console");
-    char buf[64] {};
-    bool flag = ImGui::InputText("Command", buf, 64, ImGuiInputTextFlags_EnterReturnsTrue);
-    if (ImGui::IsRootWindowOrAnyChildFocused() && !ImGui::IsAnyItemActive() && !ImGui::IsMouseClicked(0))
-      ImGui::SetKeyboardFocusHere(0);
-    if (flag) {
-      char cmd[64];
-      int a;
-      int b;
-      int r = sscanf(buf, "%s %d %d", cmd, &a, &b);
-
-      if (r == 3) {
-        std::string command(cmd);
-
-        if (a < nodes.size() && b < nodes.size()) {
-          if (command == "c") {
-            Wiring::connect(nodes[a].second, nodes[b].second);
-          }
-          if (command == "d") {
-            Wiring::disconnect(nodes[a].second, nodes[b].second);
-          }
-        }
-      }
-    }
-    ImGui::End();
 
     ImGui::Render();
     glfwSwapBuffers(window);

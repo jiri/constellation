@@ -1,24 +1,25 @@
 #include <Foundation/Systems/Picture.hpp>
 
-using namespace Picture;
+#include <Util/Random.hpp>
 
-Capability Capability::combine(const Capability& a, const Capability& b) {
-  return {
-      a.enabled && b.enabled,
-      a.errorRate + b.errorRate,
-  };
+bool Picture::System::filter(const Wiring::Edge& edge) const {
+  return edge.capabilities.picture.enabled;
 }
 
-void Buffer::send(const glm::vec3& v) {
-  pictureData = v;
+void Picture::System::swap(Wiring::Edge& edge) {
+  if (randomFloat() < edge.capabilities.picture.errorRate) {
+    buffers[edge.a].pictureData = randomColor();
+    buffers[edge.b].pictureData = randomColor();
+  }
+  std::swap(buffers[edge.a], buffers[edge.b]);
 }
 
-std::optional<glm::vec3> Buffer::receive() {
-  std::optional<glm::vec3> res = pictureData;
-  clear();
+void Picture::System::send(Wiring::Port* port, const glm::vec3& v) {
+  buffers[port].pictureData = v;
+}
+
+std::optional<glm::vec3> Picture::System::receive(Wiring::Port* port) {
+  std::optional<glm::vec3> res = buffers[port].pictureData;
+  buffers[port].pictureData = std::nullopt;
   return res;
-}
-
-void Buffer::clear() {
-  pictureData = std::nullopt;
 }

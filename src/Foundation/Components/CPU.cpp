@@ -95,14 +95,14 @@ void CPU::execute(const CPU::ByteCode& code) {
 
       /* I/O */
       case WRITE:
-        outPort.textBuffer.send(fmt::format("{}", pop()));
+//        this->world->get<Text::System>().send(fmt::format("{}", pop()));
         break;
 
       case READ:
         {
           std::optional<std::string> msg;
           do {
-            msg = inPort.textBuffer.receive();
+//            msg = this->world->get<Text::System>().receive();
           } while (shouldRun && !msg);
           std::istringstream(*msg) >> a;
           push(a);
@@ -142,7 +142,7 @@ CPU::ByteCode CPU::compile(const std::string& program) {
                                  code.push_back(LO_BYTE(i)); }
     else if (word == "pop")    { code.push_back(POP);    }
     else if (word == "swap")   { code.push_back(SWAP);   }
-      /* I/O */
+    /* I/O */
     else if (word == "read")   { code.push_back(READ);   }
     else if (word == "write")  { code.push_back(WRITE);  }
   }

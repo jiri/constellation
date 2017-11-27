@@ -2,23 +2,25 @@
 
 using namespace Text;
 
-Capability Capability::combine(const Capability& a, const Capability& b) {
-  return {
-      a.enabled && b.enabled,
-  };
+bool Text::System::filter(const Wiring::Edge& edge) const {
+  return edge.capabilities.text.enabled;
 }
 
-void Buffer::send(const std::string& m) {
-  messages.push(m);
+void Text::System::swap(Wiring::Edge& edge) {
+  std::swap(buffers[edge.a], buffers[edge.b]);
 }
 
-std::optional<std::string> Buffer::receive() {
-  if (messages.empty()) {
+void Text::System::send(Wiring::Port* port, const std::string& m) {
+  buffers[port].messages.push(m);
+}
+
+std::optional<std::string> Text::System::receive(Wiring::Port* port) {
+  if (buffers[port].messages.empty()) {
     return std::nullopt;
   }
   else {
-    std::string res = messages.front();
-    messages.pop();
+    std::string res = buffers[port].messages.front();
+    buffers[port].messages.pop();
     return res;
   }
 }

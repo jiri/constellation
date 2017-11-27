@@ -1,9 +1,19 @@
 #include <Foundation/Capabilities.hpp>
 
+#include <algorithm>
+
 Capabilities Capabilities::combine(const Capabilities& a, const Capabilities& b) {
   return {
-      Picture::Capability::combine(a.picture, b.picture),
-      Energy::Capability::combine(a.energy, b.energy),
-      Text::Capability::combine(a.text, b.text),
+      {
+          a.picture.enabled && b.picture.enabled,
+          a.picture.errorRate + b.picture.errorRate,
+      },
+      {
+          a.energy.enabled && b.energy.enabled,
+          std::min(a.energy.throughput, b.energy.throughput),
+      },
+      {
+          a.text.enabled && b.text.enabled,
+      },
   };
 }

@@ -50,6 +50,8 @@ set(FOUNDATION_SOURCE_FILES
         src/Foundation/Systems/Picture.cpp
         src/Foundation/Systems/Text.hpp
         src/Foundation/Systems/Text.cpp
+        src/Foundation/Systems/System.hpp
+        src/Foundation/Systems/System.cpp
 )
 add_library(${PROJECT_NAME}_Foundation ${FOUNDATION_SOURCE_FILES})
 

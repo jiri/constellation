@@ -1,23 +1,26 @@
 #pragma once
 
 #include <optional>
+#include <unordered_map>
 
 #include <glm/glm.hpp>
 
+#include <Foundation/Systems/System.hpp>
+
 namespace Picture {
-  struct Capability {
-    bool enabled = false;
-    float errorRate = 0.0f;
-
-    static Capability combine(const Capability& a, const Capability& b);
-  };
-
   struct Buffer {
     std::optional<glm::vec3> pictureData;
+  };
 
-    void send(const glm::vec3& v);
-    std::optional<glm::vec3> receive();
+  struct System : public ::System {
+    using ::System::System;
 
-    void clear();
+    bool filter(const Wiring::Edge& edge) const override;
+    void swap(Wiring::Edge& edge) override;
+
+    void send(Wiring::Port* port, const glm::vec3& v);
+    std::optional<glm::vec3> receive(Wiring::Port* port);
+
+    std::unordered_map<Wiring::Port*, Picture::Buffer> buffers;
   };
 };

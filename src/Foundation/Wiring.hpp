@@ -1,8 +1,9 @@
 #pragma once
 
-#include <boost/graph/adjacency_list.hpp>
+#include <optional>
+#include <vector>
 
-#include <Foundation/Systems.hpp>
+#include <Foundation/Capabilities.hpp>
 
 class Component;
 
@@ -76,10 +77,6 @@ public:
 
     Component* component = nullptr;
     Node* neighbour = nullptr;
-
-    Picture::Buffer pictureBuffer;
-    Energy::Buffer energyBuffer;
-    Text::Buffer textBuffer;
   };
 
   struct Cable : public Node {
