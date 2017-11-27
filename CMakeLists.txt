@@ -42,8 +42,8 @@ set(FOUNDATION_SOURCE_FILES
         src/Foundation/Component.cpp
         src/Foundation/Components/CPU.hpp
         src/Foundation/Components/CPU.cpp
-        src/Foundation/Systems.hpp
-        src/Foundation/Systems.cpp
+        src/Foundation/Capabilities.hpp
+        src/Foundation/Capabilities.cpp
         src/Foundation/Systems/Energy.hpp
         src/Foundation/Systems/Energy.cpp
         src/Foundation/Systems/Picture.hpp

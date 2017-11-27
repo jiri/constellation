@@ -1,4 +1,4 @@
-#include <Foundation/Systems.hpp>
+#include <Foundation/Capabilities.hpp>
 
 Capabilities Capabilities::combine(const Capabilities& a, const Capabilities& b) {
   return {
