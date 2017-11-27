@@ -20,6 +20,8 @@ struct Universe {
     };
   }
 
+  void tick();
+
   std::vector<Component*> components;
   std::vector<System*> systems;
 };

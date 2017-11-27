@@ -19,9 +19,7 @@
 
 #include <Foundation/Wiring.hpp>
 #include <Foundation/Universe.hpp>
-#include <Foundation/Component.hpp>
 #include <Foundation/Components/CPU.hpp>
-#include <Foundation/Systems/System.hpp>
 #include <Foundation/Systems/Picture.hpp>
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
@@ -199,11 +197,6 @@ int main() {
       }
   };
 
-  Wiring::connect(
-      static_cast<Monitor*>(universe.components[0])->port,
-      static_cast<Camera*>(universe.components[1])->port
-  );
-
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
     glfwPollEvents();
@@ -214,17 +207,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     /* Game tick */
-    for (auto& component : universe.components) {
-      component->update();
-    }
-
-    for (auto& system : universe.systems) {
-      system->update();
-    }
-
-    for (auto& component : universe.components) {
-      component->render();
-    }
+    universe.tick();
 
     ImGui::Render();
     glfwSwapBuffers(window);
