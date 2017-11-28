@@ -9,6 +9,7 @@
 enum Op : uint8_t {
   /* Flow */
   HALT = 0x00,
+  ILLEGAL = 0x01,
 
   /* Arithmetic */
   ADD = 0x10,
@@ -27,6 +28,10 @@ enum Op : uint8_t {
 };
 
 int16_t CPU::pop() {
+  if (stack.empty()) {
+    state = ILLEGAL;
+    return 0;
+  }
   int16_t x = stack.top();
   stack.pop();
   return x;
@@ -43,12 +48,13 @@ void CPU::execute(const CPU::ByteCode& code) {
   int16_t b;
 
   shouldRun = true;
-  while (shouldRun) {
+  while (shouldRun && state == NORMAL) {
     assert(pc < code.size());
 
     switch (code[pc++]) {
       case HALT:
         shouldRun = false;
+        state = HALTED;
         break;
 
       /* Arithmetic */
@@ -113,12 +119,15 @@ void CPU::execute(const CPU::ByteCode& code) {
         break;
 
       /* Error handling */
+      case ILLEGAL:
       default:
         state = ILLEGAL;
         shouldRun = false;
         break;
     }
   }
+
+  shouldRun = false;
 }
 
 #define HI_BYTE(a) (((a) >> 8) & 0xFF)
@@ -148,6 +157,7 @@ CPU::ByteCode CPU::compile(const std::string& program) {
     /* I/O */
     else if (word == "read")   { code.push_back(READ);   }
     else if (word == "write")  { code.push_back(WRITE);  }
+    else                       { code.push_back(ILLEGAL); }
   }
 
   code.push_back(HALT);
@@ -156,6 +166,7 @@ CPU::ByteCode CPU::compile(const std::string& program) {
 }
 
 void CPU::run(const ByteCode& code) {
+  state = NORMAL;
   shouldRun = false;
   if (evalThread.joinable()) {
     evalThread.join();
@@ -172,13 +183,11 @@ void CPU::update() {
 void CPU::render() {
   ImGui::Begin("Programmer");
   static char cbuf[512];
-  ImGui::InputTextMultiline("Text", cbuf, 512);
+  ImGui::PushItemWidth(-1);
+  ImGui::InputTextMultiline("##code", cbuf, 512);
+  ImGui::PopItemWidth();
 
   if (shouldRun) {
-    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
-    ImGui::Button("Running...");
-    ImGui::PopItemFlag();
-    ImGui::SameLine();
     if (ImGui::Button("Stop")) {
       shouldRun = false;
     }
@@ -187,6 +196,22 @@ void CPU::render() {
     if (ImGui::Button("Run")) {
       run(compile(cbuf));
     }
+  }
+  ImGui::SameLine();
+  switch (state) {
+    case NORMAL:
+      ImGui::Text("State: NORMAL");
+      break;
+
+    case HALTED:
+      ImGui::Text("State: HALTED");
+      break;
+
+    case ILLEGAL:
+      ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)ImColor { 1.0f, 0.0f, 0.0f });
+      ImGui::Text("State: ILLEGAL");
+      ImGui::PopStyleColor();
+      break;
   }
   ImGui::End();
 }
