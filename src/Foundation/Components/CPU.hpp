@@ -43,6 +43,17 @@ struct CPU : public Component {
   void update() override;
   void render() override;
 
+  std::string name() const override {
+    return "cpu";
+  }
+
+  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
+    return {
+        { "in", &inPort },
+        { "out", &outPort },
+    };
+  }
+
   State state;
   std::stack<int16_t> stack;
 

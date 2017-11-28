@@ -20,6 +20,8 @@ struct Universe {
     };
   }
 
+  Wiring::Port* lookupPort(const std::string& component, const std::string& port);
+
   void tick();
 
   std::vector<Component*> components;

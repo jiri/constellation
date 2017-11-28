@@ -1,7 +1,9 @@
 #include <optional>
 #include <queue>
+#include <regex>
 
 #include <fmt/format.h>
+#include <fmt/ostream.h>
 #include <gsl/gsl>
 
 #define GLFW_INCLUDE_NONE
@@ -65,6 +67,16 @@ struct Monitor : public Component {
     }
   }
 
+  std::string name() const override {
+    return "monitor";
+  }
+
+  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
+    return {
+        { "port", &port },
+    };
+  }
+
   glm::vec3 color;
   std::string message;
 
@@ -95,6 +107,16 @@ struct Camera : public Component {
     ImGui::End();
   }
 
+  std::string name() const override {
+    return "camera";
+  }
+
+  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
+    return {
+        { "port", &port },
+    };
+  }
+
   glm::vec3 color;
   Wiring::Port port;
 };
@@ -120,6 +142,16 @@ struct Generator : public Component {
     ImGui::Begin("Generator");
     ImGui::SliderFloat("Power", &power, 0.0f, 100.0f);
     ImGui::End();
+  }
+
+  std::string name() const override {
+    return "generator";
+  }
+
+  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
+    return {
+        { "port", &port },
+    };
   }
 
   float power = 50.0f;
@@ -152,6 +184,16 @@ struct Lamp : public Component {
     ImGui::PopStyleColor();
   }
 
+  std::string name() const override {
+    return "lamp";
+  }
+
+  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
+    return {
+        { "port", &port },
+    };
+  }
+
   float satisfaction = 0.0f;
   Wiring::Port port;
 };
@@ -178,6 +220,16 @@ struct Terminal : public Component {
       this->universe->get<Text::System>().send(&this->port, buf);
     }
     ImGui::End();
+  }
+
+  std::string name() const override {
+    return "terminal";
+  }
+
+  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
+    return {
+        { "port", &port },
+    };
   }
 
   Wiring::Port port;
@@ -243,6 +295,45 @@ int main() {
 
     /* Game tick */
     universe.tick();
+
+    /* Console */
+    ImGui::Begin("Console");
+    static char buf[256] {};
+    ImGui::PushItemWidth(-1);
+    if (ImGui::InputText("##command", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
+      std::string buffer(buf);
+      std::regex r(R"(^\s*([cd])\s+(\w+):(\w*)\s+(\w+):(\w*))");
+      std::smatch m;
+      std::regex_search(buffer, m, r);
+
+      Wiring::Port* a = universe.lookupPort(m[2], m[3]);
+      Wiring::Port* b = universe.lookupPort(m[4], m[5]);
+
+      if (a && b) {
+        if (m[1] == "c") {
+          Wiring::connect(a, b);
+        }
+        else if (m[1] == "d") {
+          Wiring::disconnect(a, b);
+        }
+        else {
+          fmt::print("Unknown command '{}'\n", m[1]);
+        }
+      }
+      else {
+        if (!a) {
+          fmt::print("Port '{}:{}' not found\n", m[2], m[3]);
+        }
+        if (!b) {
+          fmt::print("Port '{}:{}' not found\n", m[4], m[5]);
+        }
+      }
+
+      buf[0] = 0;
+      ImGui::SetKeyboardFocusHere(-1);
+    }
+    ImGui::PopItemWidth();
+    ImGui::End();
 
     ImGui::Render();
     glfwSwapBuffers(window);
