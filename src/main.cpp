@@ -341,9 +341,19 @@ int main() {
     universe.tick();
 
     /* Console */
-    ImGui::Begin("Console");
+    ImGui::SetNextWindowPos({ 0.0f, 600 - 36.0f });
+    ImGui::Begin("Console", nullptr, { 800.0f, 32.0f }, 0.0f,
+                 ImGuiWindowFlags_NoTitleBar
+                 | ImGuiWindowFlags_NoResize
+                 | ImGuiWindowFlags_NoScrollbar
+                 | ImGuiWindowFlags_NoSavedSettings
+                 | ImGuiWindowFlags_NoFocusOnAppearing);
+
     static char buf[256] {};
     ImGui::PushItemWidth(-1);
+    if (glfwGetKey(window, GLFW_KEY_SLASH) == GLFW_PRESS) {
+      ImGui::SetKeyboardFocusHere();
+    }
     if (ImGui::InputText("##command", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
       std::string buffer(buf);
       std::regex r(R"(^\s*([cd])\s+(\w+):(\w*)\s+(\w+):(\w*))");
