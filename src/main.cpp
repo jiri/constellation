@@ -218,6 +218,7 @@ struct Terminal : public Component {
     char buf[256] {};
     if (ImGui::InputText("Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
       this->universe->get<Text::System>().send(&this->port, buf);
+      ImGui::SetKeyboardFocusHere();
     }
     ImGui::End();
   }
