@@ -10,7 +10,9 @@
 #include <GLFW/glfw3.h>
 #include <glad.h>
 
+#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <imgui_impl_glfw_gl3.h>
 
 #include <glm/glm.hpp>
@@ -236,6 +238,47 @@ struct Terminal : public Component {
   Wiring::Port port;
 };
 
+void DrawGraph() {
+  static std::unordered_map<Component*, ImVec2> componentPositions;
+
+  ImColor yellow { 1.0f, 1.0f, 0.0f };
+  ImColor white  { 1.0f, 1.0f, 1.0f };
+
+  ImGui::Begin("", nullptr, { 800.0f, 600.0f }, 0.0f,
+               ImGuiWindowFlags_NoTitleBar
+               | ImGuiWindowFlags_NoResize
+               | ImGuiWindowFlags_NoScrollbar
+               | ImGuiWindowFlags_NoInputs
+               | ImGuiWindowFlags_NoSavedSettings
+               | ImGuiWindowFlags_NoFocusOnAppearing
+               | ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+  auto* window = ImGui::GetCurrentWindow();
+  ImVec2 offset = window->DC.CursorPos;
+  ImVec2 padding { 80.0f, 60.0f };
+
+  for (auto& vertex : Wiring::graph().vertices) {
+    if (componentPositions.count(vertex.component) == 0) {
+      componentPositions[vertex.component] = padding + ImVec2 { (800.0f - 2.0f * padding.x) * randomFloat(),
+                                                                (600.0f - 2.0f * padding.y) * randomFloat() };
+      fmt::print("{}: {}, {}\n", vertex.component->name(),
+                 componentPositions[vertex.component].x, componentPositions[vertex.component].y);
+    }
+    auto pos = offset + componentPositions[vertex.component];
+    window->DrawList->AddCircleFilled(pos, 4.0f, yellow);
+    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, vertex.component->name().c_str());
+  }
+
+  for (auto& edge : Wiring::graph().edges) {
+    auto& a = Wiring::graph().vertices[std::get<0>(edge)];
+    auto& b = Wiring::graph().vertices[std::get<1>(edge)];
+    window->DrawList->AddLine(offset + componentPositions[a.component],
+                              offset + componentPositions[b.component], yellow, 2.0f);
+  }
+
+  ImGui::End();
+}
+
 int main() {
   glfwSetErrorCallback([](int, const char* message) {
     fmt::print("{}\n", message);
@@ -335,6 +378,8 @@ int main() {
     }
     ImGui::PopItemWidth();
     ImGui::End();
+
+    DrawGraph();
 
     ImGui::Render();
     glfwSwapBuffers(window);
