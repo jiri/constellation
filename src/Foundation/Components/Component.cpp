@@ -1,4 +1,4 @@
-#include <Foundation/Component.hpp>
+#include <Foundation/Components/Component.hpp>
 
 #include <algorithm>
 

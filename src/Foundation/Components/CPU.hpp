@@ -7,7 +7,7 @@
 #include <fmt/format.h>
 
 #include <Foundation/Wiring.hpp>
-#include <Foundation/Component.hpp>
+#include <Foundation/Components/Component.hpp>
 
 class Universe;
 

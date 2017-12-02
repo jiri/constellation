@@ -38,8 +38,8 @@ add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
 set(FOUNDATION_SOURCE_FILES
         src/Foundation/Wiring.hpp
         src/Foundation/Wiring.cpp
-        src/Foundation/Component.hpp
-        src/Foundation/Component.cpp
+        src/Foundation/Components/Component.hpp
+        src/Foundation/Components/Component.cpp
         src/Foundation/Components/CPU.hpp
         src/Foundation/Components/CPU.cpp
         src/Foundation/Capabilities.hpp

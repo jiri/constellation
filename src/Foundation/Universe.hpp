@@ -2,7 +2,7 @@
 
 #include <fmt/format.h>
 
-#include <Foundation/Component.hpp>
+#include <Foundation/Components/Component.hpp>
 #include <Foundation/Systems/System.hpp>
 
 struct Universe {

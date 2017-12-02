@@ -1,6 +1,6 @@
 #include <Foundation/Wiring.hpp>
 
-#include <Foundation/Component.hpp>
+#include <Foundation/Components/Component.hpp>
 #include <fmt/format.h>
 
 #pragma mark Port
