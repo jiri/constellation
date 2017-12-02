@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 
-#include <Foundation/Wiring.hpp>
+#include <Foundation/Infrastructure/Wiring.hpp>
 
 class Universe;
 

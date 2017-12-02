@@ -1,4 +1,4 @@
-#include <Foundation/Wiring.hpp>
+#include <Foundation/Infrastructure/Wiring.hpp>
 
 #include <Foundation/Components/Component.hpp>
 #include <fmt/format.h>
