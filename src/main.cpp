@@ -259,10 +259,10 @@ void DrawGraph() {
 
   for (auto& vertex : Wiring::graph().vertices) {
     if (componentPositions.count(vertex.component) == 0) {
-      componentPositions[vertex.component] = padding + ImVec2 { (800.0f - 2.0f * padding.x) * randomFloat(),
-                                                                (600.0f - 2.0f * padding.y) * randomFloat() };
-      fmt::print("{}: {}, {}\n", vertex.component->name(),
-                 componentPositions[vertex.component].x, componentPositions[vertex.component].y);
+      componentPositions[vertex.component] = padding + ImVec2 {
+          (800.0f - 2.0f * padding.x) * randomFloat(),
+          (600.0f - 2.0f * padding.y) * randomFloat()
+      };
     }
     auto pos = offset + componentPositions[vertex.component];
     window->DrawList->AddCircleFilled(pos, 4.0f, yellow);
