@@ -268,8 +268,30 @@ void DrawGraph() {
   for (auto& edge : Wiring::graph().edges) {
     auto& a = Wiring::graph().vertices[std::get<0>(edge)];
     auto& b = Wiring::graph().vertices[std::get<1>(edge)];
-    window->DrawList->AddLine(offset + componentPositions[a.component],
-                              offset + componentPositions[b.component], yellow, 2.0f);
+
+    Capabilities& capabilities = std::get<2>(edge).capabilities;
+
+    float thickness = 2.0f;
+
+    window->DrawList->ChannelsSplit(2);
+
+    if (capabilities.energy.enabled) {
+      window->DrawList->ChannelsSetCurrent(1);
+      window->DrawList->AddLine(offset + componentPositions[a.component],
+                                offset + componentPositions[b.component], blue, thickness);
+      thickness += 2.0f;
+    }
+
+    if (capabilities.picture.enabled || capabilities.text.enabled) {
+      window->DrawList->ChannelsSetCurrent(0);
+      window->DrawList->AddLine(offset + componentPositions[a.component],
+                                offset + componentPositions[b.component], green, thickness);
+      thickness += 2.0f;
+    }
+
+    window->DrawList->ChannelsMerge();
+  }
+
   for (auto& vertex : Wiring::graph().vertices) {
     auto pos = offset + componentPositions[vertex.component];
     window->DrawList->AddCircleFilled(pos, 4.0f, white);
