@@ -1,6 +1,8 @@
 #include <optional>
 #include <queue>
 #include <regex>
+#include <experimental/filesystem>
+#include <fstream>
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
@@ -28,6 +30,9 @@
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
 #include <Foundation/Capabilities.hpp>
+
+#include <json.hpp>
+using json = nlohmann::json;
 
 struct Monitor : public Component {
   explicit Monitor(Universe* w)
@@ -301,6 +306,55 @@ void DrawGraph() {
   ImGui::End();
 }
 
+void save() {
+  json connections;
+
+  for (auto& edge : Wiring::graph().edges) {
+    Component* a = std::get<0>(edge);
+    Wiring::Port* aPort = std::get<2>(edge).a;
+    Component* b = std::get<1>(edge);
+    Wiring::Port* bPort = std::get<2>(edge).b;
+
+    json connection = json {
+        {
+            "a", {
+                { "component", a->name() },
+                { "port", a->nameOf(aPort) },
+            },
+        },
+        {
+            "b", {
+                { "component", b->name() },
+                { "port", b->nameOf(bPort) },
+            },
+        },
+    };
+
+    connections.push_back(connection);
+  }
+
+  std::ofstream outf { "connections.json" };
+  outf << connections << std::endl;
+}
+
+void load(Universe *universe) {
+  if (!std::experimental::filesystem::exists("connections.json")) {
+    return;
+  }
+
+  std::ifstream inf { "connections.json" };
+
+  json connections;
+  inf >> connections;
+
+  for (auto& connection : connections) {
+    Wiring::Port* a = universe->lookupPort(connection["a"]["component"], connection["a"]["port"]);
+    Wiring::Port* b = universe->lookupPort(connection["b"]["component"], connection["b"]["port"]);
+
+    Wiring::connect(a, b);
+  }
+}
+
 int main() {
   glfwSetErrorCallback([](int, const char* message) {
     fmt::print("{}\n", message);
@@ -349,6 +403,8 @@ int main() {
           new Text::System { &universe },
       }
   };
+
+  load(&universe);
 
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
@@ -416,6 +472,8 @@ int main() {
     ImGui::Render();
     glfwSwapBuffers(window);
   }
+
+  save();
 
   return 0;
 }

@@ -19,6 +19,7 @@ struct Component {
   virtual std::string defaultPort() const = 0;
 
   Wiring::Port& port(const std::string& id);
+  std::string nameOf(const Wiring::Port* p);
 
   Universe* universe = nullptr;
   std::map<std::string, Wiring::Port> ports;

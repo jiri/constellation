@@ -38,3 +38,12 @@ Wiring::Port& Component::port(const std::string& id) {
   }
   return ports.at(id);
 }
+
+std::string Component::nameOf(const Wiring::Port* p) {
+  for (auto& pair : ports) {
+    if (&pair.second == p) {
+      return pair.first;
+    }
+  }
+  throw std::runtime_error { "Invalid port" };
+}
