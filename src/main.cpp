@@ -45,8 +45,11 @@ struct Monitor : public Component {
     if (auto data = universe->get<Picture::System>().receive(&this->port)) {
       color = *data;
     }
-    else {
+    else if (noise) {
       color = 0.5f * randomColor();
+    }
+    else {
+      color = glm::vec3 { 0.0f, 0.0f, 0.0f };
     }
 
     while (auto msg = this->universe->get<Text::System>().receive(&this->port)) {
@@ -55,18 +58,13 @@ struct Monitor : public Component {
   }
 
   void render() override {
-    static bool noise = true;
     ImGui::Checkbox("Monitor noise", &noise);
-    if (noise) {
-      ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(color.r, color.g, color.b));
-    }
+    ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(color.r, color.g, color.b));
     ImGui::SetNextWindowContentSize({ 128, 128 });
     ImGui::Begin("Monitor", nullptr, ImGuiWindowFlags_NoResize);
     ImGui::Text("%s", message.c_str());
     ImGui::End();
-    if (noise) {
-      ImGui::PopStyleColor();
-    }
+    ImGui::PopStyleColor();
   }
 
   std::string name() const override {
@@ -79,6 +77,7 @@ struct Monitor : public Component {
     };
   }
 
+  bool noise = false;
   glm::vec3 color;
   std::string message;
 
