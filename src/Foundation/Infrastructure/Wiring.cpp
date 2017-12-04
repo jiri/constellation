@@ -144,7 +144,7 @@ void Wiring::connect(Universe& u, Node* a, Node* b) {
 
   if (left && right) {
     Capabilities result = *left->fold(nullptr);
-    u.graph.edges.emplace_back(left->component, right->component, Edge { left, right, result });
+    u.connections.emplace_back(left->component, right->component, Connection { left, right, result });
   }
 }
 
@@ -160,12 +160,12 @@ void Wiring::disconnect(Universe& u, Node* a, Node* b) {
   Port* right = b->findPort(a);
 
   if (left && right) {
-    auto it = std::find_if(u.graph.edges.begin(), u.graph.edges.end(), [left, right](const auto& e) -> bool {
+    auto it = std::find_if(u.connections.begin(), u.connections.end(), [left, right](const auto& e) -> bool {
       return (std::get<0>(e) == left->component && std::get<1>(e) == right->component)
           || (std::get<0>(e) == right->component && std::get<1>(e) == left->component);
     });
-    assert(it != u.graph.edges.end());
-    u.graph.edges.erase(it);
+    assert(it != u.connections.end());
+    u.connections.erase(it);
   }
 
   a->removeNeighbour(b);

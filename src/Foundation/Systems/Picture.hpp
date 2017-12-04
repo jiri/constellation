@@ -15,8 +15,8 @@ namespace Picture {
   struct System : public ::System {
     using ::System::System;
 
-    bool filter(const Wiring::Edge& edge) const override;
-    void swap(Wiring::Edge& edge) override;
+    bool filter(const Wiring::Connection& edge) const override;
+    void swap(Wiring::Connection& edge) override;
 
     void send(Wiring::Port* port, const glm::vec3& v);
     std::optional<glm::vec3> receive(Wiring::Port* port);

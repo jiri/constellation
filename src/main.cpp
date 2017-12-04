@@ -258,20 +258,20 @@ void DrawGraph(const Universe& universe) {
   ImVec2 offset = window->DC.CursorPos;
   ImVec2 padding { 80.0f, 60.0f };
 
-  for (auto& vertex : universe.graph.vertices) {
-    if (componentPositions.count(vertex) == 0) {
-      componentPositions[vertex] = padding + ImVec2 {
+  for (auto* component : universe.components) {
+    if (componentPositions.count(component) == 0) {
+      componentPositions[component] = padding + ImVec2 {
           (800.0f - 2.0f * padding.x) * randomFloat(),
           (600.0f - 2.0f * padding.y) * randomFloat()
       };
     }
   }
 
-  for (auto& edge : universe.graph.edges) {
-    auto& a = std::get<0>(edge);
-    auto& b = std::get<1>(edge);
+  for (auto& connection : universe.connections) {
+    auto& a = std::get<0>(connection);
+    auto& b = std::get<1>(connection);
 
-    const Capabilities& capabilities = std::get<2>(edge).capabilities;
+    const Capabilities& capabilities = std::get<2>(connection).capabilities;
 
     float thickness = 2.0f;
 
@@ -294,10 +294,10 @@ void DrawGraph(const Universe& universe) {
     window->DrawList->ChannelsMerge();
   }
 
-  for (auto& vertex : universe.graph.vertices) {
-    auto pos = offset + componentPositions[vertex];
+  for (auto* component : universe.components) {
+    auto pos = offset + componentPositions[component];
     window->DrawList->AddCircleFilled(pos, 4.0f, white);
-    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, vertex->name().c_str());
+    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, component->name().c_str());
   }
 
   ImGui::End();
@@ -306,13 +306,13 @@ void DrawGraph(const Universe& universe) {
 void save(const Universe& u) {
   json connections;
 
-  for (auto& edge : u.graph.edges) {
-    Component* a = std::get<0>(edge);
-    Wiring::Port* aPort = std::get<2>(edge).a;
-    Component* b = std::get<1>(edge);
-    Wiring::Port* bPort = std::get<2>(edge).b;
+  for (auto& connection : u.connections) {
+    Component* a = std::get<0>(connection);
+    Wiring::Port* aPort = std::get<2>(connection).a;
+    Component* b = std::get<1>(connection);
+    Wiring::Port* bPort = std::get<2>(connection).b;
 
-    json connection = json {
+    json c = json {
         {
             "a", {
                 { "component", a->name() },
@@ -327,7 +327,7 @@ void save(const Universe& u) {
         },
     };
 
-    connections.push_back(connection);
+    connections.push_back(c);
   }
 
   std::ofstream outf { "connections.json" };

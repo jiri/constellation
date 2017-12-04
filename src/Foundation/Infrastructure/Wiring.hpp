@@ -12,15 +12,10 @@ class Wiring {
 public:
   struct Port;
 
-  struct Edge {
+  struct Connection {
     Port* a = nullptr;
     Port* b = nullptr;
     Capabilities capabilities;
-  };
-
-  struct Graph {
-    std::vector<Component*> vertices;
-    std::vector<std::tuple<Component*, Component*, Edge>> edges;
   };
 
   struct Node {

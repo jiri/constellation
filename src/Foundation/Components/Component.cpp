@@ -10,17 +10,12 @@ Component::Component(Universe* u)
 { }
 
 Component::~Component() {
-  universe->graph.edges.erase(
-          std::remove_if(universe->graph.edges.begin(), universe->graph.edges.end(),
-                         [this](const std::tuple<Component*, Component*, Wiring::Edge>& e) {
+  universe->connections.erase(
+          std::remove_if(universe->connections.begin(), universe->connections.end(),
+                         [this](const std::tuple<Component*, Component*, Wiring::Connection>& e) {
                            return std::get<0>(e) == this || std::get<1>(e) == this;
                          }),
-          universe->graph.edges.end()
-  );
-
-  universe->graph.vertices.erase(
-          std::remove(universe->graph.vertices.begin(), universe->graph.vertices.end(), this),
-          universe->graph.vertices.end()
+          universe->connections.end()
   );
 }
 

@@ -11,8 +11,8 @@ struct System {
 
   virtual ~System() = default;
 
-  virtual bool filter(const Wiring::Edge& edge) const = 0;
-  virtual void swap(Wiring::Edge& edge) = 0;
+  virtual bool filter(const Wiring::Connection& edge) const = 0;
+  virtual void swap(Wiring::Connection& edge) = 0;
 
   void update();
 
