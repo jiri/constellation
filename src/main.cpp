@@ -298,9 +298,6 @@ void DrawGraph() {
     auto pos = offset + componentPositions[vertex];
     window->DrawList->AddCircleFilled(pos, 4.0f, white);
     window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, vertex->name().c_str());
-
-    ImGui::SetCursorScreenPos(pos - ImVec2 { 4.0f, 4.0f });
-    ImGui::Button("", { 8.0f, 8.0f });
   }
 
   ImGui::End();
