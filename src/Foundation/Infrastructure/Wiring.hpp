@@ -16,10 +16,6 @@ public:
     return w;
   }
 
-  struct Vertex {
-    Component* component = nullptr;
-  };
-
   struct Port;
 
   struct Edge {
@@ -29,15 +25,8 @@ public:
   };
 
   struct Graph {
-    using vertexHandle = size_t;
-
-    vertexHandle addVertex(const Vertex& v) {
-      vertices.push_back(v);
-      return vertices.size() - 1;
-    }
-
-    std::vector<Vertex> vertices;
-    std::vector<std::tuple<vertexHandle, vertexHandle, Edge>> edges;
+    std::vector<Component*> vertices;
+    std::vector<std::tuple<Component*, Component*, Edge>> edges;
   };
 
   Graph g;

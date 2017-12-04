@@ -20,9 +20,7 @@ struct Component {
 
   Wiring::Port& port(const std::string& id);
 
-  Wiring::Graph::vertexHandle vertex;
   Universe* universe = nullptr;
-
   std::map<std::string, Wiring::Port> ports;
 
 protected:

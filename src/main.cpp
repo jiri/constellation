@@ -254,8 +254,8 @@ void DrawGraph() {
   ImVec2 padding { 80.0f, 60.0f };
 
   for (auto& vertex : Wiring::graph().vertices) {
-    if (componentPositions.count(vertex.component) == 0) {
-      componentPositions[vertex.component] = padding + ImVec2 {
+    if (componentPositions.count(vertex) == 0) {
+      componentPositions[vertex] = padding + ImVec2 {
           (800.0f - 2.0f * padding.x) * randomFloat(),
           (600.0f - 2.0f * padding.y) * randomFloat()
       };
@@ -263,8 +263,8 @@ void DrawGraph() {
   }
 
   for (auto& edge : Wiring::graph().edges) {
-    auto& a = Wiring::graph().vertices[std::get<0>(edge)];
-    auto& b = Wiring::graph().vertices[std::get<1>(edge)];
+    auto& a = std::get<0>(edge);
+    auto& b = std::get<1>(edge);
 
     Capabilities& capabilities = std::get<2>(edge).capabilities;
 
@@ -274,15 +274,15 @@ void DrawGraph() {
 
     if (capabilities.energy.enabled) {
       window->DrawList->ChannelsSetCurrent(1);
-      window->DrawList->AddLine(offset + componentPositions[a.component],
-                                offset + componentPositions[b.component], blue, thickness);
+      window->DrawList->AddLine(offset + componentPositions[a],
+                                offset + componentPositions[b], blue, thickness);
       thickness += 2.0f;
     }
 
     if (capabilities.picture.enabled || capabilities.text.enabled) {
       window->DrawList->ChannelsSetCurrent(0);
-      window->DrawList->AddLine(offset + componentPositions[a.component],
-                                offset + componentPositions[b.component], green, thickness);
+      window->DrawList->AddLine(offset + componentPositions[a],
+                                offset + componentPositions[b], green, thickness);
       thickness += 2.0f;
     }
 
@@ -290,9 +290,12 @@ void DrawGraph() {
   }
 
   for (auto& vertex : Wiring::graph().vertices) {
-    auto pos = offset + componentPositions[vertex.component];
+    auto pos = offset + componentPositions[vertex];
     window->DrawList->AddCircleFilled(pos, 4.0f, white);
-    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, vertex.component->name().c_str());
+    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, vertex->name().c_str());
+
+    ImGui::SetCursorScreenPos(pos - ImVec2 { 4.0f, 4.0f });
+    ImGui::Button("", { 8.0f, 8.0f });
   }
 
   ImGui::End();

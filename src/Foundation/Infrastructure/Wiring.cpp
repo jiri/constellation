@@ -142,7 +142,7 @@ void Wiring::connect(Node* a, Node* b) {
 
   if (left && right) {
     Capabilities result = *left->fold(nullptr);
-    graph().edges.emplace_back(left->component->vertex, right->component->vertex, Edge { left, right, result });
+    graph().edges.emplace_back(left->component, right->component, Edge { left, right, result });
   }
 }
 
@@ -159,8 +159,8 @@ void Wiring::disconnect(Node* a, Node* b) {
 
   if (left && right) {
     auto it = std::find_if(graph().edges.begin(), graph().edges.end(), [left, right](const auto& e) -> bool {
-      return (std::get<0>(e) == left->component->vertex && std::get<1>(e) == right->component->vertex)
-          || (std::get<0>(e) == right->component->vertex && std::get<1>(e) == left->component->vertex);
+      return (std::get<0>(e) == left->component && std::get<1>(e) == right->component)
+          || (std::get<0>(e) == right->component && std::get<1>(e) == left->component);
     });
     assert(it != graph().edges.end());
     graph().edges.erase(it);

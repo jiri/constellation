@@ -4,12 +4,22 @@
 #include <fmt/format.h>
 
 Component::Component(Universe* w)
-  : vertex(Wiring::graph().addVertex({ this }))
-  , universe { w }
+  : universe { w }
 { }
 
 Component::~Component() {
-  Wiring::graph().vertices.erase(Wiring::graph().vertices.begin() + vertex);
+  Wiring::graph().edges.erase(
+          std::remove_if(Wiring::graph().edges.begin(), Wiring::graph().edges.end(),
+                         [this](const std::tuple<Component*, Component*, Wiring::Edge>& e) {
+                           return std::get<0>(e) == this || std::get<1>(e) == this;
+                         }),
+          Wiring::graph().edges.end()
+  );
+
+  Wiring::graph().vertices.erase(
+          std::remove(Wiring::graph().vertices.begin(), Wiring::graph().vertices.end(), this),
+          Wiring::graph().vertices.end()
+  );
 }
 
 void Component::updatePorts() {
