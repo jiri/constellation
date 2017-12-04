@@ -263,9 +263,6 @@ void DrawGraph() {
           (600.0f - 2.0f * padding.y) * randomFloat()
       };
     }
-    auto pos = offset + componentPositions[vertex.component];
-    window->DrawList->AddCircleFilled(pos, 4.0f, yellow);
-    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, vertex.component->name().c_str());
   }
 
   for (auto& edge : Wiring::graph().edges) {
@@ -273,6 +270,10 @@ void DrawGraph() {
     auto& b = Wiring::graph().vertices[std::get<1>(edge)];
     window->DrawList->AddLine(offset + componentPositions[a.component],
                               offset + componentPositions[b.component], yellow, 2.0f);
+  for (auto& vertex : Wiring::graph().vertices) {
+    auto pos = offset + componentPositions[vertex.component];
+    window->DrawList->AddCircleFilled(pos, 4.0f, white);
+    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, vertex.component->name().c_str());
   }
 
   ImGui::End();
