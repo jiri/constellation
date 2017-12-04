@@ -6,7 +6,14 @@
 #include <Foundation/Systems/System.hpp>
 
 struct Universe {
-  // TODO: Destructor
+  ~Universe() {
+    for (Component* component : components) {
+      delete component;
+    }
+    for (System* system : systems) {
+      delete system;
+    }
+  }
 
   template <typename T>
   T& get() {
