@@ -33,12 +33,23 @@ struct Monitor : public Component {
   explicit Monitor(Universe* w)
     : Component(w)
   {
-    video.component = this;
-    energy.component = this;
+    ports.emplace("video", Capabilities {
+        .picture = { true, 0.0f },
+        .energy = { false, 0.0f },
+        .text = { true },
+    });
+
+    ports.emplace("energy", Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { true, 10.0f },
+        .text = { false },
+    });
+
+    updatePorts();
   }
 
   void update() override {
-    if (auto data = universe->get<Picture::System>().receive(&this->video)) {
+    if (auto data = universe->get<Picture::System>().receive(&port("video"))) {
       color = *data;
     }
     else if (noise) {
@@ -48,7 +59,7 @@ struct Monitor : public Component {
       color = glm::vec3 { 0.0f, 0.0f, 0.0f };
     }
 
-    while (auto msg = this->universe->get<Text::System>().receive(&this->video)) {
+    while (auto msg = this->universe->get<Text::System>().receive(&port("video"))) {
       message += *msg + "\n";
     }
   }
@@ -67,13 +78,6 @@ struct Monitor : public Component {
     return "monitor";
   }
 
-  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
-    return {
-        { "video", &video },
-        { "energy", &energy },
-    };
-  }
-
   std::string defaultPort() const override {
     return "video";
   }
@@ -81,30 +85,29 @@ struct Monitor : public Component {
   bool noise = false;
   glm::vec3 color;
   std::string message;
-
-  Wiring::Port video = Capabilities {
-    .picture = { true, 0.0f },
-    .energy = { false, 0.0f },
-    .text = { true },
-  };
-
-  Wiring::Port energy = Capabilities {
-    .picture = { false, 0.0f },
-    .energy = { true, 10.0f },
-    .text = { false },
-  };
 };
 
 struct Camera : public Component {
   explicit Camera(Universe* w)
     : Component(w)
   {
-    video.component = this;
-    energy.component = this;
+    ports.emplace("video", Capabilities {
+        .picture = { true, 0.0f },
+        .energy = { false, 0.0f },
+        .text = { false },
+    });
+
+    ports.emplace("energy", Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { true, 10.0f },
+        .text = { false },
+    });
+
+    updatePorts();
   }
 
   void update() override {
-    universe->get<Picture::System>().send(&this->video, color);
+    universe->get<Picture::System>().send(&port("video"), color);
   }
 
   void render() override {
@@ -118,41 +121,28 @@ struct Camera : public Component {
     return "camera";
   }
 
-  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
-    return {
-        { "video", &video },
-        { "energy", &energy },
-    };
-  }
-
   std::string defaultPort() const override {
     return "video";
   }
 
   glm::vec3 color;
-
-  Wiring::Port video = Capabilities {
-      .picture = { true, 0.0f },
-      .energy = { false, 0.0f },
-      .text = { false },
-  };
-
-  Wiring::Port energy = Capabilities {
-      .picture = { false, 0.0f },
-      .energy = { true, 10.0f },
-      .text = { false },
-  };
 };
 
 struct Generator : public Component {
   explicit Generator(Universe* w)
     : Component(w)
   {
-    energy.component = this;
+    ports.emplace("energy", Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { true, 100.0f },
+        .text = { true }
+    });
+
+    updatePorts();
   }
 
   void update() override {
-    this->universe->get<Energy::System>().offer(&this->energy, power);
+    this->universe->get<Energy::System>().offer(&port("energy"), power);
   }
 
   void render() override {
@@ -165,34 +155,28 @@ struct Generator : public Component {
     return "generator";
   }
 
-  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
-    return {
-        { "energy", &energy },
-    };
-  }
-
   std::string defaultPort() const override {
     return "energy";
   }
 
   float power = 50.0f;
-
-  Wiring::Port energy = Capabilities {
-      .picture = { false, 0.0f },
-      .energy = { true, 100.0f },
-      .text = { true }
-  };
 };
 
 struct Lamp : public Component {
   explicit Lamp(Universe* w)
     : Component(w)
   {
-    energy.component = this;
+    ports.emplace("energy", Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { true, 10.0f },
+        .text = { true },
+    });
+
+    updatePorts();
   }
 
   void update() override {
-    float energy = this->universe->get<Energy::System>().request(&this->energy, 10.0f);
+    float energy = this->universe->get<Energy::System>().request(&port("energy"), 10.0f);
     satisfaction = energy / 10.0f;
   }
 
@@ -208,30 +192,24 @@ struct Lamp : public Component {
     return "lamp";
   }
 
-  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
-    return {
-        { "energy", &energy },
-    };
-  }
-
   std::string defaultPort() const override {
     return "energy";
   }
 
   float satisfaction = 0.0f;
-
-  Wiring::Port energy = Capabilities {
-      .picture = { false, 0.0f },
-      .energy = { true, 10.0f },
-      .text = { true },
-  };
 };
 
 struct Terminal : public Component {
   explicit Terminal(Universe* w)
     : Component(w)
   {
-    output.component = this;
+    ports.emplace("output", Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { false, 0.0f },
+        .text = { true },
+    });
+
+    updatePorts();
   }
 
   void update() override { }
@@ -240,7 +218,7 @@ struct Terminal : public Component {
     ImGui::Begin("Terminal");
     char buf[256] {};
     if (ImGui::InputText("Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-      this->universe->get<Text::System>().send(&this->output, buf);
+      this->universe->get<Text::System>().send(&port("output"), buf);
       ImGui::SetKeyboardFocusHere();
     }
     ImGui::End();
@@ -250,21 +228,9 @@ struct Terminal : public Component {
     return "terminal";
   }
 
-  std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
-    return {
-        { "output", &output },
-    };
-  }
-
   std::string defaultPort() const override {
     return "output";
   }
-
-  Wiring::Port output = Capabilities {
-      .picture = { false, 0.0f },
-      .energy = { false, 0.0f },
-      .text = { true },
-  };
 };
 
 void DrawGraph() {

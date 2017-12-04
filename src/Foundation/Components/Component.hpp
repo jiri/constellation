@@ -1,5 +1,6 @@
 #pragma once
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -15,9 +16,15 @@ struct Component {
   virtual void render() = 0;
 
   virtual std::string name() const = 0;
-  virtual std::vector<std::pair<std::string, Wiring::Port*>> ports() = 0;
   virtual std::string defaultPort() const = 0;
+
+  Wiring::Port& port(const std::string& id);
 
   Wiring::Graph::vertexHandle vertex;
   Universe* universe = nullptr;
+
+  std::map<std::string, Wiring::Port> ports;
+
+protected:
+  void updatePorts();
 };

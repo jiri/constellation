@@ -17,9 +17,9 @@ void Universe::tick() {
 Wiring::Port* Universe::lookupPort(const std::string& componentName, const std::string& portName) {
   for (Component* c : this->components) {
     if (c->name() == componentName) {
-      for (auto [ name, port ] : c->ports()) {
+      for (auto& [ name, port ] : c->ports) {
         if ((portName.empty() && name == c->defaultPort()) || name == portName) {
-          return port;
+          return &port;
         }
       }
     }
