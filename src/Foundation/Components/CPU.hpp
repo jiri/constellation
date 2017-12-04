@@ -18,6 +18,7 @@ struct CPU : public Component {
     NORMAL = 0x00,
     HALTED,
     ILLEGAL,
+    AWAITING_INPUT,
   };
 
   CPU(Universe* u)

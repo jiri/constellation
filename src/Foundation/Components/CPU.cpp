@@ -110,9 +110,11 @@ void CPU::execute(const CPU::ByteCode& code) {
       case READ:
         {
           std::optional<std::string> msg;
+          state = AWAITING_INPUT;
           do {
             msg = this->universe->get<Text::System>().receive(&this->inPort);
           } while (shouldRun && !msg);
+          state = NORMAL;
           std::istringstream(*msg) >> a;
           push(a);
         }
@@ -211,6 +213,10 @@ void CPU::render() {
       ImGui::PushStyleColor(ImGuiCol_Text, (ImU32)ImColor { 1.0f, 0.0f, 0.0f });
       ImGui::Text("State: ILLEGAL");
       ImGui::PopStyleColor();
+      break;
+
+    case AWAITING_INPUT:
+      ImGui::Text("State: AWAITING INPUT");
       break;
   }
   ImGui::End();
