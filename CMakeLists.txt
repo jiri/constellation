@@ -11,6 +11,7 @@ find_package(glm REQUIRED)
 add_subdirectory(libraries/gsl)
 add_subdirectory(libraries/glad)
 add_subdirectory(libraries/imgui)
+add_subdirectory(libraries/json)
 
 include_directories(SYSTEM src/)
 include_directories(
@@ -25,6 +26,7 @@ link_libraries(
         glad
         imgui
         glm
+        json
 )
 
 # Graphics library
