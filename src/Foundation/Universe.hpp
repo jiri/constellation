@@ -6,6 +6,15 @@
 #include <Foundation/Systems/System.hpp>
 
 struct Universe {
+  Universe(const std::vector<Component*>&& components, const std::vector<System*>& systems)
+    : components { components }
+    , systems { systems }
+  {
+    for (Component* component : components) {
+      graph.vertices.push_back(component);
+    }
+  }
+
   ~Universe() {
     for (Component* component : components) {
       delete component;
@@ -33,4 +42,6 @@ struct Universe {
 
   std::vector<Component*> components;
   std::vector<System*> systems;
+
+  Wiring::Graph graph;
 };

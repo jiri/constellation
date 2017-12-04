@@ -6,16 +6,10 @@
 #include <Foundation/Capabilities.hpp>
 
 class Component;
+struct Universe;
 
 class Wiring {
-  Wiring() = default;
-
 public:
-  static Wiring& instance() {
-    static Wiring w;
-    return w;
-  }
-
   struct Port;
 
   struct Edge {
@@ -28,12 +22,6 @@ public:
     std::vector<Component*> vertices;
     std::vector<std::tuple<Component*, Component*, Edge>> edges;
   };
-
-  Graph g;
-
-  static Graph& graph() {
-    return instance().g;
-  }
 
   struct Node {
     explicit Node(Capabilities c)
@@ -82,9 +70,9 @@ public:
     uint8_t neighbourCount = 0;
   };
 
-  static void connect(Node& a, Node& b);
-  static void connect(Node* a, Node* b);
+  static void connect(Universe& u, Node& a, Node& b);
+  static void connect(Universe& u, Node* a, Node* b);
 
-  static void disconnect(Node& a, Node& b);
-  static void disconnect(Node* a, Node* b);
+  static void disconnect(Universe& u, Node& a, Node& b);
+  static void disconnect(Universe& u, Node* a, Node* b);
 };

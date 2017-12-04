@@ -1,7 +1,9 @@
 #include <Foundation/Infrastructure/Wiring.hpp>
 
-#include <Foundation/Components/Component.hpp>
 #include <fmt/format.h>
+
+#include <Foundation/Universe.hpp>
+#include <Foundation/Components/Component.hpp>
 
 #pragma mark Port
 
@@ -126,7 +128,7 @@ std::optional<Capabilities> Wiring::Cable::fold(Node* prev) {
 
 #pragma mark Utility
 
-void Wiring::connect(Node* a, Node* b) {
+void Wiring::connect(Universe& u, Node* a, Node* b) {
   if (a->isNeighbourOf(b) && b->isNeighbourOf(a)) {
     return;
   }
@@ -142,11 +144,11 @@ void Wiring::connect(Node* a, Node* b) {
 
   if (left && right) {
     Capabilities result = *left->fold(nullptr);
-    graph().edges.emplace_back(left->component, right->component, Edge { left, right, result });
+    u.graph.edges.emplace_back(left->component, right->component, Edge { left, right, result });
   }
 }
 
-void Wiring::disconnect(Node* a, Node* b) {
+void Wiring::disconnect(Universe& u, Node* a, Node* b) {
   assert(a != b);
   assert(a->isNeighbourOf(b) == b->isNeighbourOf(a));
 
@@ -158,22 +160,22 @@ void Wiring::disconnect(Node* a, Node* b) {
   Port* right = b->findPort(a);
 
   if (left && right) {
-    auto it = std::find_if(graph().edges.begin(), graph().edges.end(), [left, right](const auto& e) -> bool {
+    auto it = std::find_if(u.graph.edges.begin(), u.graph.edges.end(), [left, right](const auto& e) -> bool {
       return (std::get<0>(e) == left->component && std::get<1>(e) == right->component)
           || (std::get<0>(e) == right->component && std::get<1>(e) == left->component);
     });
-    assert(it != graph().edges.end());
-    graph().edges.erase(it);
+    assert(it != u.graph.edges.end());
+    u.graph.edges.erase(it);
   }
 
   a->removeNeighbour(b);
   b->removeNeighbour(a);
 }
 
-void Wiring::connect(Node& a, Node& b) {
-  connect(&a, &b);
+void Wiring::connect(Universe& u, Node& a, Node& b) {
+  connect(u, &a, &b);
 }
 
-void Wiring::disconnect(Node& a, Node& b) {
-  disconnect(&a, &b);
+void Wiring::disconnect(Universe& u, Node& a, Node& b) {
+  disconnect(u, &a, &b);
 }

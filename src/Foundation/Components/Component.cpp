@@ -3,24 +3,24 @@
 #include <algorithm>
 #include <fmt/format.h>
 
-Component::Component(Universe* w)
-  : universe { w }
-{
-  Wiring::graph().vertices.push_back(this);
-}
+#include <Foundation/Universe.hpp>
+
+Component::Component(Universe* u)
+  : universe { u }
+{ }
 
 Component::~Component() {
-  Wiring::graph().edges.erase(
-          std::remove_if(Wiring::graph().edges.begin(), Wiring::graph().edges.end(),
+  universe->graph.edges.erase(
+          std::remove_if(universe->graph.edges.begin(), universe->graph.edges.end(),
                          [this](const std::tuple<Component*, Component*, Wiring::Edge>& e) {
                            return std::get<0>(e) == this || std::get<1>(e) == this;
                          }),
-          Wiring::graph().edges.end()
+          universe->graph.edges.end()
   );
 
-  Wiring::graph().vertices.erase(
-          std::remove(Wiring::graph().vertices.begin(), Wiring::graph().vertices.end(), this),
-          Wiring::graph().vertices.end()
+  universe->graph.vertices.erase(
+          std::remove(universe->graph.vertices.begin(), universe->graph.vertices.end(), this),
+          universe->graph.vertices.end()
   );
 }
 

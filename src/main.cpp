@@ -238,7 +238,7 @@ struct Terminal : public Component {
   }
 };
 
-void DrawGraph() {
+void DrawGraph(const Universe& universe) {
   static std::unordered_map<Component*, ImVec2> componentPositions;
 
   ImColor blue   { 0.0f, 0.0f, 1.0f };
@@ -258,7 +258,7 @@ void DrawGraph() {
   ImVec2 offset = window->DC.CursorPos;
   ImVec2 padding { 80.0f, 60.0f };
 
-  for (auto& vertex : Wiring::graph().vertices) {
+  for (auto& vertex : universe.graph.vertices) {
     if (componentPositions.count(vertex) == 0) {
       componentPositions[vertex] = padding + ImVec2 {
           (800.0f - 2.0f * padding.x) * randomFloat(),
@@ -267,11 +267,11 @@ void DrawGraph() {
     }
   }
 
-  for (auto& edge : Wiring::graph().edges) {
+  for (auto& edge : universe.graph.edges) {
     auto& a = std::get<0>(edge);
     auto& b = std::get<1>(edge);
 
-    Capabilities& capabilities = std::get<2>(edge).capabilities;
+    const Capabilities& capabilities = std::get<2>(edge).capabilities;
 
     float thickness = 2.0f;
 
@@ -294,7 +294,7 @@ void DrawGraph() {
     window->DrawList->ChannelsMerge();
   }
 
-  for (auto& vertex : Wiring::graph().vertices) {
+  for (auto& vertex : universe.graph.vertices) {
     auto pos = offset + componentPositions[vertex];
     window->DrawList->AddCircleFilled(pos, 4.0f, white);
     window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, vertex->name().c_str());
@@ -303,10 +303,10 @@ void DrawGraph() {
   ImGui::End();
 }
 
-void save() {
+void save(const Universe& u) {
   json connections;
 
-  for (auto& edge : Wiring::graph().edges) {
+  for (auto& edge : u.graph.edges) {
     Component* a = std::get<0>(edge);
     Wiring::Port* aPort = std::get<2>(edge).a;
     Component* b = std::get<1>(edge);
@@ -334,7 +334,7 @@ void save() {
   outf << connections << std::endl;
 }
 
-void load(Universe *universe) {
+void load(Universe& universe) {
   if (!std::experimental::filesystem::exists("connections.json")) {
     return;
   }
@@ -345,10 +345,10 @@ void load(Universe *universe) {
   inf >> connections;
 
   for (auto& connection : connections) {
-    Wiring::Port* a = universe->lookupPort(connection["a"]["component"], connection["a"]["port"]);
-    Wiring::Port* b = universe->lookupPort(connection["b"]["component"], connection["b"]["port"]);
+    Wiring::Port* a = universe.lookupPort(connection["a"]["component"], connection["a"]["port"]);
+    Wiring::Port* b = universe.lookupPort(connection["b"]["component"], connection["b"]["port"]);
 
-    Wiring::connect(a, b);
+    Wiring::connect(universe, a, b);
   }
 }
 
@@ -386,7 +386,7 @@ int main() {
 
   /* Components */
   Universe universe {
-      .components = {
+      {
           new Monitor { &universe },
           new Camera { &universe },
           new Generator { &universe },
@@ -394,14 +394,14 @@ int main() {
           new CPU { &universe },
           new Terminal { &universe },
       },
-      .systems = {
+      {
           new Picture::System { &universe },
           new Energy::System { &universe },
           new Text::System { &universe },
       }
   };
 
-  load(&universe);
+  load(universe);
 
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
@@ -440,10 +440,10 @@ int main() {
 
       if (a && b) {
         if (m[1] == "c") {
-          Wiring::connect(a, b);
+          Wiring::connect(universe, a, b);
         }
         else if (m[1] == "d") {
-          Wiring::disconnect(a, b);
+          Wiring::disconnect(universe, a, b);
         }
         else {
           fmt::print("Unknown command '{}'\n", m[1]);
@@ -464,13 +464,13 @@ int main() {
     ImGui::PopItemWidth();
     ImGui::End();
 
-    DrawGraph();
+    DrawGraph(universe);
 
     ImGui::Render();
     glfwSwapBuffers(window);
   }
 
-  save();
+  save(universe);
 
   return 0;
 }
