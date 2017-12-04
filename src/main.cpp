@@ -378,12 +378,12 @@ int main() {
     }
     if (ImGui::InputText("##command", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
       std::string buffer(buf);
-      std::regex r(R"(^\s*([cd])\s+(\w+):(\w*)\s+(\w+):(\w*))");
+      std::regex r(R"(^\s*([cd])\s+(\w+)(:(\w*))?\s+(\w+)(:(\w*))?)");
       std::smatch m;
       std::regex_search(buffer, m, r);
 
-      Wiring::Port* a = universe.lookupPort(m[2], m[3]);
-      Wiring::Port* b = universe.lookupPort(m[4], m[5]);
+      Wiring::Port* a = universe.lookupPort(m[2], m[4]);
+      Wiring::Port* b = universe.lookupPort(m[5], m[7]);
 
       if (a && b) {
         if (m[1] == "c") {
