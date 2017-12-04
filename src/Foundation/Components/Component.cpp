@@ -5,7 +5,9 @@
 
 Component::Component(Universe* w)
   : universe { w }
-{ }
+{
+  Wiring::graph().vertices.push_back(this);
+}
 
 Component::~Component() {
   Wiring::graph().edges.erase(
