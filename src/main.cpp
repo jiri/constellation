@@ -27,22 +27,18 @@
 #include <Foundation/Systems/Picture.hpp>
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
+#include <Foundation/Capabilities.hpp>
 
 struct Monitor : public Component {
   explicit Monitor(Universe* w)
     : Component(w)
-    , port {
-          this,
-          Capabilities {
-              .picture = { true, 0.0f },
-              .energy = { false, 0.0f },
-              .text = { true },
-          }
-      }
-  { }
+  {
+    video.component = this;
+    energy.component = this;
+  }
 
   void update() override {
-    if (auto data = universe->get<Picture::System>().receive(&this->port)) {
+    if (auto data = universe->get<Picture::System>().receive(&this->video)) {
       color = *data;
     }
     else if (noise) {
@@ -52,7 +48,7 @@ struct Monitor : public Component {
       color = glm::vec3 { 0.0f, 0.0f, 0.0f };
     }
 
-    while (auto msg = this->universe->get<Text::System>().receive(&this->port)) {
+    while (auto msg = this->universe->get<Text::System>().receive(&this->video)) {
       message += *msg + "\n";
     }
   }
@@ -73,32 +69,42 @@ struct Monitor : public Component {
 
   std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
     return {
-        { "port", &port },
+        { "video", &video },
+        { "energy", &energy },
     };
+  }
+
+  std::string defaultPort() const override {
+    return "video";
   }
 
   bool noise = false;
   glm::vec3 color;
   std::string message;
 
-  Wiring::Port port;
+  Wiring::Port video = Capabilities {
+    .picture = { true, 0.0f },
+    .energy = { false, 0.0f },
+    .text = { true },
+  };
+
+  Wiring::Port energy = Capabilities {
+    .picture = { false, 0.0f },
+    .energy = { true, 10.0f },
+    .text = { false },
+  };
 };
 
 struct Camera : public Component {
   explicit Camera(Universe* w)
     : Component(w)
-    , port {
-          this,
-          Capabilities {
-              .picture = { true, 0.0f },
-              .energy = { false, 0.0f },
-              .text = { true },
-          },
-      }
-  { }
+  {
+    video.component = this;
+    energy.component = this;
+  }
 
   void update() override {
-    universe->get<Picture::System>().send(&this->port, color);
+    universe->get<Picture::System>().send(&this->video, color);
   }
 
   void render() override {
@@ -114,29 +120,39 @@ struct Camera : public Component {
 
   std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
     return {
-        { "port", &port },
+        { "video", &video },
+        { "energy", &energy },
     };
   }
 
+  std::string defaultPort() const override {
+    return "video";
+  }
+
   glm::vec3 color;
-  Wiring::Port port;
+
+  Wiring::Port video = Capabilities {
+      .picture = { true, 0.0f },
+      .energy = { false, 0.0f },
+      .text = { false },
+  };
+
+  Wiring::Port energy = Capabilities {
+      .picture = { false, 0.0f },
+      .energy = { true, 10.0f },
+      .text = { false },
+  };
 };
 
 struct Generator : public Component {
   explicit Generator(Universe* w)
     : Component(w)
-    , port {
-          this,
-          Capabilities {
-              .picture = { false, 0.0f },
-              .energy = { true, 100.0f },
-              .text = { true }
-          },
-      }
-  { }
+  {
+    energy.component = this;
+  }
 
   void update() override {
-    this->universe->get<Energy::System>().offer(&this->port, power);
+    this->universe->get<Energy::System>().offer(&this->energy, power);
   }
 
   void render() override {
@@ -151,29 +167,32 @@ struct Generator : public Component {
 
   std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
     return {
-        { "port", &port },
+        { "energy", &energy },
     };
   }
 
+  std::string defaultPort() const override {
+    return "energy";
+  }
+
   float power = 50.0f;
-  Wiring::Port port;
+
+  Wiring::Port energy = Capabilities {
+      .picture = { false, 0.0f },
+      .energy = { true, 100.0f },
+      .text = { true }
+  };
 };
 
 struct Lamp : public Component {
   explicit Lamp(Universe* w)
     : Component(w)
-    , port {
-          this,
-          Capabilities {
-              .picture = { false, 0.0f },
-              .energy = { true, 10.0f },
-              .text = { true },
-          },
-      }
-  { }
+  {
+    energy.component = this;
+  }
 
   void update() override {
-    float energy = this->universe->get<Energy::System>().request(&this->port, 10.0f);
+    float energy = this->universe->get<Energy::System>().request(&this->energy, 10.0f);
     satisfaction = energy / 10.0f;
   }
 
@@ -191,26 +210,29 @@ struct Lamp : public Component {
 
   std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
     return {
-        { "port", &port },
+        { "energy", &energy },
     };
   }
 
+  std::string defaultPort() const override {
+    return "energy";
+  }
+
   float satisfaction = 0.0f;
-  Wiring::Port port;
+
+  Wiring::Port energy = Capabilities {
+      .picture = { false, 0.0f },
+      .energy = { true, 10.0f },
+      .text = { true },
+  };
 };
 
 struct Terminal : public Component {
   explicit Terminal(Universe* w)
     : Component(w)
-    , port {
-          this,
-          Capabilities {
-              .picture = { false, 0.0f },
-              .energy = { false, 0.0f },
-              .text = { true },
-          },
-      }
-  { }
+  {
+    output.component = this;
+  }
 
   void update() override { }
 
@@ -218,7 +240,7 @@ struct Terminal : public Component {
     ImGui::Begin("Terminal");
     char buf[256] {};
     if (ImGui::InputText("Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-      this->universe->get<Text::System>().send(&this->port, buf);
+      this->universe->get<Text::System>().send(&this->output, buf);
       ImGui::SetKeyboardFocusHere();
     }
     ImGui::End();
@@ -230,17 +252,26 @@ struct Terminal : public Component {
 
   std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
     return {
-        { "port", &port },
+        { "output", &output },
     };
   }
 
-  Wiring::Port port;
+  std::string defaultPort() const override {
+    return "output";
+  }
+
+  Wiring::Port output = Capabilities {
+      .picture = { false, 0.0f },
+      .energy = { false, 0.0f },
+      .text = { true },
+  };
 };
 
 void DrawGraph() {
   static std::unordered_map<Component*, ImVec2> componentPositions;
 
-  ImColor yellow { 1.0f, 1.0f, 0.0f };
+  ImColor blue   { 0.0f, 0.0f, 1.0f };
+  ImColor green  { 0.0f, 1.0f, 0.0f };
   ImColor white  { 1.0f, 1.0f, 1.0f };
 
   ImGui::Begin("", nullptr, { 800.0f, 600.0f }, 0.0f,

@@ -64,7 +64,7 @@ public:
   };
 
   struct Port : public Node {
-    Port(Component* c, Capabilities cap);
+    Port(Capabilities cap);
 
     Port* findPort(Node*) override;
     bool isFree() const override;

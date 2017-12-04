@@ -23,9 +23,10 @@ struct CPU : public Component {
 
   CPU(Universe* u)
     : Component(u)
-    , inPort(this, { { false, 0.0f }, { false, 0.0f }, { true } })
-    , outPort(this, { { false, 0.0f }, { false, 0.0f }, { true } })
-  { }
+  {
+    in.component = this;
+    out.component = this;
+  }
 
   ~CPU() override {
     shouldRun = false;
@@ -50,9 +51,13 @@ struct CPU : public Component {
 
   std::vector<std::pair<std::string, Wiring::Port*>> ports() override {
     return {
-        { "in", &inPort },
-        { "out", &outPort },
+        { "in", &in },
+        { "out", &out },
     };
+  }
+
+  std::string defaultPort() const override {
+    return "out";
   }
 
   State state;
@@ -61,6 +66,15 @@ struct CPU : public Component {
   std::atomic_bool shouldRun = false;
   std::thread evalThread;
 
-  Wiring::Port inPort;
-  Wiring::Port outPort;
+  Wiring::Port in = Capabilities {
+      .picture = { false, 0.0f },
+      .energy = { false, 0.0f },
+      .text = { true },
+  };
+
+  Wiring::Port out = Capabilities {
+    .picture = { false, 0.0f },
+    .energy = { false, 0.0f },
+    .text = { true },
+  };
 };

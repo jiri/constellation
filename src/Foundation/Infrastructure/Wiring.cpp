@@ -5,9 +5,8 @@
 
 #pragma mark Port
 
-Wiring::Port::Port(Component* c, Capabilities cap)
+Wiring::Port::Port(Capabilities cap)
   : Node(cap)
-  , component(c)
 { }
 
 Wiring::Port* Wiring::Port::findPort(Node*) {
