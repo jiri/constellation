@@ -32,7 +32,6 @@
 #include <Foundation/Infrastructure/Capabilities.hpp>
 
 #include <json.hpp>
-using json = nlohmann::json;
 
 struct Monitor : public Component {
   explicit Monitor(Universe* w)

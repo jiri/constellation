@@ -3,7 +3,6 @@
 #include <fstream>
 
 #include <json.hpp>
-using json = nlohmann::json;
 
 Universe::Universe(const std::vector<Component*>&& components, const std::vector<System*>& systems)
   : components { components }
