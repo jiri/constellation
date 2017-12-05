@@ -29,7 +29,7 @@
 #include <Foundation/Systems/Picture.hpp>
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
-#include <Foundation/Capabilities.hpp>
+#include <Foundation/Infrastructure/Capabilities.hpp>
 
 #include <json.hpp>
 using json = nlohmann::json;

@@ -1,4 +1,4 @@
-#include <Foundation/Capabilities.hpp>
+#include <Foundation/Infrastructure/Capabilities.hpp>
 
 #include <algorithm>
 

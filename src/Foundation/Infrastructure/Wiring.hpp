@@ -3,7 +3,7 @@
 #include <optional>
 #include <vector>
 
-#include <Foundation/Capabilities.hpp>
+#include <Foundation/Infrastructure/Capabilities.hpp>
 
 class Component;
 struct Universe;
