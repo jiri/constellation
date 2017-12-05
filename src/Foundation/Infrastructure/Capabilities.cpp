@@ -17,3 +17,7 @@ Capabilities Capabilities::combine(const Capabilities& a, const Capabilities& b)
       },
   };
 }
+
+Capabilities Capabilities::operator*(const Capabilities& other) const {
+  return Capabilities::combine(*this, other);
+}

@@ -18,4 +18,6 @@ struct Capabilities {
   } text;
 
   static Capabilities combine(const Capabilities& a, const Capabilities& b);
+
+  Capabilities operator*(const Capabilities& other) const ;
 };
