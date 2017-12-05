@@ -303,55 +303,6 @@ void DrawGraph(const Universe& universe) {
   ImGui::End();
 }
 
-void save(const Universe& u) {
-  json connections;
-
-  for (auto& connection : u.connections) {
-    Component* a = std::get<0>(connection);
-    Wiring::Port* aPort = std::get<2>(connection).a;
-    Component* b = std::get<1>(connection);
-    Wiring::Port* bPort = std::get<2>(connection).b;
-
-    json c = json {
-        {
-            "a", {
-                { "component", a->name() },
-                { "port", a->nameOf(aPort) },
-            },
-        },
-        {
-            "b", {
-                { "component", b->name() },
-                { "port", b->nameOf(bPort) },
-            },
-        },
-    };
-
-    connections.push_back(c);
-  }
-
-  std::ofstream outf { "connections.json" };
-  outf << connections << std::endl;
-}
-
-void load(Universe& universe) {
-  if (!std::experimental::filesystem::exists("connections.json")) {
-    return;
-  }
-
-  std::ifstream inf { "connections.json" };
-
-  json connections;
-  inf >> connections;
-
-  for (auto& connection : connections) {
-    Wiring::Port* a = universe.lookupPort(connection["a"]["component"], connection["a"]["port"]);
-    Wiring::Port* b = universe.lookupPort(connection["b"]["component"], connection["b"]["port"]);
-
-    Wiring::connect(universe, a, b);
-  }
-}
-
 int main() {
   glfwSetErrorCallback([](int, const char* message) {
     fmt::print("{}\n", message);
@@ -401,7 +352,7 @@ int main() {
       }
   };
 
-  load(universe);
+  universe.load("connections.json");
 
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
@@ -470,7 +421,7 @@ int main() {
     glfwSwapBuffers(window);
   }
 
-  save(universe);
+  universe.save("connections.json");
 
   return 0;
 }
