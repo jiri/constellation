@@ -346,7 +346,7 @@ int main() {
   });
 
   /* Enable VSync */
-  glfwSwapInterval(0);
+  glfwSwapInterval(1);
 
   /* Initialise ImGui */
   ImGui_ImplGlfwGL3_Init(window, true);
