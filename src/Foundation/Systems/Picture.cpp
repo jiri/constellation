@@ -14,11 +14,11 @@ void Picture::System::swap(Connection& edge) {
   std::swap(buffers[edge.a], buffers[edge.b]);
 }
 
-void Picture::System::send(Wiring::Port* port, const glm::vec3& v) {
+void Picture::System::send(Port* port, const glm::vec3& v) {
   buffers[port].pictureData = v;
 }
 
-std::optional<glm::vec3> Picture::System::receive(Wiring::Port* port) {
+std::optional<glm::vec3> Picture::System::receive(Port* port) {
   std::optional<glm::vec3> res = buffers[port].pictureData;
   buffers[port].pictureData = std::nullopt;
   return res;

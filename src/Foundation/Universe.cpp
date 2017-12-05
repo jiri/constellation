@@ -1,12 +1,14 @@
 #include <Foundation/Universe.hpp>
 
 #include <fstream>
+#include <stdexcept>
 
 #include <json.hpp>
 
 Universe::Universe(const std::vector<Component*>&& components, const std::vector<System*>& systems)
   : components { components }
   , systems { systems }
+  , infrastructure { this }
 {}
 
 Universe::~Universe() {
@@ -32,18 +34,20 @@ void Universe::tick() {
   }
 }
 
-Wiring::Port* Universe::lookupPort(const std::string& componentName, const std::string& portName) {
+Port& Universe::lookupPort(const std::string& componentName, const std::string& portName) {
   for (Component* c : this->components) {
     if (c->name() == componentName) {
       for (auto& [ name, port ] : c->ports) {
         if ((portName.empty() && name == c->defaultPort()) || name == portName) {
-          return &port;
+          return port;
         }
       }
     }
   }
 
-  return nullptr;
+  throw std::runtime_error {
+      fmt::format("Component '{}' doesn't have port '{}'")
+  };
 }
 
 void Universe::save(const fs::path& path) {
@@ -83,9 +87,9 @@ void Universe::load(const fs::path& path) {
   inf >> connections;
 
   for (auto& connection : connections) {
-    Wiring::Port* a = lookupPort(connection["a"]["component"], connection["a"]["port"]);
-    Wiring::Port* b = lookupPort(connection["b"]["component"], connection["b"]["port"]);
+    Port& a = lookupPort(connection["a"]["component"], connection["a"]["port"]);
+    Port& b = lookupPort(connection["b"]["component"], connection["b"]["port"]);
 
-    Wiring::connect(*this, a, b);
+    infrastructure.connect(a, b, Capabilities{});
   }
 }

@@ -18,9 +18,9 @@ namespace Picture {
     bool filter(const Connection& edge) const override;
     void swap(Connection& edge) override;
 
-    void send(Wiring::Port* port, const glm::vec3& v);
-    std::optional<glm::vec3> receive(Wiring::Port* port);
+    void send(Port* port, const glm::vec3& v);
+    std::optional<glm::vec3> receive(Port* port);
 
-    std::unordered_map<Wiring::Port*, Picture::Buffer> buffers;
+    std::unordered_map<Port*, Picture::Buffer> buffers;
   };
 };

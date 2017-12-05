@@ -16,9 +16,9 @@ namespace Energy {
     bool filter(const Connection& edge) const override;
     void swap(Connection& edge) override;
 
-    void offer(Wiring::Port* port, float energy);
-    float request(Wiring::Port* port, float req);
+    void offer(Port* port, float energy);
+    float request(Port* port, float req);
 
-    std::unordered_map<Wiring::Port*, Buffer> buffers;
+    std::unordered_map<Port*, Buffer> buffers;
   };
 }

@@ -18,9 +18,9 @@ namespace Text {
     bool filter(const Connection& edge) const override;
     void swap(Connection& edge) override;
 
-    void send(Wiring::Port* port, const std::string& m);
-    std::optional<std::string> receive(Wiring::Port* port);
+    void send(Port* port, const std::string& m);
+    std::optional<std::string> receive(Port* port);
 
-    std::unordered_map<Wiring::Port*, Text::Buffer> buffers;
+    std::unordered_map<Port*, Text::Buffer> buffers;
   };
 };

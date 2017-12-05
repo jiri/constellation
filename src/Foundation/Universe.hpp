@@ -25,7 +25,7 @@ struct Universe {
     };
   }
 
-  Wiring::Port* lookupPort(const std::string& component, const std::string& port);
+  Port& lookupPort(const std::string& component, const std::string& port);
 
   void tick();
 
@@ -35,4 +35,6 @@ struct Universe {
   std::vector<Component*> components;
   std::vector<System*> systems;
   std::vector<Connection> connections;
+
+  Infrastructure infrastructure;
 };

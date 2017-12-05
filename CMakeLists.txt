@@ -43,8 +43,6 @@ set(FOUNDATION_SOURCE_FILES
         src/Foundation/Infrastructure/Infrastructure.hpp
         src/Foundation/Infrastructure/Capabilities.hpp
         src/Foundation/Infrastructure/Capabilities.cpp
-        src/Foundation/Infrastructure/Wiring.hpp
-        src/Foundation/Infrastructure/Wiring.cpp
         src/Foundation/Components/Component.hpp
         src/Foundation/Components/Component.cpp
         src/Foundation/Components/CPU.hpp

@@ -14,11 +14,11 @@ void Energy::System::swap(Connection& edge) {
   buffers[edge.a].energyOffer = 0.0f;
 }
 
-void Energy::System::offer(Wiring::Port* port, float energy) {
+void Energy::System::offer(Port* port, float energy) {
   buffers[port].energyOffer += energy;
 }
 
-float Energy::System::request(Wiring::Port* port, float req) {
+float Energy::System::request(Port* port, float req) {
   float res = std::min(buffers[port].energyPool, req);
   buffers[port].energyPool -= res;
   return res;

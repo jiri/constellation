@@ -25,7 +25,7 @@ void Component::updatePorts() {
   }
 }
 
-Wiring::Port& Component::port(const std::string& id) {
+Port& Component::port(const std::string& id) {
   if (ports.count(id) == 0) {
     throw std::runtime_error {
         fmt::format("Invalid port '{}:{}'", name(), id)
@@ -34,7 +34,7 @@ Wiring::Port& Component::port(const std::string& id) {
   return ports.at(id);
 }
 
-std::string Component::nameOf(const Wiring::Port* p) {
+std::string Component::nameOf(const Port* p) {
   for (auto& pair : ports) {
     if (&pair.second == p) {
       return pair.first;

@@ -399,27 +399,22 @@ int main() {
       std::smatch m;
       std::regex_search(buffer, m, r);
 
-      Wiring::Port* a = universe.lookupPort(m[2], m[4]);
-      Wiring::Port* b = universe.lookupPort(m[5], m[7]);
+      try {
+        Port& a = universe.lookupPort(m[2], m[4]);
+        Port& b = universe.lookupPort(m[5], m[7]);
 
-      if (a && b) {
         if (m[1] == "c") {
-          Wiring::connect(universe, a, b);
+          universe.infrastructure.connect(a, b, Capabilities{});
         }
         else if (m[1] == "d") {
-          Wiring::disconnect(universe, a, b);
+          universe.infrastructure.disconnect(a, b);
         }
         else {
           fmt::print("Unknown command '{}'\n", m[1]);
         }
       }
-      else {
-        if (!a) {
-          fmt::print("Port '{}:{}' not found\n", m[2], m[3]);
-        }
-        if (!b) {
-          fmt::print("Port '{}:{}' not found\n", m[4], m[5]);
-        }
+      catch (std::runtime_error& e) {
+        fmt::print("{}\n", e.what());
       }
 
       buf[0] = 0;

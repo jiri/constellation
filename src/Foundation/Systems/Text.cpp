@@ -10,11 +10,11 @@ void Text::System::swap(Connection& edge) {
   std::swap(buffers[edge.a], buffers[edge.b]);
 }
 
-void Text::System::send(Wiring::Port* port, const std::string& m) {
+void Text::System::send(Port* port, const std::string& m) {
   buffers[port].messages.push(m);
 }
 
-std::optional<std::string> Text::System::receive(Wiring::Port* port) {
+std::optional<std::string> Text::System::receive(Port* port) {
   if (buffers[port].messages.empty()) {
     return std::nullopt;
   }
