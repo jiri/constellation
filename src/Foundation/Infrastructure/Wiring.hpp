@@ -12,12 +12,6 @@ class Wiring {
 public:
   struct Port;
 
-  struct Connection {
-    Port* a = nullptr;
-    Port* b = nullptr;
-    Capabilities capabilities;
-  };
-
   struct Node {
     explicit Node(Capabilities c)
       : capabilities(c)

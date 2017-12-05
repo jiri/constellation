@@ -2,11 +2,11 @@
 
 #include <Util/Random.hpp>
 
-bool Picture::System::filter(const Wiring::Connection& edge) const {
+bool Picture::System::filter(const Connection& edge) const {
   return edge.capabilities.picture.enabled;
 }
 
-void Picture::System::swap(Wiring::Connection& edge) {
+void Picture::System::swap(Connection& edge) {
   if (randomFloat() < edge.capabilities.picture.errorRate) {
     buffers[edge.a].pictureData = randomColor();
     buffers[edge.b].pictureData = randomColor();

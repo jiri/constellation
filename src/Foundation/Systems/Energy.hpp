@@ -13,8 +13,8 @@ namespace Energy {
   struct System : public ::System {
     using ::System::System;
 
-    bool filter(const Wiring::Connection& edge) const override;
-    void swap(Wiring::Connection& edge) override;
+    bool filter(const Connection& edge) const override;
+    void swap(Connection& edge) override;
 
     void offer(Wiring::Port* port, float energy);
     float request(Wiring::Port* port, float req);

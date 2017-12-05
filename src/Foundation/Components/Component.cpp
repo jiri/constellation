@@ -10,7 +10,7 @@ Component::Component(Universe* u)
 { }
 
 Component::~Component() {
-  auto pred = [this](const Wiring::Connection& c) {
+  auto pred = [this](const Connection& c) {
     return c.a->component == this || c.b->component == this;
   };
 

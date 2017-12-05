@@ -5,9 +5,9 @@ namespace fs = std::experimental::filesystem;
 
 #include <fmt/format.h>
 
+#include <Foundation/Infrastructure/Infrastructure.hpp>
 #include <Foundation/Components/Component.hpp>
 #include <Foundation/Systems/System.hpp>
-#include <Foundation/Infrastructure/Wiring.hpp>
 
 struct Universe {
   Universe(const std::vector<Component*>&& components, const std::vector<System*>& systems);
@@ -34,5 +34,5 @@ struct Universe {
 
   std::vector<Component*> components;
   std::vector<System*> systems;
-  std::vector<Wiring::Connection> connections;
+  std::vector<Connection> connections;
 };

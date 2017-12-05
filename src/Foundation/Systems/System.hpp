@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Foundation/Infrastructure/Wiring.hpp>
+#include <Foundation/Infrastructure/Infrastructure.hpp>
 
 class Universe;
 
@@ -11,8 +11,8 @@ struct System {
 
   virtual ~System() = default;
 
-  virtual bool filter(const Wiring::Connection& edge) const = 0;
-  virtual void swap(Wiring::Connection& edge) = 0;
+  virtual bool filter(const Connection& edge) const = 0;
+  virtual void swap(Connection& edge) = 0;
 
   void update();
 

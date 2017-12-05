@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
-bool Energy::System::filter(const Wiring::Connection& edge) const {
+bool Energy::System::filter(const Connection& edge) const {
   return edge.capabilities.energy.enabled;
 }
 
-void Energy::System::swap(Wiring::Connection& edge) {
+void Energy::System::swap(Connection& edge) {
   auto t = edge.capabilities.energy.throughput;
   buffers[edge.a].energyPool = std::min(t, buffers[edge.b].energyOffer);
   buffers[edge.b].energyOffer = 0.0f;

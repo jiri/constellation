@@ -39,14 +39,16 @@ add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
 
 # Foundation library
 set(FOUNDATION_SOURCE_FILES
+        src/Foundation/Infrastructure/Infrastructure.cpp
+        src/Foundation/Infrastructure/Infrastructure.hpp
+        src/Foundation/Infrastructure/Capabilities.hpp
+        src/Foundation/Infrastructure/Capabilities.cpp
         src/Foundation/Infrastructure/Wiring.hpp
         src/Foundation/Infrastructure/Wiring.cpp
         src/Foundation/Components/Component.hpp
         src/Foundation/Components/Component.cpp
         src/Foundation/Components/CPU.hpp
         src/Foundation/Components/CPU.cpp
-        src/Foundation/Infrastructure/Capabilities.hpp
-        src/Foundation/Infrastructure/Capabilities.cpp
         src/Foundation/Systems/Energy.hpp
         src/Foundation/Systems/Energy.cpp
         src/Foundation/Systems/Picture.hpp

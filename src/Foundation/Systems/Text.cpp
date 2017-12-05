@@ -2,11 +2,11 @@
 
 using namespace Text;
 
-bool Text::System::filter(const Wiring::Connection& edge) const {
+bool Text::System::filter(const Connection& edge) const {
   return edge.capabilities.text.enabled;
 }
 
-void Text::System::swap(Wiring::Connection& edge) {
+void Text::System::swap(Connection& edge) {
   std::swap(buffers[edge.a], buffers[edge.b]);
 }
 
