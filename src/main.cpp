@@ -260,7 +260,6 @@ void DrawGraph(Universe& universe) {
   ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar
                            | ImGuiWindowFlags_NoResize
                            | ImGuiWindowFlags_NoScrollbar
-                           | ImGuiWindowFlags_NoInputs
                            | ImGuiWindowFlags_NoSavedSettings
                            | ImGuiWindowFlags_NoFocusOnAppearing
                            | ImGuiWindowFlags_NoBringToFrontOnFocus;
@@ -306,10 +305,25 @@ void DrawGraph(Universe& universe) {
     window->DrawList->ChannelsMerge();
   }
 
+  static Component* active = nullptr;
   for (auto* c : universe.components) {
     auto pos = offset + ImVec2 { c->position.x, c->position.y };
     window->DrawList->AddCircleFilled(pos, 4.0f, white);
     window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, c->name().c_str());
+
+    ImGui::SetCursorScreenPos(pos - ImVec2 { 6.0f, 6.0f });
+    ImGui::InvisibleButton("##handle", { 12.0f, 12.0f });
+
+    if (ImGui::IsItemClicked(0)) {
+      active = c;
+    }
+    if (!ImGui::IsMouseDown(0)) {
+      active = nullptr;
+    }
+
+    if (active == c) {
+      c->position += glm::vec2 { ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y };
+    }
   }
 
   ImGui::End();
