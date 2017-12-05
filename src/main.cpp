@@ -253,8 +253,6 @@ struct Terminal : public Component {
 };
 
 void DrawGraph(const Universe& universe) {
-  static std::unordered_map<Component*, ImVec2> componentPositions;
-
   ImColor blue   { 0.0f, 0.0f, 1.0f };
   ImColor green  { 0.0f, 1.0f, 0.0f };
   ImColor white  { 1.0f, 1.0f, 1.0f };
@@ -276,12 +274,10 @@ void DrawGraph(const Universe& universe) {
   ImVec2 offset = window->DC.CursorPos;
 
   for (auto* component : universe.components) {
-    if (componentPositions.count(component) == 0) {
-      ImVec2 padding = window->Size * 0.1f;
-      componentPositions[component] = padding + ImVec2 {
-          (window->Size.x - 2.0f * padding.x) * randomFloat(),
-          (window->Size.y - 2.0f * padding.y) * randomFloat()
-      };
+    if (component->position == glm::vec2 { 0.0f, 0.0f }) {
+      glm::vec2 size { window->Size.x, window->Size.y };
+      glm::vec2 padding = 0.1f * size;
+      component->position = padding + (size - 2.0f * padding) * glm::vec2 { randomFloat(), randomFloat() };
     }
   }
 
@@ -296,24 +292,24 @@ void DrawGraph(const Universe& universe) {
     if (connection.capabilities.energy.enabled) {
       thickness += 2.0f;
       window->DrawList->ChannelsSetCurrent(1);
-      window->DrawList->AddLine(offset + componentPositions[a],
-                                offset + componentPositions[b], blue, thickness);
+      window->DrawList->AddLine(offset + ImVec2 { a->position.x, a->position.y },
+                                offset + ImVec2 { b->position.x, b->position.y }, blue, thickness);
     }
 
     if (connection.capabilities.picture.enabled || connection.capabilities.text.enabled) {
       thickness += 2.0f;
       window->DrawList->ChannelsSetCurrent(0);
-      window->DrawList->AddLine(offset + componentPositions[a],
-                                offset + componentPositions[b], green, thickness);
+      window->DrawList->AddLine(offset + ImVec2 { a->position.x, a->position.y },
+                                offset + ImVec2 { b->position.x, b->position.y }, green, thickness);
     }
 
     window->DrawList->ChannelsMerge();
   }
 
-  for (auto* component : universe.components) {
-    auto pos = offset + componentPositions[component];
+  for (auto* c : universe.components) {
+    auto pos = offset + ImVec2 { c->position.x, c->position.y };
     window->DrawList->AddCircleFilled(pos, 4.0f, white);
-    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, component->name().c_str());
+    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, c->name().c_str());
   }
 
   ImGui::End();

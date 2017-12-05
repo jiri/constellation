@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include <Foundation/Infrastructure/Wiring.hpp>
 
 class Universe;
@@ -23,6 +25,8 @@ struct Component {
 
   Universe* universe = nullptr;
   std::map<std::string, Wiring::Port> ports;
+
+  glm::vec2 position;
 
 protected:
   void updatePorts();
