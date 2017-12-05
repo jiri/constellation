@@ -29,6 +29,7 @@
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
 #include <Foundation/Infrastructure/Capabilities.hpp>
+#include <Foundation/Infrastructure/Wireless.hpp>
 
 #include <json.hpp>
 
@@ -308,6 +309,7 @@ void DrawGraph(Universe& universe) {
   for (auto* c : universe.components) {
     auto pos = offset + ImVec2 { c->position.x, c->position.y };
     window->DrawList->AddCircleFilled(pos, 4.0f, white);
+    window->DrawList->AddCircleFilled(pos, 50.0f, ImColor { 1.0f, 1.0f, 1.0f, 0.1f });
     window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, c->name().c_str());
 
     ImGui::SetCursorScreenPos(pos - ImVec2 { 6.0f, 6.0f });
@@ -375,10 +377,13 @@ int main() {
           new Picture::System { &universe },
           new Energy::System { &universe },
           new Text::System { &universe },
-      }
+      },
+      {
+          new Wireless { &universe },
+      },
   };
 
-  universe.load("connections.json");
+//  universe.load("connections.json");
 
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
@@ -442,7 +447,7 @@ int main() {
     glfwSwapBuffers(window);
   }
 
-  universe.save("connections.json");
+//  universe.save("connections.json");
 
   return 0;
 }

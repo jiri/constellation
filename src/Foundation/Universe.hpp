@@ -10,7 +10,7 @@ namespace fs = std::experimental::filesystem;
 #include <Foundation/Systems/System.hpp>
 
 struct Universe {
-  Universe(const std::vector<Component*>&& components, const std::vector<System*>& systems);
+  Universe(const std::vector<Component*>& components, const std::vector<System*>& systems, const std::vector<Infrastructure*>& infrastructures);
   ~Universe();
 
   template <typename T>
@@ -36,9 +36,8 @@ struct Universe {
   void disconnect(Port& a, Port& b);
   bool connected(Port& a, Port& b) const;
 
+  std::vector<Infrastructure*> infrastructures;
   std::vector<Component*> components;
   std::vector<System*> systems;
   std::vector<Connection> connections;
-
-  Infrastructure infrastructure;
 };

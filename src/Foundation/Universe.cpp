@@ -5,13 +5,18 @@
 
 #include <json.hpp>
 
-Universe::Universe(const std::vector<Component*>&& components, const std::vector<System*>& systems)
+Universe::Universe(const std::vector<Component*>& components,
+                   const std::vector<System*>& systems,
+                   const std::vector<Infrastructure*>& infrastructures)
   : components { components }
   , systems { systems }
-  , infrastructure { this }
+  , infrastructures { infrastructures }
 {}
 
 Universe::~Universe() {
+  for (Infrastructure* infrastructure : infrastructures) {
+    delete infrastructure;
+  }
   for (Component* component : components) {
     delete component;
   }
@@ -31,6 +36,10 @@ void Universe::tick() {
 
   for (auto& component : this->components) {
     component->render();
+  }
+
+  for (auto& infrastructure : this->infrastructures) {
+    infrastructure->update();
   }
 }
 
@@ -103,7 +112,7 @@ void Universe::connect(Port& a, Port& b, Capabilities capabilities) {
 }
 
 void Universe::disconnect(Port& a, Port& b) {
-  static auto pred = [&a, &b](const Connection& c) {
+  auto pred = [&](const Connection& c) {
     return (c.a == &a && c.b == &b) || (c.a == &b && c.b == &a);
   };
 
@@ -111,14 +120,15 @@ void Universe::disconnect(Port& a, Port& b) {
     return;
   }
 
-  auto pos = std::find_if(connections.begin(), connections.end(), pred);
+  auto pos = std::remove_if(connections.begin(), connections.end(), pred);
   connections.erase(pos, connections.end());
 }
 
 bool Universe::connected(Port& a, Port& b) const {
-  static auto pred = [&a, &b](const Connection& c) {
-    return (c.a == &a && c.b == &b) || (c.a == &b && c.b == &a);
-  };
-  auto pos = std::find_if(connections.begin(), connections.end(), pred);
-  return pos != connections.end();
+  for (const Connection& c : connections) {
+    if ((c.a == &a && c.b == &b) || (c.a == &b && c.b == &a)) {
+      return true;
+    }
+  }
+  return false;
 }

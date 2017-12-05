@@ -38,6 +38,10 @@ public:
     : universe { u }
   { }
 
-private:
+  virtual ~Infrastructure() = default;
+
+  virtual void update() = 0;
+
+protected:
   Universe* universe;
 };
