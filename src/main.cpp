@@ -252,7 +252,7 @@ struct Terminal : public Component {
   }
 };
 
-void DrawGraph(const Universe& universe) {
+void DrawGraph(Universe& universe) {
   ImColor blue   { 0.0f, 0.0f, 1.0f };
   ImColor green  { 0.0f, 1.0f, 0.0f };
   ImColor white  { 1.0f, 1.0f, 1.0f };
