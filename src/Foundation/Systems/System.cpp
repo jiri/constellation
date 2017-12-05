@@ -3,10 +3,9 @@
 #include <Foundation/Universe.hpp>
 
 void System::update() {
-  for (auto& t : universe->connections) {
-    auto& edge = std::get<2>(t);
-    if (this->filter(edge)) {
-      this->swap(edge);
+  for (auto& connection : universe->connections) {
+    if (this->filter(connection)) {
+      this->swap(connection);
     }
   }
 }

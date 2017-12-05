@@ -10,13 +10,13 @@ Component::Component(Universe* u)
 { }
 
 Component::~Component() {
-  universe->connections.erase(
-          std::remove_if(universe->connections.begin(), universe->connections.end(),
-                         [this](const std::tuple<Component*, Component*, Wiring::Connection>& e) {
-                           return std::get<0>(e) == this || std::get<1>(e) == this;
-                         }),
-          universe->connections.end()
-  );
+  auto pred = [this](const Wiring::Connection& c) {
+    return c.a->component == this || c.b->component == this;
+  };
+
+  auto beg = universe->connections.begin();
+  auto end = universe->connections.end();
+  universe->connections.erase(std::remove_if(beg, end, pred), end);
 }
 
 void Component::updatePorts() {

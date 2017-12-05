@@ -272,27 +272,25 @@ void DrawGraph(const Universe& universe) {
   }
 
   for (auto& connection : universe.connections) {
-    auto& a = std::get<0>(connection);
-    auto& b = std::get<1>(connection);
+    auto* a = connection.a->component;
+    auto* b = connection.b->component;
 
-    const Capabilities& capabilities = std::get<2>(connection).capabilities;
-
-    float thickness = 2.0f;
+    float thickness = 0.0f;
 
     window->DrawList->ChannelsSplit(2);
 
-    if (capabilities.energy.enabled) {
+    if (connection.capabilities.energy.enabled) {
+      thickness += 2.0f;
       window->DrawList->ChannelsSetCurrent(1);
       window->DrawList->AddLine(offset + componentPositions[a],
                                 offset + componentPositions[b], blue, thickness);
-      thickness += 2.0f;
     }
 
-    if (capabilities.picture.enabled || capabilities.text.enabled) {
+    if (connection.capabilities.picture.enabled || connection.capabilities.text.enabled) {
+      thickness += 2.0f;
       window->DrawList->ChannelsSetCurrent(0);
       window->DrawList->AddLine(offset + componentPositions[a],
                                 offset + componentPositions[b], green, thickness);
-      thickness += 2.0f;
     }
 
     window->DrawList->ChannelsMerge();

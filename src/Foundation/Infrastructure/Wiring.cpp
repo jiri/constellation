@@ -53,6 +53,10 @@ bool Wiring::Port::connected() {
   return neighbour && neighbour->findPort(this);
 }
 
+std::string Wiring::Port::name() const {
+  return component->nameOf(this);
+}
+
 #pragma mark Cable
 
 Wiring::Port* Wiring::Cable::findPort(Node* prev) {
@@ -144,7 +148,7 @@ void Wiring::connect(Universe& u, Node* a, Node* b) {
 
   if (left && right) {
     Capabilities result = *left->fold(nullptr);
-    u.connections.emplace_back(left->component, right->component, Connection { left, right, result });
+    u.connections.push_back({ left, right, result });
   }
 }
 
@@ -160,9 +164,9 @@ void Wiring::disconnect(Universe& u, Node* a, Node* b) {
   Port* right = b->findPort(a);
 
   if (left && right) {
-    auto it = std::find_if(u.connections.begin(), u.connections.end(), [left, right](const auto& e) -> bool {
-      return (std::get<0>(e) == left->component && std::get<1>(e) == right->component)
-          || (std::get<0>(e) == right->component && std::get<1>(e) == left->component);
+    auto it = std::find_if(u.connections.begin(), u.connections.end(), [left, right](const auto& e) {
+      return (e.a->component == left->component && e.b->component == right->component)
+          || (e.b->component == left->component && e.a->component == right->component);
     });
     assert(it != u.connections.end());
     u.connections.erase(it);

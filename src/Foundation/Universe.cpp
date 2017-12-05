@@ -51,22 +51,17 @@ void Universe::save(const fs::path& path) {
   json cs;
 
   for (auto& connection : connections) {
-    Component* a = std::get<0>(connection);
-    Wiring::Port* aPort = std::get<2>(connection).a;
-    Component* b = std::get<1>(connection);
-    Wiring::Port* bPort = std::get<2>(connection).b;
-
     json c = json {
         {
             "a", {
-                { "component", a->name() },
-                { "port", a->nameOf(aPort) },
+                { "component", connection.a->component->name() },
+                { "port", connection.a->name() },
             },
         },
         {
             "b", {
-                { "component", b->name() },
-                { "port", b->nameOf(bPort) },
+                { "component", connection.b->component->name() },
+                { "port", connection.b->name() },
             },
         },
     };

@@ -46,6 +46,7 @@ public:
     std::optional<Capabilities> fold(Node* prev) override;
 
     bool connected();
+    std::string name() const;
 
     Component* component = nullptr;
     Node* neighbour = nullptr;

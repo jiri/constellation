@@ -34,5 +34,5 @@ struct Universe {
 
   std::vector<Component*> components;
   std::vector<System*> systems;
-  std::vector<std::tuple<Component*, Component*, Wiring::Connection>> connections;
+  std::vector<Wiring::Connection> connections;
 };
