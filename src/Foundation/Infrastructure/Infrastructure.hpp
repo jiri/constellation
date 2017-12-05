@@ -4,7 +4,6 @@
 #include <vector>
 
 #include <Foundation/Infrastructure/Capabilities.hpp>
-#include <Foundation/Infrastructure/Wiring.hpp>
 
 class Component;
 class Universe;

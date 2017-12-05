@@ -23,7 +23,6 @@
 #include <Graphics/Program.hpp>
 #include <Util/Random.hpp>
 
-#include <Foundation/Infrastructure/Wiring.hpp>
 #include <Foundation/Universe.hpp>
 #include <Foundation/Components/CPU.hpp>
 #include <Foundation/Systems/Picture.hpp>
