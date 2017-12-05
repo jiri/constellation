@@ -1,18 +1,20 @@
 #pragma once
 
+#include <limits>
+
 struct Capabilities {
   struct {
-    bool enabled = false;
+    bool enabled = true;
     float errorRate = 0.0f;
   } picture;
 
   struct {
-    bool enabled = false;
-    float throughput = 0.0f;
+    bool enabled = true;
+    float throughput = std::numeric_limits<float>::infinity();
   } energy;
 
   struct {
-    bool enabled = false;
+    bool enabled = true;
   } text;
 
   static Capabilities combine(const Capabilities& a, const Capabilities& b);
