@@ -135,6 +135,7 @@ struct Camera : public Component {
 struct Generator : public Component {
   explicit Generator(Universe* w)
     : Component(w)
+    , history(256, 0)
   {
     ports.emplace("energy", Capabilities {
         .picture = { false, 0.0f },
@@ -146,12 +147,24 @@ struct Generator : public Component {
   }
 
   void update() override {
-    this->universe->get<Energy::System>().offer(&port("energy"), power);
+    noise = (randomFloat() - 0.5f) * 10.0f;
+    this->universe->get<Energy::System>().offer(&port("energy"), power + noise);
+    history.push_back(power + noise);
   }
 
   void render() override {
+    ImGui::SetNextWindowSize({ 256.0f, 0.0f });
     ImGui::Begin("Generator");
-    ImGui::SliderFloat("Power", &power, 0.0f, 100.0f);
+
+    ImGui::PushItemWidth(-1);
+    ImGui::SliderFloat("##power", &power, 0.0f, 100.0f);
+
+    while (history.size() > 256) {
+      history.erase(history.begin());
+    }
+    ImGui::PushItemWidth(-1);
+    ImGui::PlotLines("##history", history.data(), history.size(), 0, nullptr, 0.0f, 100.0f);
+
     ImGui::End();
   }
 
@@ -164,6 +177,8 @@ struct Generator : public Component {
   }
 
   float power = 50.0f;
+  float noise = 0.0f;
+  std::vector<float> history;
 };
 
 struct Lamp : public Component {
