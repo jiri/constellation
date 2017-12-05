@@ -245,24 +245,28 @@ void DrawGraph(const Universe& universe) {
   ImColor green  { 0.0f, 1.0f, 0.0f };
   ImColor white  { 1.0f, 1.0f, 1.0f };
 
-  ImGui::Begin("", nullptr, { 800.0f, 600.0f }, 0.0f,
-               ImGuiWindowFlags_NoTitleBar
-               | ImGuiWindowFlags_NoResize
-               | ImGuiWindowFlags_NoScrollbar
-               | ImGuiWindowFlags_NoInputs
-               | ImGuiWindowFlags_NoSavedSettings
-               | ImGuiWindowFlags_NoFocusOnAppearing
-               | ImGuiWindowFlags_NoBringToFrontOnFocus);
+  ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar
+                           | ImGuiWindowFlags_NoResize
+                           | ImGuiWindowFlags_NoScrollbar
+                           | ImGuiWindowFlags_NoInputs
+                           | ImGuiWindowFlags_NoSavedSettings
+                           | ImGuiWindowFlags_NoFocusOnAppearing
+                           | ImGuiWindowFlags_NoBringToFrontOnFocus;
+
+  ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4 { 0.0f, 0.0f, 0.0f, 0.0f });
+  ImGui::SetNextWindowSize({ 800.0f, 600.0f });
+  ImGui::SetNextWindowPos({ 0.0f, 0.0f });
+  ImGui::Begin("", nullptr, flags);
 
   auto* window = ImGui::GetCurrentWindow();
   ImVec2 offset = window->DC.CursorPos;
-  ImVec2 padding { 80.0f, 60.0f };
 
   for (auto* component : universe.components) {
     if (componentPositions.count(component) == 0) {
+      ImVec2 padding = window->Size * 0.1f;
       componentPositions[component] = padding + ImVec2 {
-          (800.0f - 2.0f * padding.x) * randomFloat(),
-          (600.0f - 2.0f * padding.y) * randomFloat()
+          (window->Size.x - 2.0f * padding.x) * randomFloat(),
+          (window->Size.y - 2.0f * padding.y) * randomFloat()
       };
     }
   }
@@ -301,6 +305,7 @@ void DrawGraph(const Universe& universe) {
   }
 
   ImGui::End();
+  ImGui::PopStyleColor();
 }
 
 int main() {
