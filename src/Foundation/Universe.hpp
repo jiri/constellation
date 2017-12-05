@@ -32,6 +32,10 @@ struct Universe {
   void save(const fs::path& path);
   void load(const fs::path& path);
 
+  void connect(Port& a, Port& b, Capabilities capabilities);
+  void disconnect(Port& a, Port& b);
+  bool connected(Port& a, Port& b) const;
+
   std::vector<Component*> components;
   std::vector<System*> systems;
   std::vector<Connection> connections;

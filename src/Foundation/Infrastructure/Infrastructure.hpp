@@ -39,10 +39,6 @@ public:
     : universe { u }
   { }
 
-  void connect(Port& a, Port& b, Capabilities capabilities);
-  void disconnect(Port& a, Port& b);
-  bool connected(Port& a, Port& b) const;
-
 private:
   Universe* universe;
 };
