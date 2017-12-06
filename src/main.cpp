@@ -253,6 +253,8 @@ struct Terminal : public Component {
 };
 
 void DrawGraph(Universe& universe) {
+  static std::unordered_map<Port*, glm::vec2> portPositions;
+
   ImColor blue   { 0.0f, 0.0f, 1.0f };
   ImColor green  { 0.0f, 1.0f, 0.0f };
   ImColor white  { 1.0f, 1.0f, 1.0f };
@@ -277,12 +279,20 @@ void DrawGraph(Universe& universe) {
       glm::vec2 size { window->Size.x, window->Size.y };
       glm::vec2 padding = 0.1f * size;
       component->position = padding + (size - 2.0f * padding) * glm::vec2 { randomFloat(), randomFloat() };
+
+      int i = 0;
+      for (auto& pair : component->ports) {
+        i++;
+        float d = 2.0f * glm::pi<float>() * float(i) / float(component->ports.size());
+        Port* p = &pair.second;
+        portPositions[p] = glm::vec2 { glm::sin(d), glm::cos(d) } * 12.0f;
+      }
     }
   }
 
   for (auto& connection : universe.connections) {
-    auto* a = connection.a->component;
-    auto* b = connection.b->component;
+    auto aPos = connection.a->component->position + portPositions[connection.a];
+    auto bPos = connection.b->component->position + portPositions[connection.b];
 
     float thickness = 0.0f;
 
@@ -291,15 +301,15 @@ void DrawGraph(Universe& universe) {
     if (connection.capabilities.energy.enabled) {
       thickness += 2.0f;
       window->DrawList->ChannelsSetCurrent(1);
-      window->DrawList->AddLine(offset + ImVec2 { a->position.x, a->position.y },
-                                offset + ImVec2 { b->position.x, b->position.y }, blue, thickness);
+      window->DrawList->AddLine(offset + ImVec2 { aPos.x, aPos.y },
+                                offset + ImVec2 { bPos.x, bPos.y }, blue, thickness);
     }
 
     if (connection.capabilities.picture.enabled || connection.capabilities.text.enabled) {
       thickness += 2.0f;
       window->DrawList->ChannelsSetCurrent(0);
-      window->DrawList->AddLine(offset + ImVec2 { a->position.x, a->position.y },
-                                offset + ImVec2 { b->position.x, b->position.y }, green, thickness);
+      window->DrawList->AddLine(offset + ImVec2 { aPos.x, aPos.y },
+                                offset + ImVec2 { bPos.x, bPos.y }, green, thickness);
     }
 
     window->DrawList->ChannelsMerge();
@@ -311,6 +321,12 @@ void DrawGraph(Universe& universe) {
     window->DrawList->AddCircleFilled(pos, 4.0f, white);
     window->DrawList->AddCircleFilled(pos, 50.0f, ImColor { 1.0f, 1.0f, 1.0f, 0.1f });
     window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, c->name().c_str());
+
+    for (auto& pair : c->ports) {
+      Port* p = &pair.second;
+      ImVec2 ppos { portPositions[p].x, portPositions[p].y };
+      window->DrawList->AddCircleFilled(pos + ppos, 2.0f, white);
+    }
 
     ImGui::SetCursorScreenPos(pos - ImVec2 { 6.0f, 6.0f });
     ImGui::InvisibleButton("##handle", { 12.0f, 12.0f });
