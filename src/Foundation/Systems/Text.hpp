@@ -7,20 +7,18 @@
 
 #include <Foundation/Systems/System.hpp>
 
-namespace Text {
+struct TextSystem : public System {
   struct Buffer {
     std::queue<std::string> messages;
   };
 
-  struct System : public ::System {
-    using ::System::System;
+  using System::System;
 
-    bool filter(const Connection& edge) const override;
-    void swap(Connection& edge) override;
+  bool filter(const Connection& edge) const override;
+  void swap(Connection& edge) override;
 
-    void send(Port* port, const std::string& m);
-    std::optional<std::string> receive(Port* port);
+  void send(Port* port, const std::string& m);
+  std::optional<std::string> receive(Port* port);
 
-    std::unordered_map<Port*, Text::Buffer> buffers;
-  };
+  std::unordered_map<Port*, Buffer> buffers;
 };

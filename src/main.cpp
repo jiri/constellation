@@ -53,7 +53,7 @@ struct Monitor : public Component {
   }
 
   void update() override {
-    if (auto data = universe->get<Picture::System>().receive(&port("video"))) {
+    if (auto data = universe->get<PictureSystem>().receive(&port("video"))) {
       color = *data;
     }
     else if (noise) {
@@ -63,7 +63,7 @@ struct Monitor : public Component {
       color = glm::vec3 { 0.0f, 0.0f, 0.0f };
     }
 
-    while (auto msg = this->universe->get<Text::System>().receive(&port("video"))) {
+    while (auto msg = this->universe->get<TextSystem>().receive(&port("video"))) {
       message += *msg + "\n";
     }
   }
@@ -111,7 +111,7 @@ struct Camera : public Component {
   }
 
   void update() override {
-    universe->get<Picture::System>().send(&port("video"), color);
+    universe->get<PictureSystem>().send(&port("video"), color);
   }
 
   void render() override {
@@ -148,7 +148,7 @@ struct Generator : public Component {
 
   void update() override {
     noise = (randomFloat() - 0.5f) * 10.0f;
-    this->universe->get<Energy::System>().offer(&port("energy"), power + noise);
+    this->universe->get<EnergySystem>().offer(&port("energy"), power + noise);
     history.push_back(power + noise);
   }
 
@@ -195,7 +195,7 @@ struct Lamp : public Component {
   }
 
   void update() override {
-    float energy = this->universe->get<Energy::System>().request(&port("energy"), 10.0f);
+    float energy = this->universe->get<EnergySystem>().request(&port("energy"), 10.0f);
     satisfaction = energy / 10.0f;
   }
 
@@ -237,7 +237,7 @@ struct Terminal : public Component {
     ImGui::Begin("Terminal");
     char buf[256] {};
     if (ImGui::InputText("Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-      this->universe->get<Text::System>().send(&port("output"), buf);
+      this->universe->get<TextSystem>().send(&port("output"), buf);
       ImGui::SetKeyboardFocusHere();
     }
     ImGui::End();
@@ -395,9 +395,9 @@ int main() {
           new Terminal { &universe },
       },
       {
-          new Picture::System { &universe },
-          new Energy::System { &universe },
-          new Text::System { &universe },
+          new PictureSystem { &universe },
+          new EnergySystem { &universe },
+          new TextSystem { &universe },
       },
       {
 //          new Wireless { &universe },

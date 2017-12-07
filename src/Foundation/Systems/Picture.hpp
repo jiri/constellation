@@ -7,20 +7,19 @@
 
 #include <Foundation/Systems/System.hpp>
 
-namespace Picture {
+class PictureSystem : public System {
+public:
   struct Buffer {
     std::optional<glm::vec3> pictureData;
   };
 
-  struct System : public ::System {
-    using ::System::System;
+  using System::System;
 
-    bool filter(const Connection& edge) const override;
-    void swap(Connection& edge) override;
+  bool filter(const Connection& edge) const override;
+  void swap(Connection& edge) override;
 
-    void send(Port* port, const glm::vec3& v);
-    std::optional<glm::vec3> receive(Port* port);
+  void send(Port* port, const glm::vec3& v);
+  std::optional<glm::vec3> receive(Port* port);
 
-    std::unordered_map<Port*, Picture::Buffer> buffers;
-  };
+  std::unordered_map<Port*, Buffer> buffers;
 };

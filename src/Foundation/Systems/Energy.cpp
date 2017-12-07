@@ -2,11 +2,11 @@
 
 #include <algorithm>
 
-bool Energy::System::filter(const Connection& edge) const {
+bool EnergySystem::filter(const Connection& edge) const {
   return edge.capabilities.energy.enabled;
 }
 
-void Energy::System::swap(Connection& edge) {
+void EnergySystem::swap(Connection& edge) {
   auto t = edge.capabilities.energy.throughput;
   buffers[edge.a].energyPool = std::min(t, buffers[edge.b].energyOffer);
   buffers[edge.b].energyOffer = 0.0f;
@@ -14,11 +14,11 @@ void Energy::System::swap(Connection& edge) {
   buffers[edge.a].energyOffer = 0.0f;
 }
 
-void Energy::System::offer(Port* port, float energy) {
+void EnergySystem::offer(Port* port, float energy) {
   buffers[port].energyOffer += energy;
 }
 
-float Energy::System::request(Port* port, float req) {
+float EnergySystem::request(Port* port, float req) {
   float res = std::min(buffers[port].energyPool, req);
   buffers[port].energyPool -= res;
   return res;
