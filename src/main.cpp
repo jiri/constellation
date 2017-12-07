@@ -404,7 +404,7 @@ int main() {
       },
   };
 
-//  universe.load("connections.json");
+  universe.load("connections.json");
 
   /* Main loop */
   while (!glfwWindowShouldClose(window)) {
@@ -468,7 +468,7 @@ int main() {
     glfwSwapBuffers(window);
   }
 
-//  universe.save("connections.json");
+  universe.save("connections.json");
 
   return 0;
 }
