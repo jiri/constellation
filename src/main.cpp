@@ -400,7 +400,7 @@ int main() {
           new Text::System { &universe },
       },
       {
-          new Wireless { &universe },
+//          new Wireless { &universe },
       },
   };
 
