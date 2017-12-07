@@ -296,23 +296,28 @@ void DrawGraph(Universe& universe) {
 
     float thickness = 0.0f;
 
-    window->DrawList->ChannelsSplit(2);
+    window->DrawList->ChannelsSplit(3);
 
     if (connection.capabilities.energy.enabled) {
       thickness += 2.0f;
-      window->DrawList->ChannelsSetCurrent(1);
+      window->DrawList->ChannelsSetCurrent(2);
       window->DrawList->AddLine(offset + ImVec2 { aPos.x, aPos.y },
                                 offset + ImVec2 { bPos.x, bPos.y }, blue, thickness);
     }
 
     if (connection.capabilities.picture.enabled || connection.capabilities.text.enabled) {
       thickness += 2.0f;
-      window->DrawList->ChannelsSetCurrent(0);
+      window->DrawList->ChannelsSetCurrent(1);
       window->DrawList->AddLine(offset + ImVec2 { aPos.x, aPos.y },
                                 offset + ImVec2 { bPos.x, bPos.y }, green, thickness);
     }
 
+    window->DrawList->ChannelsSetCurrent(0);
+    window->DrawList->AddLine(offset + ImVec2 { aPos.x, aPos.y },
+                              offset + ImVec2 { bPos.x, bPos.y }, white, 1.0f);
+
     window->DrawList->ChannelsMerge();
+    
   }
 
   static Component* active = nullptr;
