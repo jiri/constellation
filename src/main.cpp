@@ -37,11 +37,11 @@ struct Monitor : public Component {
   explicit Monitor(Universe* w)
     : Component(w)
   {
-    ports.emplace("video", new Port(Capabilities {
+    ports.emplace("video", new Antenna(Capabilities {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
-    }));
+    }, 50.0f));
 
     ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },
@@ -95,11 +95,11 @@ struct Camera : public Component {
   explicit Camera(Universe* w)
     : Component(w)
   {
-    ports.emplace("video", new Port(Capabilities {
+    ports.emplace("video", new Antenna(Capabilities {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { false },
-    }));
+    }, 50.0f));
 
     ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },
@@ -400,7 +400,7 @@ int main() {
           new TextSystem { &universe },
       },
       {
-//          new Wireless { &universe },
+          new Wireless { &universe },
           new Debug { &universe },
       },
   };

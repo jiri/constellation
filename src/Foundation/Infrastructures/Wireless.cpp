@@ -3,34 +3,36 @@
 #include <Foundation/Universe.hpp>
 
 void Wireless::update() {
-  for (Component* a : universe->components) {
-    for (Component* b : universe->components) {
-      if (a == b) {
+  for (Component* componentA : universe->components) {
+    for (Component* componentB : universe->components) {
+      if (componentA >= componentB) {
         continue;
       }
 
-      Port& aPort = a->port(a->defaultPort());
-      Port& bPort = b->port(b->defaultPort());
+      for (auto& aPair : componentA->ports) {
+        for (auto& bPair : componentB->ports) {
+          auto* a = dynamic_cast<Antenna*>(aPair.second.get());
+          auto* b = dynamic_cast<Antenna*>(bPair.second.get());
 
-      glm::vec2 delta = b->position - a->position;
+          if (!a || !b) {
+            continue;
+          }
 
-      if (glm::length(delta) == 0) {
-        continue;
-      }
+          glm::vec2 delta = b->position() - a->position();
 
-      if (glm::length(delta) <= 50.0f) {
-        float errorRate = std::fabs(std::max(glm::length(delta) - 40.0f, 0.0f) * 0.01f);
+          if (glm::length(delta) <= std::max(a->radius, b->radius)) {
+            Capabilities caps {
+                    .picture = { true, 0.0 },
+                    .energy = { false, 0.0f },
+                    .text = { false },
+            };
 
-        Capabilities caps {
-            .picture = { true, errorRate },
-            .energy = { false, 0.0f },
-            .text = { false },
-        };
-
-        connect(aPort, bPort, caps);
-      }
-      else {
-        disconnect(aPort, bPort);
+            connect(*a, *b, Capabilities{});
+          }
+          else {
+            disconnect(*a, *b);
+          }
+        }
       }
     }
   }
