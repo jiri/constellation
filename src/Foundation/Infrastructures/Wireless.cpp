@@ -29,8 +29,10 @@ void Wireless::update() {
 
             connect(*a, *b, Capabilities{});
           }
-          else {
-            disconnect(*a, *b);
+          else if (auto conn = connection(*a, *b)) {
+            if (conn->author == this) {
+              disconnect(*a, *b);
+            }
           }
         }
       }
