@@ -40,8 +40,14 @@ struct Monitor : public Component {
     ports.emplace("video", new Antenna(Capabilities {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
-        .text = { true },
+        .text = { false },
     }, 200.0f, 42.0f));
+
+    ports.emplace("data", new Port(Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { false, 0.0f },
+        .text = { true },
+    }));
 
     ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },
@@ -83,7 +89,7 @@ struct Monitor : public Component {
   }
 
   std::string defaultPort() const override {
-    return "video";
+    return "data";
   }
 
   bool noise = false;
