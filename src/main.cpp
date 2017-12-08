@@ -37,17 +37,17 @@ struct Monitor : public Component {
   explicit Monitor(Universe* w)
     : Component(w)
   {
-    ports.emplace("video", Capabilities {
+    ports.emplace("video", new Port(Capabilities {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
-    });
+    }));
 
-    ports.emplace("energy", Capabilities {
+    ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
-    });
+    }));
 
     updatePorts();
   }
@@ -95,17 +95,17 @@ struct Camera : public Component {
   explicit Camera(Universe* w)
     : Component(w)
   {
-    ports.emplace("video", Capabilities {
+    ports.emplace("video", new Port(Capabilities {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { false },
-    });
+    }));
 
-    ports.emplace("energy", Capabilities {
+    ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
-    });
+    }));
 
     updatePorts();
   }
@@ -137,11 +137,11 @@ struct Generator : public Component {
     : Component(w)
     , history(256, 0)
   {
-    ports.emplace("energy", Capabilities {
+    ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 100.0f },
         .text = { true }
-    });
+    }));
 
     updatePorts();
   }
@@ -185,11 +185,11 @@ struct Lamp : public Component {
   explicit Lamp(Universe* w)
     : Component(w)
   {
-    ports.emplace("energy", Capabilities {
+    ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { true },
-    });
+    }));
 
     updatePorts();
   }
@@ -222,11 +222,11 @@ struct Terminal : public Component {
   explicit Terminal(Universe* w)
     : Component(w)
   {
-    ports.emplace("output", Capabilities {
+    ports.emplace("output", new Port(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
-    });
+    }));
 
     updatePorts();
   }
@@ -284,7 +284,7 @@ void DrawGraph(Universe& universe) {
       for (auto& pair : component->ports) {
         i++;
         float d = 2.0f * glm::pi<float>() * float(i) / float(component->ports.size());
-        Port* p = &pair.second;
+        Port* p = pair.second.get();
         portPositions[p] = glm::vec2 { glm::sin(d), glm::cos(d) } * 12.0f;
       }
     }
@@ -328,7 +328,7 @@ void DrawGraph(Universe& universe) {
     window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, c->name().c_str());
 
     for (auto& pair : c->ports) {
-      Port* p = &pair.second;
+      Port* p = pair.second.get();
       ImVec2 ppos { portPositions[p].x, portPositions[p].y };
       window->DrawList->AddCircleFilled(pos + ppos, 2.0f, white);
     }

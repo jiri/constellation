@@ -23,22 +23,17 @@ struct CPU : public Component {
   CPU(Universe* u)
     : Component(u)
   {
-    ports = {
-        {
-            "in", Capabilities {
-                .picture = { false, 0.0f },
-                .energy = { false, 0.0f },
-                .text = { true },
-            }
-        },
-        {
-            "out", Capabilities {
-                .picture = { false, 0.0f },
-                .energy = { false, 0.0f },
-                .text = { true },
-            }
-        },
-    };
+    ports.emplace("in", new Port(Capabilities {
+            .picture = { false, 0.0f },
+            .energy = { false, 0.0f },
+            .text = { true },
+    }));
+
+    ports.emplace("out", new Port(Capabilities {
+            .picture = { false, 0.0f },
+            .energy = { false, 0.0f },
+            .text = { true },
+    }));
 
     updatePorts();
   }

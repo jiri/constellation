@@ -24,7 +24,7 @@ struct Component {
   std::string nameOf(const Port* p);
 
   Universe* universe = nullptr;
-  std::map<std::string, Port> ports;
+  std::map<std::string, std::unique_ptr<Port>> ports;
 
   glm::vec2 position;
 

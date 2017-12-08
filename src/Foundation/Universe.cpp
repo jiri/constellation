@@ -48,7 +48,7 @@ Port& Universe::lookupPort(const std::string& componentName, const std::string& 
     if (c->name() == componentName) {
       for (auto& [ name, port ] : c->ports) {
         if ((portName.empty() && name == c->defaultPort()) || name == portName) {
-          return port;
+          return *port;
         }
       }
     }

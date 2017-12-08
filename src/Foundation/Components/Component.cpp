@@ -21,7 +21,7 @@ Component::~Component() {
 
 void Component::updatePorts() {
   for (auto& pair : ports) {
-    pair.second.component = this;
+    pair.second->component = this;
   }
 }
 
@@ -31,12 +31,12 @@ Port& Component::port(const std::string& id) {
         fmt::format("Invalid port '{}:{}'", name(), id)
     };
   }
-  return ports.at(id);
+  return *ports.at(id);
 }
 
 std::string Component::nameOf(const Port* p) {
   for (auto& pair : ports) {
-    if (&pair.second == p) {
+    if (pair.second.get() == p) {
       return pair.first;
     }
   }
