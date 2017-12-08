@@ -41,7 +41,7 @@ struct Monitor : public Component {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
-    }, 200.0f));
+    }, 200.0f, 42.0f));
 
     ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },
@@ -99,7 +99,7 @@ struct Camera : public Component {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { false },
-    }, 50.0f));
+    }, 50.0f, 40.0f));
 
     ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },

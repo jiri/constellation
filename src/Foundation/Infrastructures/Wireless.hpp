@@ -4,12 +4,14 @@
 
 class Antenna : public Port {
 public:
-  Antenna(Capabilities c, float r)
+  Antenna(Capabilities c, float r, float f)
     : Port { c }
     , radius { r }
+    , frequency { f }
   { }
 
-  float radius = 50.0f;
+  float radius;
+  float frequency;
 };
 
 class Wireless : public Infrastructure {
