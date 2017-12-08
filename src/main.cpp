@@ -41,7 +41,7 @@ struct Monitor : public Component {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
-    }, 50.0f));
+    }, 200.0f));
 
     ports.emplace("energy", new Port(Capabilities {
         .picture = { false, 0.0f },
