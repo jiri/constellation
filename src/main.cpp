@@ -5,7 +5,6 @@
 #include <fstream>
 
 #include <fmt/format.h>
-#include <fmt/ostream.h>
 #include <gsl/gsl>
 
 #define GLFW_INCLUDE_NONE
@@ -30,6 +29,7 @@
 #include <Foundation/Systems/Text.hpp>
 #include <Foundation/Infrastructures/Capabilities.hpp>
 #include <Foundation/Infrastructures/Wireless.hpp>
+#include <Foundation/Infrastructures/Debug.hpp>
 
 #include <json.hpp>
 
@@ -401,6 +401,7 @@ int main() {
       },
       {
 //          new Wireless { &universe },
+          new Debug { &universe },
       },
   };
 
@@ -417,50 +418,6 @@ int main() {
 
     /* Game tick */
     universe.tick();
-
-    /* Console */
-    ImGui::SetNextWindowPos({ 0.0f, 600 - 36.0f });
-    ImGui::Begin("Console", nullptr, { 800.0f, 32.0f }, 0.0f,
-                 ImGuiWindowFlags_NoTitleBar
-                 | ImGuiWindowFlags_NoResize
-                 | ImGuiWindowFlags_NoScrollbar
-                 | ImGuiWindowFlags_NoSavedSettings
-                 | ImGuiWindowFlags_NoFocusOnAppearing);
-
-    static char buf[256] {};
-    ImGui::PushItemWidth(-1);
-    if (glfwGetKey(window, GLFW_KEY_SLASH) == GLFW_PRESS) {
-      ImGui::SetKeyboardFocusHere();
-    }
-    if (ImGui::InputText("##command", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-      std::string buffer(buf);
-      std::regex r(R"(^\s*([cd])\s+(\w+)(:(\w*))?\s+(\w+)(:(\w*))?)");
-      std::smatch m;
-      std::regex_search(buffer, m, r);
-
-      try {
-        Port& a = universe.lookupPort(m[2], m[4]);
-        Port& b = universe.lookupPort(m[5], m[7]);
-
-        if (m[1] == "c") {
-//          universe.connect(a, b, Capabilities{});
-        }
-        else if (m[1] == "d") {
-//          universe.disconnect(a, b);
-        }
-        else {
-          fmt::print("Unknown command '{}'\n", m[1]);
-        }
-      }
-      catch (std::runtime_error& e) {
-        fmt::print("{}\n", e.what());
-      }
-
-      buf[0] = 0;
-      ImGui::SetKeyboardFocusHere(-1);
-    }
-    ImGui::PopItemWidth();
-    ImGui::End();
 
     DrawGraph(universe);
 
