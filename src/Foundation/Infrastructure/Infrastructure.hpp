@@ -42,6 +42,10 @@ public:
 
   virtual void update() = 0;
 
+  void connect(Port& a, Port& b, Capabilities capabilities);
+  void disconnect(Port& a, Port& b);
+  bool connected(Port& a, Port& b) const;
+
 protected:
   Universe* universe;
 };

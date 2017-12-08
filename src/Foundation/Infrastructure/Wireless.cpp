@@ -27,10 +27,10 @@ void Wireless::update() {
             .text = { false },
         };
 
-        universe->connect(aPort, bPort, caps);
+        connect(aPort, bPort, caps);
       }
       else {
-        universe->disconnect(aPort, bPort);
+        disconnect(aPort, bPort);
       }
     }
   }

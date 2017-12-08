@@ -443,10 +443,10 @@ int main() {
         Port& b = universe.lookupPort(m[5], m[7]);
 
         if (m[1] == "c") {
-          universe.connect(a, b, Capabilities{});
+//          universe.connect(a, b, Capabilities{});
         }
         else if (m[1] == "d") {
-          universe.disconnect(a, b);
+//          universe.disconnect(a, b);
         }
         else {
           fmt::print("Unknown command '{}'\n", m[1]);

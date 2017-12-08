@@ -99,36 +99,6 @@ void Universe::load(const fs::path& path) {
     Port& a = lookupPort(connection["a"]["component"], connection["a"]["port"]);
     Port& b = lookupPort(connection["b"]["component"], connection["b"]["port"]);
 
-    connect(a, b, Capabilities{});
+//    connect(a, b, Capabilities{});
   }
-}
-
-void Universe::connect(Port& a, Port& b, Capabilities capabilities) {
-  if (connected(a, b)) {
-    return;
-  }
-
-  connections.emplace_back(&a, &b, a.capabilities * b.capabilities * capabilities);
-}
-
-void Universe::disconnect(Port& a, Port& b) {
-  auto pred = [&](const Connection& c) {
-    return (c.a == &a && c.b == &b) || (c.a == &b && c.b == &a);
-  };
-
-  if (!connected(a, b)) {
-    return;
-  }
-
-  auto pos = std::remove_if(connections.begin(), connections.end(), pred);
-  connections.erase(pos, connections.end());
-}
-
-bool Universe::connected(Port& a, Port& b) const {
-  for (const Connection& c : connections) {
-    if ((c.a == &a && c.b == &b) || (c.a == &b && c.b == &a)) {
-      return true;
-    }
-  }
-  return false;
 }
