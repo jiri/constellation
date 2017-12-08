@@ -115,9 +115,12 @@ struct Camera : public Component {
   }
 
   void render() override {
-    ImGui::SetNextWindowSize({ 256, 256 });
+    auto* a = dynamic_cast<Antenna*>(ports.at("video").get());
+
+    ImGui::SetNextWindowSize({ 256, 0 });
     ImGui::Begin("Camera");
     ImGui::ColorPicker3("Color", (float*)&color);
+    ImGui::SliderFloat("Frequency", &a->frequency, 40.0f, 50.0f);
     ImGui::End();
   }
 
