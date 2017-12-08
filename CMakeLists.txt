@@ -39,6 +39,8 @@ add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
 
 # Foundation library
 set(FOUNDATION_SOURCE_FILES
+        src/Foundation/Universe.hpp
+        src/Foundation/Universe.cpp
         src/Foundation/Infrastructures/Capabilities.hpp
         src/Foundation/Infrastructures/Capabilities.cpp
         src/Foundation/Infrastructures/Infrastructure.hpp
@@ -64,7 +66,7 @@ add_library(${PROJECT_NAME}_Foundation ${FOUNDATION_SOURCE_FILES})
 set(SOURCE_FILES
         src/main.cpp
         src/Util/Random.hpp
-        src/Foundation/Universe.cpp src/Foundation/Universe.hpp)
+)
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
 target_link_libraries(
