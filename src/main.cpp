@@ -253,8 +253,6 @@ struct Terminal : public Component {
 };
 
 void DrawGraph(Universe& universe) {
-  static std::unordered_map<Port*, glm::vec2> portPositions;
-
   ImColor blue   { 0.0f, 0.0f, 1.0f };
   ImColor green  { 0.0f, 1.0f, 0.0f };
   ImColor white  { 1.0f, 1.0f, 1.0f };
@@ -285,14 +283,14 @@ void DrawGraph(Universe& universe) {
         i++;
         float d = 2.0f * glm::pi<float>() * float(i) / float(component->ports.size());
         Port* p = pair.second.get();
-        portPositions[p] = glm::vec2 { glm::sin(d), glm::cos(d) } * 12.0f;
+        p->position = glm::vec2 { glm::sin(d), glm::cos(d) } * 12.0f;
       }
     }
   }
 
   for (auto& connection : universe.connections) {
-    auto aPos = connection.a->component->position + portPositions[connection.a];
-    auto bPos = connection.b->component->position + portPositions[connection.b];
+    auto aPos = connection.a->globalPosition();
+    auto bPos = connection.b->globalPosition();
 
     float thickness = 0.0f;
 
@@ -322,18 +320,17 @@ void DrawGraph(Universe& universe) {
 
   static Component* active = nullptr;
   for (auto* c : universe.components) {
-    auto pos = offset + ImVec2 { c->position.x, c->position.y };
-    window->DrawList->AddCircleFilled(pos, 4.0f, white);
-    window->DrawList->AddCircleFilled(pos, 50.0f, ImColor { 1.0f, 1.0f, 1.0f, 0.1f });
-    window->DrawList->AddText(pos + ImVec2 { 8.0f, -7.0f }, white, c->name().c_str());
+    auto pos = ImVec2 { c->position.x, c->position.y };
+    window->DrawList->AddCircleFilled(offset + pos, 4.0f, white);
+    window->DrawList->AddText(offset + pos + ImVec2 { 8.0f, -7.0f }, white, c->name().c_str());
 
     for (auto& pair : c->ports) {
       Port* p = pair.second.get();
-      ImVec2 ppos { portPositions[p].x, portPositions[p].y };
-      window->DrawList->AddCircleFilled(pos + ppos, 2.0f, white);
+      ImVec2 ppos { p->globalPosition().x, p->globalPosition().y };
+      window->DrawList->AddCircleFilled(offset + ppos, 2.0f, white);
     }
 
-    ImGui::SetCursorScreenPos(pos - ImVec2 { 6.0f, 6.0f });
+    ImGui::SetCursorScreenPos(offset + pos - ImVec2 { 6.0f, 6.0f });
     ImGui::InvisibleButton("##handle", { 12.0f, 12.0f });
 
     if (ImGui::IsItemClicked(0)) {
