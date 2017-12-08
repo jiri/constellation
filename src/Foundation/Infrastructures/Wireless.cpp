@@ -18,16 +18,21 @@ void Wireless::update() {
             continue;
           }
 
-          glm::vec2 delta = b->globalPosition() - a->globalPosition();
+          float distance = glm::length(b->globalPosition() - a->globalPosition());
+          if (distance <= std::max(a->radius, b->radius)) {
+            float errorRate = std::fabs(a->frequency - b->frequency);
+            if (auto conn = connection(*a, *b)) {
+              conn->capabilities.picture.errorRate = errorRate;
+            }
+            else {
+              Capabilities caps {
+                      .picture = { true, errorRate },
+                      .energy = { false, 0.0f },
+                      .text = { false },
+              };
 
-          if (glm::length(delta) <= std::max(a->radius, b->radius)) {
-            Capabilities caps {
-                    .picture = { true, 0.0 },
-                    .energy = { false, 0.0f },
-                    .text = { false },
-            };
-
-            connect(*a, *b, Capabilities{});
+              connect(*a, *b, caps);
+            }
           }
           else if (auto conn = connection(*a, *b)) {
             if (conn->author == this) {
