@@ -12,9 +12,11 @@ class Universe;
 
 class Port {
 public:
-  Port(Capabilities c)
+  explicit Port(Capabilities c)
     : capabilities { c }
   { }
+
+  virtual ~Port() = default;
 
   std::string name() const;
 
