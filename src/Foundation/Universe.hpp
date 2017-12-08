@@ -1,5 +1,6 @@
 #pragma once
 
+#include <vector>
 #include <experimental/filesystem>
 namespace fs = std::experimental::filesystem;
 
