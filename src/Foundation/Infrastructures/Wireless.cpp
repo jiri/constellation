@@ -1,4 +1,4 @@
-#include <Foundation/Infrastructure/Wireless.hpp>
+#include <Foundation/Infrastructures/Wireless.hpp>
 
 #include <Foundation/Universe.hpp>
 

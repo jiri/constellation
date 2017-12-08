@@ -6,7 +6,7 @@
 
 #include <glm/glm.hpp>
 
-#include <Foundation/Infrastructure/Infrastructure.hpp>
+#include <Foundation/Infrastructures/Infrastructure.hpp>
 
 class Universe;
 

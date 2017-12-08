@@ -28,8 +28,8 @@
 #include <Foundation/Systems/Picture.hpp>
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
-#include <Foundation/Infrastructure/Capabilities.hpp>
-#include <Foundation/Infrastructure/Wireless.hpp>
+#include <Foundation/Infrastructures/Capabilities.hpp>
+#include <Foundation/Infrastructures/Wireless.hpp>
 
 #include <json.hpp>
 

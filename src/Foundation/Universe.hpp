@@ -6,7 +6,7 @@ namespace fs = std::experimental::filesystem;
 
 #include <fmt/format.h>
 
-#include <Foundation/Infrastructure/Infrastructure.hpp>
+#include <Foundation/Infrastructures/Infrastructure.hpp>
 #include <Foundation/Components/Component.hpp>
 #include <Foundation/Systems/System.hpp>
 

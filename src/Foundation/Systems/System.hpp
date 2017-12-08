@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Foundation/Infrastructure/Infrastructure.hpp>
+#include <Foundation/Infrastructures/Infrastructure.hpp>
 
 class Universe;
 
