@@ -15,7 +15,7 @@ void Infrastructure::connect(Port& a, Port& b, Capabilities capabilities) {
     return;
   }
 
-  universe->connections.emplace_back(&a, &b, a.capabilities * b.capabilities * capabilities);
+  universe->connections.emplace_back(&a, &b, a.capabilities * b.capabilities * capabilities, this);
 }
 
 void Infrastructure::disconnect(Port& a, Port& b) {
@@ -38,4 +38,13 @@ bool Infrastructure::connected(Port& a, Port& b) const {
     }
   }
   return false;
+}
+
+Connection* Infrastructure::connection(Port& a, Port& b) {
+  for (Connection& c : universe->connections) {
+    if ((c.a == &a && c.b == &b) || (c.a == &b && c.b == &a)) {
+      return &c;
+    }
+  }
+  return nullptr;
 }

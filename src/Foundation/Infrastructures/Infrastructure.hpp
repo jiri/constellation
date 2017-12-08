@@ -29,16 +29,20 @@ protected:
   glm::vec2 _position;
 };
 
+class Infrastructure;
+
 struct Connection {
-  Connection(Port* a, Port* b, Capabilities c)
+  Connection(Port* a, Port* b, Capabilities c, Infrastructure* author)
     : a { a }
     , b { b }
     , capabilities { c }
+    , author { author }
   { }
 
-  Port* a = nullptr;
-  Port* b = nullptr;
+  Port* a;
+  Port* b;
   Capabilities capabilities;
+  Infrastructure* author;
 };
 
 class Infrastructure {
@@ -54,6 +58,7 @@ public:
   void connect(Port& a, Port& b, Capabilities capabilities);
   void disconnect(Port& a, Port& b);
   bool connected(Port& a, Port& b) const;
+  Connection* connection(Port& a, Port& b);
 
 protected:
   Universe* universe;
