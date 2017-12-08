@@ -328,6 +328,10 @@ void DrawGraph(Universe& universe) {
       Port* p = pair.second.get();
       ImVec2 ppos { p->globalPosition().x, p->globalPosition().y };
       window->DrawList->AddCircleFilled(offset + ppos, 2.0f, white);
+
+      if (auto* a = dynamic_cast<Antenna*>(p)) {
+        window->DrawList->AddCircleFilled(offset + ppos, a->radius, ImColor { 1.0f, 1.0f, 1.0f, 0.1f }, 72);
+      }
     }
 
     ImGui::SetCursorScreenPos(offset + pos - ImVec2 { 6.0f, 6.0f });
