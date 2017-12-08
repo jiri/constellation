@@ -68,7 +68,7 @@ struct CPU : public Component {
     return "out";
   }
 
-  State state;
+  State state = State::HALTED;
   std::stack<int16_t> stack;
 
   std::atomic_bool shouldRun = false;
