@@ -6,6 +6,10 @@ std::string Port::name() const {
   return component->nameOf(this);
 }
 
+glm::vec2 Port::position() const {
+  return component->position + this->_position;
+}
+
 void Infrastructure::connect(Port& a, Port& b, Capabilities capabilities) {
   if (connected(a, b)) {
     return;

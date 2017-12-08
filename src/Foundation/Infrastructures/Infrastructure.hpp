@@ -3,6 +3,8 @@
 #include <cstdint>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include <Foundation/Infrastructures/Capabilities.hpp>
 
 class Component;
@@ -16,8 +18,13 @@ public:
 
   std::string name() const;
 
+  glm::vec2 position() const;
+
   Component* component = nullptr;
   Capabilities capabilities;
+
+protected:
+  glm::vec2 _position;
 };
 
 struct Connection {
