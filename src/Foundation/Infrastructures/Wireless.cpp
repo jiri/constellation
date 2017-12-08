@@ -18,7 +18,7 @@ void Wireless::update() {
             continue;
           }
 
-          glm::vec2 delta = b->position() - a->position();
+          glm::vec2 delta = b->globalPosition() - a->globalPosition();
 
           if (glm::length(delta) <= std::max(a->radius, b->radius)) {
             Capabilities caps {

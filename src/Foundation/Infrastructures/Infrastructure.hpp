@@ -20,13 +20,11 @@ public:
 
   std::string name() const;
 
-  glm::vec2 position() const;
+  glm::vec2 globalPosition() const;
 
   Component* component = nullptr;
   Capabilities capabilities;
-
-protected:
-  glm::vec2 _position;
+  glm::vec2 position;
 };
 
 class Infrastructure;
