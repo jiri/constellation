@@ -4,7 +4,7 @@
 
 class Antenna : public Port {
 public:
-  Antenna(Capabilities c, float r, float f)
+  Antenna(float r, float f, Capabilities c)
     : Port { c }
     , radius { r }
     , frequency { f }
