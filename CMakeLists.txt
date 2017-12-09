@@ -68,6 +68,7 @@ add_library(${PROJECT_NAME}_Foundation ${FOUNDATION_SOURCE_FILES})
 set(SOURCE_FILES
         src/main.cpp
         src/Util/Random.hpp
+        src/Util/Parse.hpp
 )
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
