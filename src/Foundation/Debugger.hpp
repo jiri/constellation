@@ -2,6 +2,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <variant>
 
 #include <Foundation/Universe.hpp>
 #include <Foundation/Infrastructures/Infrastructure.hpp>
@@ -17,9 +18,7 @@ public:
     , port { std::move(portName) }
   { }
 
-  void addCommand(const std::string& name, Command&& c);
-  void addCommand(const std::string& name, VoidCommand&& c);
-  void addCommand(const std::string& name, CommandVoid&& c);
+  void addCommand(const std::string& name, std::variant<Command, VoidCommand, CommandVoid>&& v);
   void process();
 
 private:

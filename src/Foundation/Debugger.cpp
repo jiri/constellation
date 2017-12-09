@@ -4,21 +4,25 @@
 
 #include <Foundation/Systems/Text.hpp>
 
-void Debugger::addCommand(const std::string& name, Command&& c) {
-  commands[name] = c;
-}
-
-void Debugger::addCommand(const std::string& name, VoidCommand&& c) {
-  commands[name] = [c](const std::vector<std::string>& ps) {
-    c(ps);
-    return "";
+void Debugger::addCommand(const std::string& name, std::variant<Command, VoidCommand, CommandVoid>&& v) {
+  auto visitor = [this, &name](auto&& c) {
+    using T = std::decay_t<decltype(c)>;
+    if constexpr (std::is_same_v<T, Debugger::Command>) {
+      commands[name] = c;
+    }
+    else if constexpr (std::is_same_v<T, Debugger::VoidCommand>) {
+      commands[name] = [c](const std::vector<std::string>& ps) {
+        c(ps);
+        return "";
+      };
+    }
+    else if constexpr (std::is_same_v<T, Debugger::CommandVoid>) {
+      commands[name] = [c](const std::vector<std::string>& ps) {
+        return c();
+      };
+    }
   };
-}
-
-void Debugger::addCommand(const std::string& name, CommandVoid&& c) {
-  commands[name] = [c](const std::vector<std::string>& ps) {
-    return c();
-  };
+  std::visit(visitor, v);
 }
 
 void Debugger::process() {
