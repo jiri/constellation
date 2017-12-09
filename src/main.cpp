@@ -3,6 +3,7 @@
 #include <regex>
 #include <experimental/filesystem>
 #include <fstream>
+#include <list>
 
 #include <fmt/format.h>
 #include <gsl/gsl>
@@ -23,6 +24,7 @@
 #include <Util/Random.hpp>
 
 #include <Foundation/Universe.hpp>
+#include <Foundation/Debugger.hpp>
 #include <Foundation/Components/CPU.hpp>
 #include <Foundation/Systems/Picture.hpp>
 #include <Foundation/Systems/Energy.hpp>
@@ -53,6 +55,12 @@ struct Monitor : public Component {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
+    }));
+
+    ports.emplace("debug", new Port(Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { false, 0.0f },
+        .text = { true },
     }));
 
     updatePorts();
@@ -100,6 +108,7 @@ struct Monitor : public Component {
 struct Camera : public Component {
   explicit Camera(Universe* w)
     : Component(w)
+    , debugger { this, "debug" }
   {
     ports.emplace("video", new Antenna(Capabilities {
         .picture = { true, 0.0f },
@@ -113,11 +122,41 @@ struct Camera : public Component {
         .text = { false },
     }));
 
+    ports.emplace("debug", new Port(Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { false, 0.0f },
+        .text = { true },
+    }));
+
     updatePorts();
+
+    debugger.addCommand("set_color", [this](const std::vector<std::string>& ps) {
+      auto fs = parseTuple<float, float, float>(ps);
+      color.r = std::get<0>(fs);
+      color.g = std::get<1>(fs);
+      color.b = std::get<2>(fs);
+    });
+
+    debugger.addCommand("get_color", [this]() {
+      return fmt::format("{} {} {}", color.r, color.g, color.b);
+    });
+
+    debugger.addCommand("set_freq", [this](const std::vector<std::string>& ps) {
+      auto fs = parseTuple<float>(ps);
+      auto* a = dynamic_cast<Antenna*>(ports.at("video").get());
+      a->frequency = std::get<0>(fs);
+    });
+
+    debugger.addCommand("get_freq", [this]() {
+      auto* a = dynamic_cast<Antenna*>(ports.at("video").get());
+      return fmt::format("{}", a->frequency);
+    });
   }
 
   void update() override {
     universe->get<PictureSystem>().send(&port("video"), color);
+
+    debugger.process();
   }
 
   void render() override {
@@ -138,6 +177,7 @@ struct Camera : public Component {
     return "video";
   }
 
+  Debugger debugger;
   glm::vec3 color;
 };
 
