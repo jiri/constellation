@@ -130,21 +130,17 @@ struct Camera : public Component {
 
     updatePorts();
 
-    debugger.addCommand("set_color", [this](const std::vector<std::string>& ps) {
-      auto fs = parseTuple<float, float, float>(ps);
-      color.r = std::get<0>(fs);
-      color.g = std::get<1>(fs);
-      color.b = std::get<2>(fs);
+    debugger.addCommand("set_color", [this](float r, float g, float b) {
+      color = { r, g, b };
     });
 
     debugger.addCommand("get_color", [this]() {
       return fmt::format("{} {} {}", color.r, color.g, color.b);
     });
 
-    debugger.addCommand("set_freq", [this](const std::vector<std::string>& ps) {
-      auto fs = parseTuple<float>(ps);
+    debugger.addCommand("set_freq", [this](float f) {
       auto* a = dynamic_cast<Antenna*>(ports.at("video").get());
-      a->frequency = std::get<0>(fs);
+      a->frequency = f;
     });
 
     debugger.addCommand("get_freq", [this]() {
