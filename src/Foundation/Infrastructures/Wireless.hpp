@@ -16,9 +16,7 @@ public:
 
 class Wireless : public Infrastructure {
 public:
-  explicit Wireless(Universe* u)
-    : Infrastructure { u }
-  { }
+  using Infrastructure::Infrastructure;
 
   void update() override;
 };
