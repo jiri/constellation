@@ -231,7 +231,7 @@ struct Terminal : public Component {
   explicit Terminal(Universe* w)
     : Component(w)
   {
-    ports.emplace("output", new Port(Capabilities {
+    ports.emplace("port", new Port(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
@@ -252,16 +252,19 @@ struct Terminal : public Component {
 
   void render() override {
     ImGui::Begin("Terminal");
-    char buf[256] {};
-    if (ImGui::InputText("Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-      this->universe->get<TextSystem>().send(&port("output"), buf);
 
     for (auto& msg : messages) {
       ImGui::Text("%s", msg.c_str());
     }
 
+    ImGui::PushItemWidth(-1);
+    if (ImGui::InputText("##input", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
+      this->universe->get<TextSystem>().send(&port("port"), buf);
       ImGui::SetKeyboardFocusHere();
+      buf[0] = '\0';
     }
+    ImGui::PopItemWidth();
+
     ImGui::End();
   }
 
@@ -270,8 +273,10 @@ struct Terminal : public Component {
   }
 
   std::string defaultPort() const override {
-    return "output";
+    return "port";
   }
+
+  char buf[256] {};
   std::list<std::string> messages;
 };
 
