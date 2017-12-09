@@ -20,5 +20,6 @@ struct TextSystem : public System {
   void send(Port* port, const std::string& m);
   std::optional<std::string> receive(Port* port);
 
-  std::unordered_map<Port*, Buffer> buffers;
+  std::unordered_map<Port*, Buffer> sendBuffers;
+  std::unordered_map<Port*, Buffer> recvBuffers;
 };
