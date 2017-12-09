@@ -41,6 +41,8 @@ add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
 set(FOUNDATION_SOURCE_FILES
         src/Foundation/Universe.hpp
         src/Foundation/Universe.cpp
+        src/Foundation/Debugger.hpp
+        src/Foundation/Debugger.cpp
         src/Foundation/Infrastructures/Capabilities.hpp
         src/Foundation/Infrastructures/Capabilities.cpp
         src/Foundation/Infrastructures/Infrastructure.hpp
