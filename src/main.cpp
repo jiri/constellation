@@ -167,12 +167,14 @@ struct Generator : public Component {
 
     ImGui::PushItemWidth(-1);
     ImGui::SliderFloat("##power", &power, 0.0f, 100.0f);
+    ImGui::PopItemWidth();
 
     while (history.size() > 256) {
       history.erase(history.begin());
     }
     ImGui::PushItemWidth(-1);
     ImGui::PlotLines("##history", history.data(), history.size(), 0, nullptr, 0.0f, 100.0f);
+    ImGui::PopItemWidth();
 
     ImGui::End();
   }
