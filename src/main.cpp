@@ -38,6 +38,7 @@
 struct Monitor : public Component {
   explicit Monitor(Universe* w)
     : Component(w)
+    , debugger { this, "debug" }
   {
     ports.emplace("video", new Antenna(200.0f, 42.0f, Capabilities {
         .picture = { true, 0.0f },
@@ -64,6 +65,10 @@ struct Monitor : public Component {
     }));
 
     updatePorts();
+
+    debugger.addCommand("clear", [this] {
+      message = "";
+    });
   }
 
   void update() override {
@@ -80,6 +85,8 @@ struct Monitor : public Component {
     while (auto msg = this->universe->get<TextSystem>().receive(&port("video"))) {
       message += *msg + "\n";
     }
+
+    debugger.process();
   }
 
   void render() override {
@@ -103,6 +110,7 @@ struct Monitor : public Component {
   bool noise = false;
   glm::vec3 color;
   std::string message;
+  Debugger debugger;
 };
 
 struct Camera : public Component {
