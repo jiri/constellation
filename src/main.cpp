@@ -82,7 +82,7 @@ struct Monitor : public Component {
       color = glm::vec3 { 0.0f, 0.0f, 0.0f };
     }
 
-    while (auto msg = this->universe->get<TextSystem>().receive(&port("video"))) {
+    while (auto msg = this->universe->get<TextSystem>().receive(&port("data"))) {
       message += *msg + "\n";
     }
 
