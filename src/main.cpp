@@ -31,7 +31,7 @@
 #include <Foundation/Systems/Text.hpp>
 #include <Foundation/Infrastructures/Capabilities.hpp>
 #include <Foundation/Infrastructures/Wireless.hpp>
-#include <Foundation/Infrastructures/Debug.hpp>
+#include <Foundation/Infrastructures/Manual.hpp>
 
 #include <json.hpp>
 
@@ -471,7 +471,7 @@ int main() {
       },
       {
           new Wireless { &universe },
-          new Debug { &universe },
+          new Manual { &universe },
       },
   };
 

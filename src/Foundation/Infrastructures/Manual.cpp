@@ -1,4 +1,4 @@
-#include <Foundation/Infrastructures/Debug.hpp>
+#include <Foundation/Infrastructures/Manual.hpp>
 
 #include <regex>
 
@@ -8,7 +8,7 @@
 
 #include <Foundation/Universe.hpp>
 
-void Debug::update() {
+void Manual::update() {
   ImGui::SetNextWindowPos({ 0.0f, 600 - 36.0f });
   ImGui::Begin("Console", nullptr, { 800.0f, 32.0f }, 0.0f,
                ImGuiWindowFlags_NoTitleBar

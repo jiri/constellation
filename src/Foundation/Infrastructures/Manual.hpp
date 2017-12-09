@@ -1,9 +1,8 @@
 #pragma once
 
-
 #include <Foundation/Infrastructures/Infrastructure.hpp>
 
-class Debug : public Infrastructure {
+class Manual : public Infrastructure {
 public:
   using Infrastructure::Infrastructure;
 

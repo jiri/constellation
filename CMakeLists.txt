@@ -49,8 +49,8 @@ set(FOUNDATION_SOURCE_FILES
         src/Foundation/Infrastructures/Infrastructure.cpp
         src/Foundation/Infrastructures/Wireless.hpp
         src/Foundation/Infrastructures/Wireless.cpp
-        src/Foundation/Infrastructures/Debug.hpp
-        src/Foundation/Infrastructures/Debug.cpp
+        src/Foundation/Infrastructures/Manual.hpp
+        src/Foundation/Infrastructures/Manual.cpp
         src/Foundation/Components/Component.hpp
         src/Foundation/Components/Component.cpp
         src/Foundation/Components/CPU.hpp
