@@ -343,7 +343,6 @@ void DrawGraph(Universe& universe) {
                               offset + ImVec2 { bPos.x, bPos.y }, white, 1.0f);
 
     window->DrawList->ChannelsMerge();
-    
   }
 
   static Component* active = nullptr;
