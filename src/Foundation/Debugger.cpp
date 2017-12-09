@@ -35,7 +35,14 @@ void Debugger::process() {
     };
 
     try {
-      if (!tokens.empty() && commands.count(tokens[0]) != 0) {
+      if (!tokens.empty() && tokens[0] == "help") {
+        std::string message;
+        for (auto& pair : commands) {
+          message += pair.first + "\n";
+        }
+        component->universe->get<TextSystem>().send(&component->port(port), message);
+      }
+      else if (!tokens.empty() && commands.count(tokens[0]) != 0) {
         auto res = commands[tokens[0]]({ ++tokens.begin(), tokens.end() });
 
         if (!res.empty()) {
