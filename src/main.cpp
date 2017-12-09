@@ -240,13 +240,26 @@ struct Terminal : public Component {
     updatePorts();
   }
 
-  void update() override { }
+  void update() override {
+    while (auto s = this->universe->get<TextSystem>().receive(&port("port"))) {
+      messages.push_back(*s);
+    }
+
+    while (messages.size() > 12) {
+      messages.pop_front();
+    }
+  }
 
   void render() override {
     ImGui::Begin("Terminal");
     char buf[256] {};
     if (ImGui::InputText("Text", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
       this->universe->get<TextSystem>().send(&port("output"), buf);
+
+    for (auto& msg : messages) {
+      ImGui::Text("%s", msg.c_str());
+    }
+
       ImGui::SetKeyboardFocusHere();
     }
     ImGui::End();
@@ -259,6 +272,7 @@ struct Terminal : public Component {
   std::string defaultPort() const override {
     return "output";
   }
+  std::list<std::string> messages;
 };
 
 void DrawGraph(Universe& universe) {
