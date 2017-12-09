@@ -395,7 +395,14 @@ void DrawGraph(Universe& universe) {
   for (auto* c : universe.components) {
     auto pos = ImVec2 { c->position.x, c->position.y };
     window->DrawList->AddCircleFilled(offset + pos, 4.0f, white);
-    window->DrawList->AddText(offset + pos + ImVec2 { 8.0f, -7.0f }, white, c->name().c_str());
+
+    ImVec2 labelSize = ImGui::CalcTextSize(c->name().c_str());
+    ImVec2 labelPadding { 8.0f, 4.0f };
+    ImColor labelColor { 0.0f, 0.0f, 0.0f, 0.5f };
+    ImVec2 labelPos = offset + pos - labelSize * 0.5f - labelPadding + ImVec2 { 0.0f, 32.0f };
+
+    window->DrawList->AddRectFilled(labelPos, labelPos + labelSize + labelPadding * 2.0f, labelColor, 2.0f);
+    window->DrawList->AddText(labelPos + labelPadding, white, c->name().c_str());
 
     for (auto& pair : c->ports) {
       Port* p = pair.second.get();
