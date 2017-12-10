@@ -327,24 +327,18 @@ struct Terminal : public Component {
 };
 
 void DrawGraph(Universe& universe) {
+  static ImVec2 scrolling = ImVec2(0.0f, 0.0f);
+
   ImColor blue   { 0.0f, 0.0f, 1.0f };
   ImColor green  { 0.0f, 1.0f, 0.0f };
   ImColor white  { 1.0f, 1.0f, 1.0f };
+  
+  ImGui::Begin("Graph");
 
-  ImGuiWindowFlags flags = ImGuiWindowFlags_NoTitleBar
-                           | ImGuiWindowFlags_NoResize
-                           | ImGuiWindowFlags_NoScrollbar
-                           | ImGuiWindowFlags_NoSavedSettings
-                           | ImGuiWindowFlags_NoFocusOnAppearing
-                           | ImGuiWindowFlags_NoBringToFrontOnFocus;
-
-  ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4 { 0.0f, 0.0f, 0.0f, 0.0f });
-  ImGui::SetNextWindowSize({ 800.0f, 600.0f });
-  ImGui::SetNextWindowPos({ 0.0f, 0.0f });
-  ImGui::Begin("", nullptr, flags);
+  ImGui::BeginChild("scrolling_region", { 0, 0 }, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
 
   auto* window = ImGui::GetCurrentWindow();
-  ImVec2 offset = window->DC.CursorPos;
+  ImVec2 offset = window->DC.CursorPos - scrolling;
 
   for (auto* component : universe.components) {
     if (component->position == glm::vec2 { 0.0f, 0.0f }) {
@@ -429,8 +423,13 @@ void DrawGraph(Universe& universe) {
     }
   }
 
+  if (ImGui::IsWindowHovered() && !ImGui::IsAnyItemActive() && ImGui::IsMouseDragging(2, 0.0f)) {
+    scrolling -= ImGui::GetIO().MouseDelta;
+  }
+
+  ImGui::EndChild();
+
   ImGui::End();
-  ImGui::PopStyleColor();
 }
 
 int main() {
