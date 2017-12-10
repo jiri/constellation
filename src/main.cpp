@@ -332,7 +332,7 @@ void DrawGraph(Universe& universe) {
   ImColor blue   { 0.0f, 0.0f, 1.0f };
   ImColor green  { 0.0f, 1.0f, 0.0f };
   ImColor white  { 1.0f, 1.0f, 1.0f };
-  
+
   ImGui::Begin("Graph");
 
   ImGui::BeginChild("scrolling_region", { 0, 0 }, true, ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoMove);
@@ -386,6 +386,10 @@ void DrawGraph(Universe& universe) {
   }
 
   static Component* active = nullptr;
+  if (!ImGui::IsMouseDown(0)) {
+    active = nullptr;
+  }
+
   for (auto* c : universe.components) {
     auto pos = ImVec2 { c->position.x, c->position.y };
     window->DrawList->AddCircleFilled(offset + pos, 4.0f, white);
@@ -413,9 +417,6 @@ void DrawGraph(Universe& universe) {
 
     if (ImGui::IsItemClicked(0)) {
       active = c;
-    }
-    if (!ImGui::IsMouseDown(0)) {
-      active = nullptr;
     }
 
     if (active == c) {
