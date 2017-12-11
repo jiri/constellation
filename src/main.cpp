@@ -76,9 +76,6 @@ struct Monitor : public Component {
     if (auto data = universe->get<PictureSystem>().receive(&port("video"))) {
       color = *data;
     }
-    else if (noise) {
-      color = 0.5f * randomColor();
-    }
     else {
       color = glm::vec3 { 0.0f, 0.0f, 0.0f };
     }
@@ -91,7 +88,6 @@ struct Monitor : public Component {
   }
 
   void render() override {
-    ImGui::Checkbox("Monitor noise", &noise);
     ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(color.r, color.g, color.b));
     ImGui::SetNextWindowContentSize({ 128, 128 });
     ImGui::Begin("Monitor", nullptr, ImGuiWindowFlags_NoResize);
@@ -108,7 +104,6 @@ struct Monitor : public Component {
     return "data";
   }
 
-  bool noise = false;
   glm::vec3 color;
   std::string message;
   Debugger debugger;
