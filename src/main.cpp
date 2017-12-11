@@ -285,19 +285,22 @@ struct Terminal : public Component {
   void update() override {
     while (auto s = this->universe->get<TextSystem>().receive(&port("port"))) {
       messages.push_back(*s);
-    }
-
-    while (messages.size() > 12) {
-      messages.pop_front();
+      newMessage = true;
     }
   }
 
   void render() override {
     ImGui::Begin("Terminal");
 
+    ImGui::BeginChild("##text", { 0, -ImGui::GetItemsLineHeightWithSpacing() });
     for (auto& msg : messages) {
       ImGui::Text("%s", msg.c_str());
     }
+    if (newMessage) {
+      ImGui::SetScrollHere();
+      newMessage = false;
+    }
+    ImGui::EndChild();
 
     ImGui::PushItemWidth(-1);
     if (ImGui::InputText("##input", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
@@ -318,6 +321,7 @@ struct Terminal : public Component {
     return "port";
   }
 
+  bool newMessage = false;
   char buf[256] {};
   std::list<std::string> messages;
 };
