@@ -23,10 +23,7 @@ struct function_traits<R(C::*)(Ps...) const> {
 class Debugger {
   using Command = std::function<std::string(const std::vector<std::string>&)>;
 public:
-  Debugger(Component* c, std::string portName)
-    : component { c }
-    , port { std::move(portName) }
-  { }
+  Debugger(Component* c, std::string portName);
 
   template <typename F>
   void addCommand(const std::string& name, F&& f) {

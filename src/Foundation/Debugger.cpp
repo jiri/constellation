@@ -2,6 +2,24 @@
 
 #include <Foundation/Systems/Text.hpp>
 
+Debugger::Debugger(Component* c, std::string portName)
+  : component { c }
+  , port { std::move(portName) }
+{
+  addCommand("help", "Print this help message", [this] {
+    std::string message;
+    message += fmt::format("Debug commands available on '{}':\n", component->name());
+    for (auto& pair : commands) {
+      Command& cmd = pair.second;
+      message += fmt::format("  {} {}\n", cmd.name, cmd.args);
+      if (cmd.description) {
+        message += fmt::format("      {}\n", *cmd.description);
+      }
+    }
+    component->universe->get<TextSystem>().send(&component->port(port), message);
+  });
+}
+
 void Debugger::process() {
   while (auto s = component->universe->get<TextSystem>().receive(&component->port(port))) {
     std::istringstream iss(*s);
@@ -10,15 +28,6 @@ void Debugger::process() {
         std::istream_iterator<std::string>{iss},
         std::istream_iterator<std::string>{}
     };
-
-    addCommand("help", [this] {
-      std::string message;
-      message += fmt::format("Debug commands available on '{}':\n", component->name());
-      for (auto& pair : commands) {
-        message += fmt::format("  {}\n", pair.first);
-      }
-      component->universe->get<TextSystem>().send(&component->port(port), message);
-    });
 
     if (!tokens.empty()) {
       try {
