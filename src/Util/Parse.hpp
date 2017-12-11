@@ -46,3 +46,28 @@ T parseTuple(const std::vector<std::string>& ps) {
   T t;
   return _parseTuple(t, ps);
 }
+
+template <typename T, typename... Ts>
+std::string __tupleToString() {
+  if constexpr (sizeof...(Ts) == 0) {
+    return fmt::format("<{}>", typeid(T).name());
+  }
+  else {
+    return fmt::format("<{}> {}", typeid(T).name(), __tupleToString<Ts...>());
+  }
+};
+
+template <typename... Ts>
+std::string _tupleToString(const std::tuple<Ts...>& t) {
+  if constexpr (sizeof...(Ts) == 0) {
+    return "";
+  }
+  else {
+    return __tupleToString<Ts...>();
+  }
+};
+
+template <typename T>
+std::string tupleToString() {
+  return _tupleToString(T{});
+}
