@@ -9,13 +9,14 @@
 #include <Foundation/Universe.hpp>
 
 void Manual::update() {
-  ImGui::SetNextWindowPos({ 0.0f, 600 - 36.0f });
-  ImGui::Begin("Console", nullptr, { 800.0f, 32.0f }, 0.0f,
-               ImGuiWindowFlags_NoTitleBar
-               | ImGuiWindowFlags_NoResize
-               | ImGuiWindowFlags_NoScrollbar
-               | ImGuiWindowFlags_NoSavedSettings
-               | ImGuiWindowFlags_NoFocusOnAppearing);
+  ImGui::SetNextWindowPos({ 0.0f, ImGui::GetIO().DisplaySize.y - 36.0f });
+  ImGui::SetNextWindowSize({ ImGui::GetIO().DisplaySize.x, 32.0f });
+  ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4 { 0.0f, 0.0f, 0.0f, 0.0f });
+  ImGui::Begin("Console", nullptr, ImGuiWindowFlags_NoTitleBar
+                                   | ImGuiWindowFlags_NoResize
+                                   | ImGuiWindowFlags_NoScrollbar
+                                   | ImGuiWindowFlags_NoSavedSettings
+                                   | ImGuiWindowFlags_NoFocusOnAppearing);
 
   ImGui::PushItemWidth(-1);
   if (ImGui::InputText("##command", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
@@ -48,4 +49,5 @@ void Manual::update() {
 
   ImGui::PopItemWidth();
   ImGui::End();
+  ImGui::PopStyleColor();
 }
