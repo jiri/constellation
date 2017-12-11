@@ -6,21 +6,29 @@
 #include <vector>
 
 template <typename T, typename... Ts>
-std::tuple<T, Ts...> __parseTuple(std::vector<std::string>::const_iterator beg,
+std::tuple<T, Ts...> __parseTuple(size_t ix,
+                                  std::vector<std::string>::const_iterator beg,
                                   std::vector<std::string>::const_iterator end) {
   if (beg == end) {
-    throw std::runtime_error { "Not enough values to parse" };
+    throw std::runtime_error { "Not enough arguments" };
   }
 
   T value;
   std::stringstream stream(*beg);
   stream >> value;
 
+  if (!stream) {
+    throw std::runtime_error { fmt::format("Could not parse argument {}", ix) };
+  }
+
   if constexpr (sizeof...(Ts) == 0) {
+    if (++beg != end) {
+      throw std::runtime_error { "Too many arguments" };
+    }
     return std::tuple<T>{ value };
   }
   else {
-    return std::tuple_cat(std::tuple<T> { value }, __parseTuple<Ts...>(++beg, end));
+    return std::tuple_cat(std::tuple<T> { value }, __parseTuple<Ts...>(ix + 1, ++beg, end));
   }
 };
 
@@ -29,7 +37,7 @@ std::tuple<Ts...> _parseTuple(std::tuple<Ts...>& t, const std::vector<std::strin
   if constexpr (sizeof...(Ts) == 0) {
     return {};
   } else {
-    return __parseTuple<Ts...>(ps.begin(), ps.end());
+    return __parseTuple<Ts...>(1, ps.begin(), ps.end());
   }
 };
 
