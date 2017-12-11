@@ -1,185 +1,89 @@
 #include <Foundation/Infrastructures/Wiring.hpp>
 
-#include <fmt/format.h>
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui.h>
+#include <imgui_internal.h>
 
 #include <Foundation/Universe.hpp>
-#include <Foundation/Components/Component.hpp>
 
-#pragma mark Port
-
-Wiring::Port::Port(Capabilities cap)
-  : Node(cap)
-{ }
-
-Wiring::Port* Wiring::Port::findPort(Node*) {
-  return this;
+Cable::Cable(Wiring* w, Capabilities caps)
+        : wiring { w }
+        , capabilities { caps }
+{
+  wiring->connections.emplace_back(&a, &b);
 }
 
-bool Wiring::Port::isFree() const {
-  return neighbour == nullptr;
-}
-
-void Wiring::Port::addNeighbour(Node* node) {
-  assert(isFree());
-  neighbour = node;
-}
-
-void Wiring::Port::removeNeighbour(Node* node) {
-  assert(neighbour == node);
-  neighbour = nullptr;
-}
-bool Wiring::Port::isNeighbourOf(Node* node) const {
-  return neighbour == node;
-}
-
-std::optional<Capabilities> Wiring::Port::fold(Node* prev) {
-  if (prev == nullptr) {
-    if (neighbour == nullptr) {
-      return std::nullopt;
-    }
-    else if (auto other = neighbour->fold(this)) {
-      return Capabilities::combine(capabilities, *other);
-    }
-    else {
-      return std::nullopt;
-    }
-  }
-  else {
-    return { capabilities };
-  }
-}
-
-bool Wiring::Port::connected() {
-  return neighbour && neighbour->findPort(this);
-}
-
-std::string Wiring::Port::name() const {
-  return component->nameOf(this);
-}
-
-#pragma mark Cable
-
-Wiring::Port* Wiring::Cable::findPort(Node* prev) {
-  assert(prev != nullptr &&
-         (neighbours[0] == prev || neighbours[1] == prev));
-
-  if (neighbours[0] == nullptr || neighbours[1] == nullptr) {
-    return nullptr;
-  }
-
-  if (prev == neighbours[0]) {
-    return neighbours[1]->findPort(this);
-  }
-  else {
-    return neighbours[0]->findPort(this);
-  }
-}
-
-bool Wiring::Cable::isFree() const {
-  return neighbourCount < 2;
-}
-
-void Wiring::Cable::addNeighbour(Node* node) {
-  assert(isFree());
-  neighbours[neighbourCount++] = node;
-}
-
-void Wiring::Cable::removeNeighbour(Node* node) {
-  assert(neighbours[0] == node || neighbours[1] == node);
-
-  if (neighbours[1] == node) {
-    neighbours[1] = nullptr;
-    neighbourCount--;
-  }
-  else {
-    neighbours[0] = neighbours[1];
-    neighbours[1] = nullptr;
-    neighbourCount--;
-  }
-}
-
-bool Wiring::Cable::isNeighbourOf(Node* node) const {
-  return neighbours[0] == node || neighbours[1] == node;
-}
-
-std::optional<Capabilities> Wiring::Cable::fold(Node* prev) {
-  assert(prev == nullptr || prev == neighbours[0] || prev == neighbours[1]);
-
-  if (neighbourCount < 2) {
-    return std::nullopt;
-  }
-
-  auto ra = neighbours[0]->fold(this);
-  auto rb = neighbours[1]->fold(this);
-
-  if (prev == nullptr) {
-    if (ra && rb) {
-      return Capabilities::combine(capabilities, Capabilities::combine(*ra, *rb));
-    }
-    else {
-      return std::nullopt;
-    }
-  }
-  else {
-    if (prev == neighbours[0]) {
-      return Capabilities::combine(capabilities, *rb);
-    }
-    else {
-      return Capabilities::combine(capabilities, *ra);
+Cable::~Cable() {
+  for (auto it = wiring->connections.begin(); it != wiring->connections.end(); it++) {
+    if (it->first == &a && it->second == &b) {
+      wiring->connections.erase(it);
     }
   }
 }
 
-#pragma mark Utility
+Socket* Wiring::findOther(Socket* socket) {
+  Node* prev = socket;
+  Node* next = nullptr;
 
-void Wiring::connect(Universe& u, Node* a, Node* b) {
-  if (a->isNeighbourOf(b) && b->isNeighbourOf(a)) {
-    return;
+  for (auto& connection : connections) {
+    if (connection.first == socket) {
+      next = connection.second;
+    }
+    if (connection.second == socket) {
+      next = connection.first;
+    }
   }
 
-  assert(a != b);
-  assert(a->isFree() && b->isFree());
+  bool stepMade = false;
+  do {
+    stepMade = false;
+    for (auto& connection : connections) {
+      if (connection.first == next || connection.second == next) {
+        if (connection.first == prev || connection.second == prev) {
+          continue;
+        }
+        else if (connection.first == next) {
+          prev = next;
+          next = connection.second;
+          stepMade = true;
+        }
+        else if (connection.second == next) {
+          prev = next;
+          next = connection.first;
+          stepMade = true;
+        }
+      }
+    }
+  } while (stepMade);
 
-  a->addNeighbour(b);
-  b->addNeighbour(a);
-
-  Port* left = a->findPort(b);
-  Port* right = b->findPort(a);
-
-  if (left && right) {
-    Capabilities result = *left->fold(nullptr);
-    u.connections.push_back({ left, right, result });
-  }
+  return dynamic_cast<Socket*>(next);
 }
 
-void Wiring::disconnect(Universe& u, Node* a, Node* b) {
-  assert(a != b);
-  assert(a->isNeighbourOf(b) == b->isNeighbourOf(a));
-
-  if (!a->isNeighbourOf(b) || !b->isNeighbourOf(a)) {
-    return;
+void Wiring::update() {
+  for (auto& c : universe->components) {
+    for (auto& pair : c->ports) {
+      if (auto* s = dynamic_cast<Socket*>(pair.second.get())) {
+        Socket* other = findOther(s);
+        if (other) {
+          connect(*s, *other, Capabilities{});
+        }
+      }
+    }
   }
 
-  Port* left = a->findPort(b);
-  Port* right = b->findPort(a);
+  ImGui::Begin("Switchboard");
 
-  if (left && right) {
-    auto it = std::find_if(u.connections.begin(), u.connections.end(), [left, right](const auto& e) {
-      return (e.a->component == left->component && e.b->component == right->component)
-          || (e.b->component == left->component && e.a->component == right->component);
-    });
-    assert(it != u.connections.end());
-    u.connections.erase(it);
+  if (ImGui::Button("Connect")) {
+    cables.emplace_back(this, Capabilities{});
+
+    auto* a = dynamic_cast<Socket*>(&universe->lookupPort("generator", "energy"));
+    auto* b = dynamic_cast<Socket*>(&universe->lookupPort("lamp", "energy"));
+
+    assert(a && b);
+
+    connections.emplace_back(a, &cables[0].a);
+    connections.emplace_back(&cables[0].b, b);
   }
 
-  a->removeNeighbour(b);
-  b->removeNeighbour(a);
-}
-
-void Wiring::connect(Universe& u, Node& a, Node& b) {
-  connect(u, &a, &b);
-}
-
-void Wiring::disconnect(Universe& u, Node& a, Node& b) {
-  disconnect(u, &a, &b);
+  ImGui::End();
 }

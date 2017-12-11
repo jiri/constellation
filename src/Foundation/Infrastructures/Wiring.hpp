@@ -1,68 +1,47 @@
 #pragma once
 
-#include <optional>
-#include <vector>
+#include <list>
 
-#include <Foundation/Infrastructures/Capabilities.hpp>
+#include <Foundation/Infrastructures/Infrastructure.hpp>
 
-class Component;
-struct Universe;
+class Wiring;
 
-class Wiring {
+class Node {
 public:
-  struct Port;
+  virtual ~Node() = default;
+};
 
-  struct Node {
-    explicit Node(Capabilities c)
-      : capabilities(c)
-    { }
+class Socket : public Port, public Node {
+public:
+  using Port::Port;
+};
 
-    virtual ~Node() = default;
+class Connector : public Node {
+public:
+  glm::vec2 position;
+};
 
-    virtual Port* findPort(Node* prev) = 0;
-    virtual bool isFree() const = 0;
-    virtual void addNeighbour(Node* node) = 0;
-    virtual void removeNeighbour(Node* node) = 0;
-    virtual bool isNeighbourOf(Node* node) const = 0;
-    virtual std::optional<Capabilities> fold(Node* prev) = 0;
+class Cable {
+public:
+  Cable(Wiring* w, Capabilities caps);
+  ~Cable();
 
-    Capabilities capabilities;
-  };
+  Wiring* wiring;
+  Connector a;
+  Connector b;
+  Capabilities capabilities;
+};
 
-  struct Port : public Node {
-    Port(Capabilities cap);
+class Wiring : public Infrastructure {
+  friend class Cable;
+public:
+  using Infrastructure::Infrastructure;
 
-    Port* findPort(Node*) override;
-    bool isFree() const override;
-    void addNeighbour(Node* node) override;
-    void removeNeighbour(Node* node) override;
-    bool isNeighbourOf(Node* node) const override;
-    std::optional<Capabilities> fold(Node* prev) override;
+  void update() override;
 
-    bool connected();
-    std::string name() const;
+private:
+  std::vector<std::pair<Node*, Node*>> connections;
+  std::vector<Cable> cables;
 
-    Component* component = nullptr;
-    Node* neighbour = nullptr;
-  };
-
-  struct Cable : public Node {
-    using Node::Node;
-
-    Port* findPort(Node* prev) override;
-    bool isFree() const override;
-    void addNeighbour(Node *node) override;
-    void removeNeighbour(Node* node) override;
-    bool isNeighbourOf(Node* node) const override;
-    std::optional<Capabilities> fold(Node *prev) override;
-
-    Node* neighbours[2] {};
-    uint8_t neighbourCount = 0;
-  };
-
-  static void connect(Universe& u, Node& a, Node& b);
-  static void connect(Universe& u, Node* a, Node* b);
-
-  static void disconnect(Universe& u, Node& a, Node& b);
-  static void disconnect(Universe& u, Node* a, Node* b);
+  Socket* findOther(Socket* socket);
 };

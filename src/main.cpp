@@ -30,6 +30,7 @@
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
 #include <Foundation/Infrastructures/Capabilities.hpp>
+#include <Foundation/Infrastructures/Wiring.hpp>
 #include <Foundation/Infrastructures/Wireless.hpp>
 #include <Foundation/Infrastructures/Manual.hpp>
 
@@ -46,19 +47,19 @@ struct Monitor : public Component {
         .text = { false },
     }));
 
-    ports.emplace("data", new Port(Capabilities {
+    ports.emplace("data", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));
 
-    ports.emplace("energy", new Port(Capabilities {
+    ports.emplace("energy", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
     }));
 
-    ports.emplace("debug", new Port(Capabilities {
+    ports.emplace("debug", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
@@ -124,13 +125,13 @@ struct Camera : public Component {
         .text = { false },
     }));
 
-    ports.emplace("energy", new Port(Capabilities {
+    ports.emplace("energy", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
     }));
 
-    ports.emplace("debug", new Port(Capabilities {
+    ports.emplace("debug", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
@@ -190,7 +191,7 @@ struct Generator : public Component {
     : Component(w)
     , history(256, 0)
   {
-    ports.emplace("energy", new Port(Capabilities {
+    ports.emplace("energy", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 100.0f },
         .text = { true }
@@ -240,7 +241,7 @@ struct Lamp : public Component {
   explicit Lamp(Universe* w)
     : Component(w)
   {
-    ports.emplace("energy", new Port(Capabilities {
+    ports.emplace("energy", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { true },
@@ -277,7 +278,7 @@ struct Terminal : public Component {
   explicit Terminal(Universe* w)
     : Component(w)
   {
-    ports.emplace("port", new Port(Capabilities {
+    ports.emplace("port", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
@@ -483,6 +484,7 @@ int main() {
       {
           new Wireless { &universe },
           new Manual { &universe },
+          new Wiring { &universe },
       },
   };
 
