@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <variant>
 #include <type_traits>
+#include <optional>
 
 #include <Foundation/Universe.hpp>
 #include <Foundation/Infrastructures/Infrastructure.hpp>
@@ -21,13 +22,13 @@ struct function_traits<R(C::*)(Ps...) const> {
 };
 
 class Debugger {
-  using Command = std::function<std::string(const std::vector<std::string>&)>;
+  using Command = std::function<std::optional<std::string>(const std::vector<std::string>&)>;
 public:
   Debugger(Component* c, std::string portName);
 
   template <typename F>
   void addCommand(const std::string& name, F&& f) {
-    auto lambda = [f](const std::vector<std::string>& ps) -> std::string {
+    auto lambda = [f](const std::vector<std::string>& ps) -> std::optional<std::string> {
       auto args = parseTuple<typename function_traits<F>::argument_tuple_type>(ps);
 
       if constexpr (!std::is_same<typename function_traits<F>::result_type, void>::value) {
@@ -35,7 +36,7 @@ public:
         return fmt::format("{}", r);
       } else {
         std::apply(f, args);
-        return {};
+        return std::nullopt;
       }
     };
     commands[name] = lambda;

@@ -6,15 +6,11 @@ Debugger::Debugger(Component* c, std::string portName)
   : component { c }
   , port { std::move(portName) }
 {
-  addCommand("help", "Print this help message", [this] {
+  addCommand("help", [this] {
     std::string message;
     message += fmt::format("Debug commands available on '{}':\n", component->name());
     for (auto& pair : commands) {
-      Command& cmd = pair.second;
-      message += fmt::format("  {} {}\n", cmd.name, cmd.args);
-      if (cmd.description) {
-        message += fmt::format("      {}\n", *cmd.description);
-      }
+      message += fmt::format("  {}\n", pair.first);
     }
     component->universe->get<TextSystem>().send(&component->port(port), message);
   });
@@ -34,8 +30,8 @@ void Debugger::process() {
         if (commands.count(tokens[0]) != 0) {
           auto res = commands[tokens[0]]({ ++tokens.begin(), tokens.end() });
 
-          if (!res.empty()) {
-            component->universe->get<TextSystem>().send(&component->port(port), res);
+          if (res) {
+            component->universe->get<TextSystem>().send(&component->port(port), *res);
           }
         }
         else {
