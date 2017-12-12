@@ -44,8 +44,8 @@ public:
       }
     };
     commands[name] = {
-            tupleToString<typename function_traits<F>::argument_tuple_type>(),
-            lambda,
+        tupleToString<typename function_traits<F>::argument_tuple_type>(),
+        lambda,
     };
   }
 
