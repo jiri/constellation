@@ -1,5 +1,6 @@
 #include <Foundation/Debugger.hpp>
 
+#include <Foundation/Universe.hpp>
 #include <Foundation/Systems/Text.hpp>
 
 Debugger::Debugger(Component* c, std::string portName)

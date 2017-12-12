@@ -5,6 +5,8 @@
 #include <tuple>
 #include <vector>
 
+#include <fmt/format.h>
+
 template <typename T, typename... Ts>
 std::tuple<T, Ts...> __parseTuple(size_t ix,
                                   std::vector<std::string>::const_iterator beg,

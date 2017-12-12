@@ -6,9 +6,10 @@
 #include <type_traits>
 #include <optional>
 
-#include <Foundation/Universe.hpp>
 #include <Foundation/Infrastructures/Infrastructure.hpp>
 #include <Util/Parse.hpp>
+
+#include <fmt/format.h>
 
 template <typename T>
 struct function_traits
