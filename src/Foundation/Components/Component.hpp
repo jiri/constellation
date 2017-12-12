@@ -6,6 +6,7 @@
 
 #include <glm/glm.hpp>
 
+#include <Foundation/Debugger.hpp>
 #include <Foundation/Infrastructures/Infrastructure.hpp>
 
 class Universe;
@@ -14,7 +15,7 @@ struct Component {
   explicit Component(Universe* world);
   virtual ~Component();
 
-  virtual void update() = 0;
+  virtual void update();
   virtual void render() = 0;
 
   virtual std::string name() const = 0;
@@ -32,4 +33,6 @@ struct Component {
 
 protected:
   void addPort(const std::string& name, Port* p);
+
+  Debugger debugger;
 };

@@ -5,9 +5,18 @@
 
 #include <Foundation/Universe.hpp>
 
+#include <Foundation/Infrastructures/Wiring.hpp>
+
 Component::Component(Universe* u)
   : universe { u }
-{ }
+  , debugger { this, "debug" }
+{
+  addPort("debug", new Socket(Capabilities {
+      .picture = { false, 0.0f },
+      .energy = { false, 0.0f },
+      .text = { true },
+  }));
+}
 
 Component::~Component() {
   auto pred = [this](const Connection& c) {
@@ -40,4 +49,8 @@ std::string Component::nameOf(const Port* p) {
     }
   }
   throw std::runtime_error { "Invalid port" };
+}
+
+void Component::update() {
+  debugger.update();
 }

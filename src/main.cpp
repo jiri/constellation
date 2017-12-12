@@ -39,7 +39,6 @@
 struct Monitor : public Component {
   explicit Monitor(Universe* w)
     : Component(w)
-    , debugger { this, "debug" }
   {
     addPort("video", new Antenna(200.0f, 42.0f, Capabilities {
         .picture = { true, 0.0f },
@@ -59,18 +58,14 @@ struct Monitor : public Component {
         .text = { false },
     }));
 
-    addPort("debug", new Socket(Capabilities {
-        .picture = { false, 0.0f },
-        .energy = { false, 0.0f },
-        .text = { true },
-    }));
-
     debugger.addCommand("clear", [this] {
       message = "";
     });
   }
 
   void update() override {
+    Component::update();
+
     if (auto data = universe->get<PictureSystem>().receive(&port("video"))) {
       color = *data;
     }
@@ -81,8 +76,6 @@ struct Monitor : public Component {
     while (auto msg = this->universe->get<TextSystem>().receive(&port("data"))) {
       message += *msg + "\n";
     }
-
-    debugger.update();
   }
 
   void render() override {
@@ -104,13 +97,11 @@ struct Monitor : public Component {
 
   glm::vec3 color;
   std::string message;
-  Debugger debugger;
 };
 
 struct Camera : public Component {
   explicit Camera(Universe* w)
     : Component(w)
-    , debugger { this, "debug" }
   {
     addPort("video", new Antenna(100.0f, 40.0f, Capabilities {
         .picture = { true, 0.0f },
@@ -122,12 +113,6 @@ struct Camera : public Component {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
-    }));
-
-    addPort("debug", new Socket(Capabilities {
-        .picture = { false, 0.0f },
-        .energy = { false, 0.0f },
-        .text = { true },
     }));
 
     debugger.addCommand("set_color", [this](float r, float g, float b) {
@@ -150,9 +135,9 @@ struct Camera : public Component {
   }
 
   void update() override {
-    universe->get<PictureSystem>().send(&port("video"), color);
+    Component::update();
 
-    debugger.update();
+    universe->get<PictureSystem>().send(&port("video"), color);
   }
 
   void render() override {
@@ -173,7 +158,6 @@ struct Camera : public Component {
     return "video";
   }
 
-  Debugger debugger;
   glm::vec3 color;
 };
 
@@ -190,6 +174,8 @@ struct Generator : public Component {
   }
 
   void update() override {
+    Component::update();
+
     noise = (randomFloat() - 0.5f) * 10.0f;
     this->universe->get<EnergySystem>().produce(&port("energy"), power + noise);
     history.push_back(power + noise);
@@ -239,6 +225,8 @@ struct Lamp : public Component {
   }
 
   void update() override {
+    Component::update();
+
     float energy = this->universe->get<EnergySystem>().consume(&port("energy"), 10.0f);
     satisfaction = energy / 10.0f;
   }
@@ -279,6 +267,8 @@ struct Terminal : public Component {
   }
 
   void update() override {
+    Component::update();
+
     while (auto s = this->universe->get<TextSystem>().receive(&port("port"))) {
       messages.push_back(*s);
       newMessage = true;
@@ -346,8 +336,6 @@ public:
     }));
   }
 
-  void update() override { }
-
   void render() override { }
 
   std::vector<std::pair<float, Port*>> redistributeEnergy(Port* p) override {
@@ -373,7 +361,6 @@ struct Switch : public Component {
 public:
   explicit Switch(Universe* u)
     : Component(u)
-    , debugger { this, "debug" }
   {
     addPort("a", new Socket(Capabilities {
         .picture = { false, 0.0f },
@@ -387,19 +374,9 @@ public:
         .text = { false },
     }));
 
-    addPort("debug", new Socket(Capabilities {
-        .picture = { false, 0.0f },
-        .energy = { false, 0.0f },
-        .text = { true },
-    }));
-
     debugger.addCommand("toggle", [this] {
       toggle = !toggle;
     });
-  }
-
-  void update() override {
-    debugger.update();
   }
 
   void render() override {
@@ -428,7 +405,6 @@ public:
   }
 
   bool toggle = true;
-  Debugger debugger;
 };
 
 void DrawGraph(Universe& universe) {
