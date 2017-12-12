@@ -6,7 +6,6 @@ bool TextSystem::filter(const Connection& edge) const {
 
 void TextSystem::swap(Connection& edge) {
   std::swap(sendBuffers[edge.from], recvBuffers[edge.to]);
-  std::swap(recvBuffers[edge.from], sendBuffers[edge.to]);
 }
 
 void TextSystem::send(Port* port, const std::string& m) {
