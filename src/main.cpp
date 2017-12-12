@@ -410,9 +410,10 @@ public:
 void DrawGraph(Universe& universe) {
   static ImVec2 scrolling = ImVec2(0.0f, 0.0f);
 
-  ImColor blue   { 0.0f, 0.0f, 1.0f };
-  ImColor green  { 0.0f, 1.0f, 0.0f };
-  ImColor white  { 1.0f, 1.0f, 1.0f };
+  ImColor red   { 1.0f, 0.0f, 0.0f };
+  ImColor blue  { 0.0f, 0.0f, 1.0f };
+  ImColor green { 0.0f, 1.0f, 0.0f };
+  ImColor white { 1.0f, 1.0f, 1.0f };
 
   ImGui::Begin("Graph");
 
@@ -471,7 +472,8 @@ void DrawGraph(Universe& universe) {
     for (auto& pair : c->ports) {
       Port* p = pair.second.get();
       ImVec2 ppos { p->globalPosition().x, p->globalPosition().y };
-      window->DrawList->AddCircleFilled(offset + ppos, 2.0f, white);
+
+      window->DrawList->AddCircleFilled(offset + ppos, 2.0f, p->name() == "debug" ? red : white);
 
       if (auto* a = dynamic_cast<Antenna*>(p)) {
         window->DrawList->AddCircleFilled(offset + ppos, a->radius, ImColor { 1.0f, 1.0f, 1.0f, 0.1f }, 72);
