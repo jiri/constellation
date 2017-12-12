@@ -11,7 +11,9 @@ namespace fs = std::experimental::filesystem;
 #include <Foundation/Systems/System.hpp>
 
 struct Universe {
-  Universe(const std::vector<Component*>& components, const std::vector<System*>& systems, const std::vector<Infrastructure*>& infrastructures);
+  Universe(std::vector<Component*> components,
+           std::vector<System*> systems,
+           std::vector<Infrastructure*> infrastructures);
   ~Universe();
 
   template <typename T>

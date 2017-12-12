@@ -6,12 +6,12 @@
 #include <json.hpp>
 #include <Foundation/Infrastructures/Manual.hpp>
 
-Universe::Universe(const std::vector<Component*>& components,
-                   const std::vector<System*>& systems,
-                   const std::vector<Infrastructure*>& infrastructures)
-  : components { components }
-  , systems { systems }
-  , infrastructures { infrastructures }
+Universe::Universe(std::vector<Component*> components,
+                   std::vector<System*> systems,
+                   std::vector<Infrastructure*> infrastructures)
+  : components { std::move(components) }
+  , systems { std::move(systems) }
+  , infrastructures { std::move(infrastructures) }
 {}
 
 Universe::~Universe() {
