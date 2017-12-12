@@ -8,18 +8,19 @@ bool PictureSystem::filter(const Connection& edge) const {
 
 void PictureSystem::swap(Connection& edge) {
   if (randomFloat() < edge.capabilities.picture.errorRate) {
-    buffers[edge.from].pictureData = randomColor();
-    buffers[edge.to].pictureData = randomColor();
+    buffers[edge.to] = randomColor();
   }
-  std::swap(buffers[edge.from], buffers[edge.to]);
+  else {
+    buffers[edge.to] = buffers[edge.from];
+  }
 }
 
 void PictureSystem::send(Port* port, const glm::vec3& v) {
-  buffers[port].pictureData = v;
+  buffers[port] = v;
 }
 
 std::optional<glm::vec3> PictureSystem::receive(Port* port) {
-  std::optional<glm::vec3> res = buffers[port].pictureData;
-  buffers[port].pictureData = std::nullopt;
+  std::optional<glm::vec3> res = buffers[port];
+  buffers[port] = std::nullopt;
   return res;
 }

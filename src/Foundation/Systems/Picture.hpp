@@ -8,11 +8,8 @@
 #include <Foundation/Systems/System.hpp>
 
 class PictureSystem : public System {
+  using Buffer = std::optional<glm::vec3>;
 public:
-  struct Buffer {
-    std::optional<glm::vec3> pictureData;
-  };
-
   using System::System;
 
   bool filter(const Connection& edge) const override;
