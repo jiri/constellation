@@ -114,7 +114,7 @@ struct Camera : public Component {
     : Component(w)
     , debugger { this, "debug" }
   {
-    ports.emplace("video", new Antenna(50.0f, 40.0f, Capabilities {
+    ports.emplace("video", new Antenna(100.0f, 40.0f, Capabilities {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { false },
