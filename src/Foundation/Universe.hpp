@@ -28,7 +28,7 @@ struct Universe {
     };
   }
 
-  Port& lookupPort(const std::string& component, const std::string& port);
+  Port* lookupPort(const std::string& component, const std::string& port);
 
   void tick();
 

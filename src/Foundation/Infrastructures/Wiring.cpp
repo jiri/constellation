@@ -65,7 +65,7 @@ void Wiring::update() {
       if (auto* s = dynamic_cast<Socket*>(pair.second.get())) {
         Socket* other = findOther(s);
         if (other) {
-          connect(*s, *other, Capabilities{});
+          connect(s, other, Capabilities{});
         }
       }
     }
@@ -76,8 +76,8 @@ void Wiring::update() {
   if (ImGui::Button("Connect")) {
     cables.emplace_back(this, Capabilities{});
 
-    auto* a = dynamic_cast<Socket*>(&universe->lookupPort("generator", "energy"));
-    auto* b = dynamic_cast<Socket*>(&universe->lookupPort("lamp", "energy"));
+    auto* a = dynamic_cast<Socket*>(universe->lookupPort("generator", "energy"));
+    auto* b = dynamic_cast<Socket*>(universe->lookupPort("lamp", "energy"));
 
     assert(a && b);
 

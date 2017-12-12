@@ -44,12 +44,12 @@ void Universe::tick() {
   }
 }
 
-Port& Universe::lookupPort(const std::string& componentName, const std::string& portName) {
+Port* Universe::lookupPort(const std::string& componentName, const std::string& portName) {
   for (Component* c : this->components) {
     if (c->name() == componentName) {
       for (auto& [ name, port ] : c->ports) {
         if ((portName.empty() && name == c->defaultPort()) || name == portName) {
-          return *port;
+          return port.get();
         }
       }
     }
@@ -115,8 +115,8 @@ void Universe::load(const fs::path& path) {
   inf >> connections;
 
   for (auto& connection : connections) {
-    Port& a = lookupPort(connection["a"]["component"], connection["a"]["port"]);
-    Port& b = lookupPort(connection["b"]["component"], connection["b"]["port"]);
+    Port* a = lookupPort(connection["a"]["component"], connection["a"]["port"]);
+    Port* b = lookupPort(connection["b"]["component"], connection["b"]["port"]);
 
     manual->connect(a, b, Capabilities{});
   }

@@ -26,8 +26,8 @@ void Manual::update() {
     std::regex_search(buffer, m, r);
 
     try {
-      Port& a = universe->lookupPort(m[2], m[4]);
-      Port& b = universe->lookupPort(m[5], m[7]);
+      Port* a = universe->lookupPort(m[2], m[4]);
+      Port* b = universe->lookupPort(m[5], m[7]);
 
       if (m[1] == "c") {
         connect(a, b, Capabilities{});

@@ -20,23 +20,17 @@ void Wireless::update() {
 
           float distance = glm::length(b->globalPosition() - a->globalPosition());
           if (distance <= std::max(a->radius, b->radius)) {
-            float errorRate = std::fabs(a->frequency - b->frequency);
-            if (auto conn = connection(*a, *b)) {
-              conn->capabilities.picture.errorRate = errorRate;
-            }
-            else {
-              Capabilities caps {
-                      .picture = { true, errorRate },
-                      .energy = { false, 0.0f },
-                      .text = { false },
-              };
+            Capabilities caps {
+                .picture = { true, std::fabs(a->frequency - b->frequency) },
+                .energy = { false, 0.0f },
+                .text = { false },
+            };
 
-              connect(*a, *b, caps);
-            }
+            connect(a, b, caps);
           }
-          else if (auto conn = connection(*a, *b)) {
+          else if (auto conn = connection(a, b)) {
             if (conn->author == this) {
-              disconnect(*a, *b);
+              disconnect(a, b);
             }
           }
         }
