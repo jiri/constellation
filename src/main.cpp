@@ -82,7 +82,7 @@ struct Monitor : public Component {
       message += *msg + "\n";
     }
 
-    debugger.process();
+    debugger.update();
   }
 
   void render() override {
@@ -152,7 +152,7 @@ struct Camera : public Component {
   void update() override {
     universe->get<PictureSystem>().send(&port("video"), color);
 
-    debugger.process();
+    debugger.update();
   }
 
   void render() override {

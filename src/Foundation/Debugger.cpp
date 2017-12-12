@@ -16,7 +16,7 @@ Debugger::Debugger(Component* c, std::string portName)
   });
 }
 
-void Debugger::process() {
+void Debugger::update() {
   while (auto s = component->universe->get<TextSystem>().receive(&component->port(port))) {
     std::istringstream iss(*s);
 

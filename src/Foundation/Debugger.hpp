@@ -49,7 +49,7 @@ public:
     };
   }
 
-  void process();
+  void update();
 
 private:
   Component* component;
