@@ -460,6 +460,8 @@ void DrawGraph(Universe& universe) {
     active = nullptr;
   }
 
+  std::vector<std::pair<glm::vec2, Socket*>> socketPositions;
+
   /* Draw components */
   for (auto* c : universe.components) {
     auto pos = ImVec2 { c->position.x, c->position.y };
@@ -483,6 +485,10 @@ void DrawGraph(Universe& universe) {
       if (auto* a = dynamic_cast<Antenna*>(p)) {
         window->DrawList->AddCircleFilled(offset + ppos, a->radius, ImColor { 1.0f, 1.0f, 1.0f, 0.1f }, 72);
       }
+
+      if (auto* s = dynamic_cast<Socket*>(p)) {
+        socketPositions.emplace_back(p->globalPosition(), s);
+      }
     }
 
     ImGui::SetCursorScreenPos(offset + pos - ImVec2 { 6.0f, 6.0f });
@@ -494,6 +500,67 @@ void DrawGraph(Universe& universe) {
 
     if (active == c) {
       c->position += glm::vec2 { ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y };
+    }
+  }
+
+  /* Draw cables */
+  Wiring* wiring = nullptr;
+  for (auto* infrastructure : universe.infrastructures) {
+    if (auto* w = dynamic_cast<Wiring*>(infrastructure)) {
+      wiring = w;
+    }
+  }
+  assert(wiring);
+
+  static Connector* activeC = nullptr;
+  if (!ImGui::IsMouseDown(0)) {
+    activeC = nullptr;
+  }
+
+  for (auto& cable : wiring->cables) {
+    ImVec2 aPos = offset + ImVec2 { cable->a.position.x, cable->a.position.y };
+    ImVec2 bPos = offset + ImVec2 { cable->b.position.x, cable->b.position.y };
+
+    window->DrawList->AddLine(aPos, bPos, red, 2.0f);
+    window->DrawList->AddCircleFilled(aPos, 2.0f, white);
+
+    ImGui::SetCursorScreenPos(aPos - ImVec2 { 3.0f, 3.0f });
+    ImGui::InvisibleButton("##a", { 6.0f, 6.0f });
+    if (ImGui::IsItemClicked(0)) {
+      activeC = &cable->a;
+    }
+    if (ImGui::IsItemClicked(1)) {
+      cable->a.position -= glm::vec2 { 0.0f, 20.0f };
+    }
+
+    window->DrawList->AddCircleFilled(bPos, 2.0f, white);
+
+    ImGui::SetCursorScreenPos(bPos - ImVec2 { 3.0f, 3.0f });
+    ImGui::InvisibleButton("##b", { 6.0f, 6.0f });
+    if (ImGui::IsItemClicked(0)) {
+      activeC = &cable->b;
+    }
+    if (ImGui::IsItemClicked(1)) {
+      cable->b.position -= glm::vec2 { 0.0f, 20.0f };
+    }
+
+    if (activeC == &cable->a) {
+      cable->a.position += glm::vec2 { ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y };
+
+      for (auto& pair : socketPositions) {
+        if (glm::distance(cable->a.position, pair.first) < 4.0f) {
+          wiring->join(&cable->a, pair.second);
+        }
+      }
+    }
+    if (activeC == &cable->b) {
+      cable->b.position += glm::vec2 { ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y };
+
+      for (auto& pair : socketPositions) {
+        if (glm::distance(cable->b.position, pair.first) < 4.0f) {
+          wiring->join(&cable->b, pair.second);
+        }
+      }
     }
   }
 
