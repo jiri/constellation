@@ -29,5 +29,5 @@ struct Component {
   glm::vec2 position;
 
 protected:
-  void updatePorts();
+  void addPort(const std::string& name, Port* p);
 };

@@ -23,19 +23,17 @@ struct CPU : public Component {
   CPU(Universe* u)
     : Component(u)
   {
-    ports.emplace("in", new Port(Capabilities {
-            .picture = { false, 0.0f },
-            .energy = { false, 0.0f },
-            .text = { true },
+    addPort("in", new Port(Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { false, 0.0f },
+        .text = { true },
     }));
 
-    ports.emplace("out", new Port(Capabilities {
-            .picture = { false, 0.0f },
-            .energy = { false, 0.0f },
-            .text = { true },
+    addPort("out", new Port(Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { false, 0.0f },
+        .text = { true },
     }));
-
-    updatePorts();
   }
 
   ~CPU() override {

@@ -41,31 +41,29 @@ struct Monitor : public Component {
     : Component(w)
     , debugger { this, "debug" }
   {
-    ports.emplace("video", new Antenna(200.0f, 42.0f, Capabilities {
+    addPort("video", new Antenna(200.0f, 42.0f, Capabilities {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { false },
     }));
 
-    ports.emplace("data", new Socket(Capabilities {
+    addPort("data", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));
 
-    ports.emplace("energy", new Socket(Capabilities {
+    addPort("energy", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
     }));
 
-    ports.emplace("debug", new Socket(Capabilities {
+    addPort("debug", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));
-
-    updatePorts();
 
     debugger.addCommand("clear", [this] {
       message = "";
@@ -114,25 +112,23 @@ struct Camera : public Component {
     : Component(w)
     , debugger { this, "debug" }
   {
-    ports.emplace("video", new Antenna(100.0f, 40.0f, Capabilities {
+    addPort("video", new Antenna(100.0f, 40.0f, Capabilities {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { false },
     }));
 
-    ports.emplace("energy", new Socket(Capabilities {
+    addPort("energy", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
     }));
 
-    ports.emplace("debug", new Socket(Capabilities {
+    addPort("debug", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));
-
-    updatePorts();
 
     debugger.addCommand("set_color", [this](float r, float g, float b) {
       color = { r, g, b };
@@ -186,13 +182,11 @@ struct Generator : public Component {
     : Component(w)
     , history(256, 0)
   {
-    ports.emplace("energy", new Socket(Capabilities {
+    addPort("energy", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 100.0f },
         .text = { true }
     }));
-
-    updatePorts();
   }
 
   void update() override {
@@ -236,13 +230,11 @@ struct Lamp : public Component {
   explicit Lamp(Universe* w)
     : Component(w)
   {
-    ports.emplace("energy", new Socket(Capabilities {
+    addPort("energy", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { true },
     }));
-
-    updatePorts();
   }
 
   void update() override {
@@ -273,13 +265,11 @@ struct Terminal : public Component {
   explicit Terminal(Universe* w)
     : Component(w)
   {
-    ports.emplace("port", new Socket(Capabilities {
+    addPort("port", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));
-
-    updatePorts();
   }
 
   void update() override {

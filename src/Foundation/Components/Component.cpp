@@ -19,10 +19,9 @@ Component::~Component() {
   universe->connections.erase(std::remove_if(beg, end, pred), end);
 }
 
-void Component::updatePorts() {
-  for (auto& pair : ports) {
-    pair.second->component = this;
-  }
+void Component::addPort(const std::string& name, Port* p) {
+  p->component = this;
+  ports.emplace(name, p);
 }
 
 Port& Component::port(const std::string& id) {
