@@ -422,6 +422,8 @@ void DrawGraph(Universe& universe) {
   auto* window = ImGui::GetCurrentWindow();
   ImVec2 offset = window->DC.CursorPos - scrolling;
 
+  /* Generate component positions */
+  // TODO: Save & load this
   for (auto* component : universe.components) {
     if (component->position == glm::vec2 { 0.0f, 0.0f }) {
       glm::vec2 size { window->Size.x, window->Size.y };
@@ -438,6 +440,7 @@ void DrawGraph(Universe& universe) {
     }
   }
 
+  /* Draw connections */
   for (auto& connection : universe.connections) {
     auto fPos = connection.from->globalPosition();
     auto tPos = connection.to->globalPosition();
@@ -457,6 +460,7 @@ void DrawGraph(Universe& universe) {
     active = nullptr;
   }
 
+  /* Draw components */
   for (auto* c : universe.components) {
     auto pos = ImVec2 { c->position.x, c->position.y };
     window->DrawList->AddCircleFilled(offset + pos, 4.0f, white);
@@ -469,6 +473,7 @@ void DrawGraph(Universe& universe) {
     window->DrawList->AddRectFilled(labelPos, labelPos + labelSize + labelPadding * 2.0f, labelColor, 2.0f);
     window->DrawList->AddText(labelPos + labelPadding, white, c->name().c_str());
 
+    /* Draw ports */
     for (auto& pair : c->ports) {
       Port* p = pair.second.get();
       ImVec2 ppos { p->globalPosition().x, p->globalPosition().y };
