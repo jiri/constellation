@@ -31,9 +31,11 @@ void Manual::update() {
 
       if (m[1] == "c") {
         connect(a, b, Capabilities{});
+        connect(b, a, Capabilities{});
       }
       else if (m[1] == "d") {
         disconnect(a, b);
+        disconnect(b, a);
       }
       else {
         fmt::print("Unknown command '{}'\n", m[1]);
