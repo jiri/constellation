@@ -78,14 +78,14 @@ void Universe::save(const fs::path& path) {
     json c = json {
         {
             "a", {
-                { "component", connection.a->component->name() },
-                { "port", connection.a->name() },
+                { "component", connection.from->component->name() },
+                { "port", connection.from->name() },
             },
         },
         {
             "b", {
-                { "component", connection.b->component->name() },
-                { "port", connection.b->name() },
+                { "component", connection.to->component->name() },
+                { "port", connection.to->name() },
             },
         },
     };
@@ -119,5 +119,6 @@ void Universe::load(const fs::path& path) {
     Port* b = lookupPort(connection["b"]["component"], connection["b"]["port"]);
 
     manual->connect(a, b, Capabilities{});
+    manual->connect(b, a, Capabilities{});
   }
 }

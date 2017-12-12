@@ -11,7 +11,7 @@ Component::Component(Universe* u)
 
 Component::~Component() {
   auto pred = [this](const Connection& c) {
-    return c.a->component == this || c.b->component == this;
+    return c.from->component == this || c.to->component == this;
   };
 
   auto beg = universe->connections.begin();

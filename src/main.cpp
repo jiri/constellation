@@ -357,8 +357,8 @@ void DrawGraph(Universe& universe) {
   }
 
   for (auto& connection : universe.connections) {
-    auto aPos = connection.a->globalPosition();
-    auto bPos = connection.b->globalPosition();
+    auto aPos = connection.from->globalPosition();
+    auto bPos = connection.to->globalPosition();
 
     float thickness = 0.0f;
 

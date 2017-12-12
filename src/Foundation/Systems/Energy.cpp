@@ -8,10 +8,10 @@ bool EnergySystem::filter(const Connection& edge) const {
 
 void EnergySystem::swap(Connection& edge) {
   auto t = edge.capabilities.energy.throughput;
-  buffers[edge.a].energyPool = std::min(t, buffers[edge.b].energyOffer);
-  buffers[edge.b].energyOffer = 0.0f;
-  buffers[edge.b].energyPool = std::min(t, buffers[edge.a].energyOffer);
-  buffers[edge.a].energyOffer = 0.0f;
+  buffers[edge.from].energyPool = std::min(t, buffers[edge.to].energyOffer);
+  buffers[edge.to].energyOffer = 0.0f;
+  buffers[edge.to].energyPool = std::min(t, buffers[edge.from].energyOffer);
+  buffers[edge.from].energyOffer = 0.0f;
 }
 
 void EnergySystem::offer(Port* port, float energy) {

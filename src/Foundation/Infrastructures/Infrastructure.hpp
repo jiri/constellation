@@ -30,15 +30,15 @@ public:
 class Infrastructure;
 
 struct Connection {
-  Connection(Port* a, Port* b, Capabilities c, Infrastructure* author)
-    : a { a }
-    , b { b }
+  Connection(Port* f, Port* t, Capabilities c, Infrastructure* author)
+    : from { f }
+    , to { t }
     , capabilities { c }
     , author { author }
   { }
 
-  Port* a;
-  Port* b;
+  Port* from;
+  Port* to;
   Capabilities capabilities;
   Infrastructure* author;
 };
@@ -53,11 +53,11 @@ public:
 
   virtual void update() = 0;
 
-  void connect(Port* a, Port* b, Capabilities capabilities);
-  void disconnect(Port* a, Port* b);
+  void connect(Port* from, Port* to, Capabilities capabilities);
+  void disconnect(Port* from, Port* to);
 
 protected:
   Universe* universe;
 
-  Connection* connection(Port* a, Port* b);
+  Connection* connection(Port* from, Port* to);
 };

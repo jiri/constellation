@@ -10,29 +10,29 @@ glm::vec2 Port::globalPosition() const {
   return component->position + this->position;
 }
 
-void Infrastructure::connect(Port* a, Port* b, Capabilities capabilities) {
-  Capabilities newCapabilities = a->capabilities * capabilities * b->capabilities;
+void Infrastructure::connect(Port* from, Port* to, Capabilities capabilities) {
+  Capabilities newCapabilities = from->capabilities * capabilities * to->capabilities;
 
-  if (Connection* c = connection(a, b)) {
+  if (Connection* c = connection(from, to)) {
     c->capabilities = newCapabilities;
   }
   else {
-    universe->connections.emplace_back(a, b, newCapabilities, this);
+    universe->connections.emplace_back(from, to, newCapabilities, this);
   }
 }
 
-void Infrastructure::disconnect(Port* a, Port* b) {
+void Infrastructure::disconnect(Port* from, Port* to) {
   auto pred = [&](const Connection& c) {
-    return (c.a == a && c.b == b) || (c.a == b && c.b == a);
+    return c.from == from && c.to == to;
   };
 
   auto pos = std::remove_if(universe->connections.begin(), universe->connections.end(), pred);
   universe->connections.erase(pos, universe->connections.end());
 }
 
-Connection* Infrastructure::connection(Port* a, Port* b) {
+Connection* Infrastructure::connection(Port* from, Port* to) {
   for (Connection& c : universe->connections) {
-    if ((c.a == a && c.b == b) || (c.a == b && c.b == a)) {
+    if (c.from == from && c.to == to) {
       return &c;
     }
   }
