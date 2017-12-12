@@ -5,7 +5,7 @@
 void Wireless::update() {
   for (Component* componentA : universe->components) {
     for (Component* componentB : universe->components) {
-      if (componentA >= componentB) {
+      if (componentA == componentB) {
         continue;
       }
 
@@ -18,8 +18,8 @@ void Wireless::update() {
             continue;
           }
 
-          float distance = glm::length(b->globalPosition() - a->globalPosition());
-          if (distance <= std::max(a->radius, b->radius)) {
+          float distance = glm::distance(a->globalPosition(), b->globalPosition());
+          if (distance <= a->radius) {
             Capabilities caps {
                 .picture = { true, std::fabs(a->frequency - b->frequency) },
                 .energy = { false, 0.0f },
