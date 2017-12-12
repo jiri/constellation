@@ -14,7 +14,7 @@ struct System {
   virtual bool filter(const Connection& edge) const = 0;
   virtual void swap(Connection& edge) = 0;
 
-  void update();
+  virtual void update();
 
   Universe* universe;
 };

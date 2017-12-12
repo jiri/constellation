@@ -5,19 +5,18 @@
 #include <Foundation/Systems/System.hpp>
 
 class EnergySystem : public System {
+  using Buffer = float;
 public:
-  struct Buffer {
-    float energyOffer = 0.0f;
-    float energyPool = 0.0f;
-  };
-
   using System::System;
 
   bool filter(const Connection& edge) const override;
   void swap(Connection& edge) override;
 
-  void offer(Port* port, float energy);
-  float request(Port* port, float req);
+  void update() override;
 
-  std::unordered_map<Port*, Buffer> buffers;
+  void produce(Port* port, float energy);
+  float consume(Port* port, float req);
+
+  std::unordered_map<Port*, Buffer> sendBuffers;
+  std::unordered_map<Port*, Buffer> recvBuffers;
 };

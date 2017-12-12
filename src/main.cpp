@@ -191,7 +191,7 @@ struct Generator : public Component {
 
   void update() override {
     noise = (randomFloat() - 0.5f) * 10.0f;
-    this->universe->get<EnergySystem>().offer(&port("energy"), power + noise);
+    this->universe->get<EnergySystem>().produce(&port("energy"), power + noise);
     history.push_back(power + noise);
   }
 
@@ -229,6 +229,7 @@ struct Generator : public Component {
 struct Lamp : public Component {
   explicit Lamp(Universe* w)
     : Component(w)
+    , id { ++counter }
   {
     addPort("energy", new Socket(Capabilities {
         .picture = { false, 0.0f },
@@ -238,20 +239,20 @@ struct Lamp : public Component {
   }
 
   void update() override {
-    float energy = this->universe->get<EnergySystem>().request(&port("energy"), 10.0f);
+    float energy = this->universe->get<EnergySystem>().consume(&port("energy"), 10.0f);
     satisfaction = energy / 10.0f;
   }
 
   void render() override {
     ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(satisfaction, satisfaction, 0.0f));
     ImGui::SetNextWindowContentSize({ 64, 64 });
-    ImGui::Begin("Lamp", nullptr, ImGuiWindowFlags_NoResize);
+    ImGui::Begin(name().c_str(), nullptr, ImGuiWindowFlags_NoResize);
     ImGui::End();
     ImGui::PopStyleColor();
   }
 
   std::string name() const override {
-    return "lamp";
+    return fmt::format("lamp{}", id);
   }
 
   std::string defaultPort() const override {
@@ -259,7 +260,12 @@ struct Lamp : public Component {
   }
 
   float satisfaction = 0.0f;
+
+  static size_t counter;
+  size_t id = 0;
 };
+
+size_t Lamp::counter = 0;
 
 struct Terminal : public Component {
   explicit Terminal(Universe* w)
@@ -314,6 +320,115 @@ struct Terminal : public Component {
   bool newMessage = false;
   char buf[256] {};
   std::list<std::string> messages;
+};
+
+class Splitter : public Component {
+public:
+  explicit Splitter(Universe* u)
+    : Component(u)
+  {
+    addPort("a", new Socket(Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { true, 20.0f },
+        .text = { false },
+    }));
+
+    addPort("b", new Socket(Capabilities {
+            .picture = { false, 0.0f },
+            .energy = { true, 20.0f },
+            .text = { false },
+    }));
+
+    addPort("c", new Socket(Capabilities {
+            .picture = { false, 0.0f },
+            .energy = { true, 20.0f },
+            .text = { false },
+    }));
+  }
+
+  void update() override { }
+
+  void render() override { }
+
+  std::vector<std::pair<float, Port*>> redistributeEnergy(Port* p) override {
+    std::vector<std::pair<float, Port*>> neighbours;
+
+    if (p != &port("a")) { neighbours.emplace_back(0.5f, &port("a")); }
+    if (p != &port("b")) { neighbours.emplace_back(0.5f, &port("b")); }
+    if (p != &port("c")) { neighbours.emplace_back(0.5f, &port("c")); }
+
+    return neighbours;
+  }
+
+  std::string name() const override {
+    return "splitter";
+  }
+
+  std::string defaultPort() const override {
+    return "a";
+  }
+};
+
+struct Switch : public Component {
+public:
+  explicit Switch(Universe* u)
+    : Component(u)
+    , debugger { this, "debug" }
+  {
+    addPort("a", new Socket(Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { true, 20.0f },
+        .text = { false },
+    }));
+
+    addPort("b", new Socket(Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { true, 20.0f },
+        .text = { false },
+    }));
+
+    addPort("debug", new Socket(Capabilities {
+        .picture = { false, 0.0f },
+        .energy = { false, 0.0f },
+        .text = { true },
+    }));
+
+    debugger.addCommand("toggle", [this] {
+      toggle = !toggle;
+    });
+  }
+
+  void update() override {
+    debugger.update();
+  }
+
+  void render() override {
+    ImGui::Begin("Switch");
+    ImGui::Checkbox("Toggle", &toggle);
+    ImGui::End();
+  }
+
+  std::vector<std::pair<float, Port*>> redistributeEnergy(Port* p) override {
+    std::vector<std::pair<float, Port*>> neighbours;
+
+    if (toggle) {
+      if (p != &port("a")) { neighbours.emplace_back(1.0f, &port("a")); }
+      if (p != &port("b")) { neighbours.emplace_back(1.0f, &port("b")); }
+    }
+
+    return neighbours;
+  }
+
+  std::string name() const override {
+    return "switch";
+  }
+
+  std::string defaultPort() const override {
+    return "a";
+  }
+
+  bool toggle = true;
+  Debugger debugger;
 };
 
 void DrawGraph(Universe& universe) {
@@ -447,8 +562,11 @@ int main() {
           new Camera { &universe },
           new Generator { &universe },
           new Lamp { &universe },
+          new Lamp { &universe },
           new CPU { &universe },
           new Terminal { &universe },
+          new Splitter { &universe },
+          new Switch { &universe },
       },
       {
           new PictureSystem { &universe },

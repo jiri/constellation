@@ -23,6 +23,8 @@ struct Component {
   Port& port(const std::string& id);
   std::string nameOf(const Port* p);
 
+  virtual std::vector<std::pair<float, Port*>> redistributeEnergy(Port *port) { return {}; };
+
   Universe* universe = nullptr;
   std::map<std::string, std::unique_ptr<Port>> ports;
 
