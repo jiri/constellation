@@ -56,7 +56,7 @@ Port* Universe::lookupPort(const std::string& componentName, const std::string& 
   }
 
   throw std::runtime_error {
-      fmt::format("Component '{}' doesn't have port '{}'")
+      fmt::format("Component '{}' doesn't have port '{}'", componentName, portName)
   };
 }
 
