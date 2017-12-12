@@ -357,32 +357,17 @@ void DrawGraph(Universe& universe) {
   }
 
   for (auto& connection : universe.connections) {
-    auto aPos = connection.from->globalPosition();
-    auto bPos = connection.to->globalPosition();
+    auto fPos = connection.from->globalPosition();
+    auto tPos = connection.to->globalPosition();
+    auto mPos = fPos + (tPos - fPos) * 0.5f;
 
-    float thickness = 0.0f;
+    ImColor active { 1.0f, 1.0f, 1.0f, 1.0f };
+    ImColor inactive { 1.0f, 1.0f, 1.0f, 0.5f };
 
-    window->DrawList->ChannelsSplit(3);
-
-    if (connection.capabilities.energy.enabled) {
-      thickness += 2.0f;
-      window->DrawList->ChannelsSetCurrent(2);
-      window->DrawList->AddLine(offset + ImVec2 { aPos.x, aPos.y },
-                                offset + ImVec2 { bPos.x, bPos.y }, blue, thickness);
-    }
-
-    if (connection.capabilities.picture.enabled || connection.capabilities.text.enabled) {
-      thickness += 2.0f;
-      window->DrawList->ChannelsSetCurrent(1);
-      window->DrawList->AddLine(offset + ImVec2 { aPos.x, aPos.y },
-                                offset + ImVec2 { bPos.x, bPos.y }, green, thickness);
-    }
-
-    window->DrawList->ChannelsSetCurrent(0);
-    window->DrawList->AddLine(offset + ImVec2 { aPos.x, aPos.y },
-                              offset + ImVec2 { bPos.x, bPos.y }, white, 1.0f);
-
-    window->DrawList->ChannelsMerge();
+    window->DrawList->AddLine(offset + ImVec2 { fPos.x, fPos.y },
+                              offset + ImVec2 { mPos.x, mPos.y }, active, 1.0f);
+    window->DrawList->AddLine(offset + ImVec2 { mPos.x, mPos.y },
+                              offset + ImVec2 { tPos.x, tPos.y }, inactive, 1.0f);
   }
 
   static Component* active = nullptr;
