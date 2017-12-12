@@ -21,8 +21,12 @@ struct function_traits<R(C::*)(Ps...) const> {
   using argument_tuple_type = std::tuple<Ps...>;
 };
 
+struct Command {
+  std::string args;
+  std::function<std::optional<std::string>(const std::vector<std::string>&)> callback;
+};
+
 class Debugger {
-  using Command = std::function<std::optional<std::string>(const std::vector<std::string>&)>;
 public:
   Debugger(Component* c, std::string portName);
 
@@ -39,7 +43,10 @@ public:
         return std::nullopt;
       }
     };
-    commands[name] = lambda;
+    commands[name] = {
+            tupleToString<typename function_traits<F>::argument_tuple_type>(),
+            lambda,
+    };
   }
 
   void process();

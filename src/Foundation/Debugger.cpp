@@ -10,7 +10,7 @@ Debugger::Debugger(Component* c, std::string portName)
     std::string message;
     message += fmt::format("Debug commands available on '{}':\n", component->name());
     for (auto& pair : commands) {
-      message += fmt::format("  {}\n", pair.first);
+      message += fmt::format("  {} {}\n", pair.first, pair.second.args);
     }
     component->universe->get<TextSystem>().send(&component->port(port), message);
   });
@@ -28,7 +28,7 @@ void Debugger::process() {
     if (!tokens.empty()) {
       try {
         if (commands.count(tokens[0]) != 0) {
-          auto res = commands[tokens[0]]({ ++tokens.begin(), tokens.end() });
+          auto res = commands[tokens[0]].callback({ ++tokens.begin(), tokens.end() });
 
           if (res) {
             component->universe->get<TextSystem>().send(&component->port(port), *res);
