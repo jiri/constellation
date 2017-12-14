@@ -28,7 +28,6 @@ public:
 
   static const Geometry CUBE;
 
-private:
   std::vector<Vertex> vertices;
   std::vector<uint32_t> indices;
 };
