@@ -34,6 +34,8 @@ link_libraries(
 set(GRAPHICS_SOURCE_FILES
         src/Graphics/Program.hpp
         src/Graphics/Program.cpp
+        src/Graphics/Geometry.hpp
+        src/Graphics/Geometry.cpp
 )
 add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
 
