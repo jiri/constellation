@@ -66,7 +66,7 @@ struct Monitor : public Component {
   void update() override {
     Component::update();
 
-    if (auto data = universe->get<PictureSystem>().receive(&port("video"))) {
+    if (auto data = universe->get<VideoSystem>().receive(&port("video"))) {
       color = *data;
     }
     else {
@@ -137,7 +137,7 @@ struct Camera : public Component {
   void update() override {
     Component::update();
 
-    universe->get<PictureSystem>().send(&port("video"), color);
+    universe->get<VideoSystem>().send(&port("video"), color);
   }
 
   void render() override {
@@ -619,7 +619,7 @@ int main() {
           new Switch { &universe },
       },
       {
-          new PictureSystem { &universe },
+          new VideoSystem { &universe },
           new EnergySystem { &universe },
           new TextSystem { &universe },
       },

@@ -7,7 +7,7 @@
 
 #include <Foundation/Systems/System.hpp>
 
-class PictureSystem : public System {
+class VideoSystem : public System {
   using Buffer = std::optional<glm::vec3>;
 public:
   using System::System;
