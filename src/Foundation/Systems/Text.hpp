@@ -12,7 +12,7 @@ struct TextSystem : public System {
     std::queue<std::string> messages;
   };
 
-  TextSystem(Universe* u)
+  explicit TextSystem(Universe* u)
     : System { u, "Text" }
   { }
 

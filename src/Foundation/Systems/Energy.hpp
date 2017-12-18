@@ -7,7 +7,7 @@
 class EnergySystem : public System {
   using Buffer = float;
 public:
-  EnergySystem(Universe* u)
+  explicit EnergySystem(Universe* u)
     : System { u, "Energy" }
   { }
 
