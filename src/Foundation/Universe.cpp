@@ -27,12 +27,17 @@ Universe::~Universe() {
 }
 
 void Universe::tick() {
+  static std::chrono::time_point oldTime = std::chrono::system_clock::now();
+  std::chrono::time_point newTime = std::chrono::system_clock::now();
+  std::chrono::system_clock::duration delta = newTime - oldTime;
+  oldTime = newTime;
+
   for (auto& component : this->components) {
     component->update();
   }
 
   for (auto& system : this->systems) {
-    system->update();
+    system->timePassed(delta);
   }
 
   for (auto& component : this->components) {

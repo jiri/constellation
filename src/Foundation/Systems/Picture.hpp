@@ -12,7 +12,9 @@ class VideoSystem : public System {
 public:
   VideoSystem(Universe* u)
     : System { u, "Video" }
-  { }
+  {
+    this->ups = 60;
+  }
 
   bool filter(const Connection& edge) const override;
   void swap(Connection& edge) override;

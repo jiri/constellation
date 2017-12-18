@@ -573,6 +573,19 @@ void DrawGraph(Universe& universe) {
   ImGui::End();
 }
 
+void SystemUI(Universe& universe) {
+  ImGui::Begin("Systems");
+
+  for (System* system : universe.systems) {
+    if (ImGui::TreeNode(system->name.c_str())) {
+      system->UI();
+      ImGui::TreePop();
+    }
+  }
+
+  ImGui::End();
+}
+
 int main() {
   glfwSetErrorCallback([](int, const char* message) {
     fmt::print("{}\n", message);
@@ -645,6 +658,7 @@ int main() {
     universe.tick();
 
     DrawGraph(universe);
+    SystemUI(universe);
 
     ImGui::Render();
     glfwSwapBuffers(window);
