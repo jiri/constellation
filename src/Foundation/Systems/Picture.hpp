@@ -10,7 +10,9 @@
 class VideoSystem : public System {
   using Buffer = std::optional<glm::vec3>;
 public:
-  using System::System;
+  VideoSystem(Universe* u)
+    : System { u, "Video" }
+  { }
 
   bool filter(const Connection& edge) const override;
   void swap(Connection& edge) override;

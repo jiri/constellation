@@ -1,12 +1,16 @@
 #pragma once
 
+#include <string>
+#include <string_view>
+
 #include <Foundation/Infrastructures/Infrastructure.hpp>
 
 class Universe;
 
 struct System {
-  System(Universe* u)
+  System(Universe* u, std::string_view name)
     : universe { u }
+    , name { name }
   { }
 
   virtual ~System() = default;
@@ -17,4 +21,5 @@ struct System {
   virtual void update();
 
   Universe* universe;
+  std::string name;
 };

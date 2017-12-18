@@ -12,7 +12,9 @@ struct TextSystem : public System {
     std::queue<std::string> messages;
   };
 
-  using System::System;
+  TextSystem(Universe* u)
+    : System { u, "Text" }
+  { }
 
   bool filter(const Connection& edge) const override;
   void swap(Connection& edge) override;

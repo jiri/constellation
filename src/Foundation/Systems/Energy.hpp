@@ -7,7 +7,9 @@
 class EnergySystem : public System {
   using Buffer = float;
 public:
-  using System::System;
+  EnergySystem(Universe* u)
+    : System { u, "Energy" }
+  { }
 
   bool filter(const Connection& edge) const override;
   void swap(Connection& edge) override;
