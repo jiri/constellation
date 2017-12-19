@@ -28,6 +28,18 @@ struct Universe {
     };
   }
 
+  template <typename T>
+  T& infrastructure() {
+    for (Infrastructure* i : infrastructures) {
+      if (auto t = dynamic_cast<T*>(i)) {
+        return *t;
+      }
+    }
+    throw std::runtime_error {
+        fmt::format("Universe doesn't own infrastructure of type '{}'", typeid(T).name())
+    };
+  }
+
   Port* lookupPort(const std::string& component, const std::string& port);
 
   void tick();

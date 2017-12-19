@@ -496,20 +496,14 @@ void DrawGraph(Universe& universe) {
   }
 
   /* Draw cables */
-  Wiring* wiring = nullptr;
-  for (auto* infrastructure : universe.infrastructures) {
-    if (auto* w = dynamic_cast<Wiring*>(infrastructure)) {
-      wiring = w;
-    }
-  }
-  assert(wiring);
+  auto& wiring = universe.infrastructure<Wiring>();
 
   static Connector* activeC = nullptr;
   if (!ImGui::IsMouseDown(0)) {
     activeC = nullptr;
   }
 
-  for (auto& cable : wiring->cables) {
+  for (auto& cable : wiring.cables) {
     ImVec2 aPos = offset + ImVec2 { cable->a.position.x, cable->a.position.y };
     ImVec2 bPos = offset + ImVec2 { cable->b.position.x, cable->b.position.y };
 
@@ -541,7 +535,7 @@ void DrawGraph(Universe& universe) {
 
       for (auto& pair : socketPositions) {
         if (glm::distance(cable->a.position, pair.first) < 4.0f) {
-          wiring->join(&cable->a, pair.second);
+          wiring.join(&cable->a, pair.second);
         }
       }
     }
@@ -550,7 +544,7 @@ void DrawGraph(Universe& universe) {
 
       for (auto& pair : socketPositions) {
         if (glm::distance(cable->b.position, pair.first) < 4.0f) {
-          wiring->join(&cable->b, pair.second);
+          wiring.join(&cable->b, pair.second);
         }
       }
     }

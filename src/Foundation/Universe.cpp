@@ -81,15 +81,10 @@ Port* Universe::lookupPort(const std::string& componentName, const std::string& 
 void Universe::save(const fs::path& path) {
   json cs;
 
-  Manual* manual = nullptr;
-  for (auto* i : infrastructures) {
-    if (auto* m = dynamic_cast<Manual*>(i)) {
-      manual = m;
-    }
-  }
+  Manual& manual = this->infrastructure<Manual>();
 
   for (auto& connection : connections) {
-    if (connection.author != manual) {
+    if (connection.author != &manual) {
       continue;
     }
 
@@ -120,12 +115,7 @@ void Universe::load(const fs::path& path) {
     return;
   }
 
-  Manual* manual = nullptr;
-  for (auto* i : infrastructures) {
-    if (auto* m = dynamic_cast<Manual*>(i)) {
-      manual = m;
-    }
-  }
+  Manual& manual = this->infrastructure<Manual>();
 
   std::ifstream inf { path };
 
@@ -136,7 +126,7 @@ void Universe::load(const fs::path& path) {
     Port* a = lookupPort(connection["a"]["component"], connection["a"]["port"]);
     Port* b = lookupPort(connection["b"]["component"], connection["b"]["port"]);
 
-    manual->connect(a, b, Capabilities{});
-    manual->connect(b, a, Capabilities{});
+    manual.connect(a, b, Capabilities{});
+    manual.connect(b, a, Capabilities{});
   }
 }
