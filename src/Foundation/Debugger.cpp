@@ -13,12 +13,12 @@ Debugger::Debugger(Component* c, std::string portName)
     for (auto& pair : commands) {
       message += fmt::format("  {} {}\n", pair.first, pair.second.args);
     }
-    component->universe->get<TextSystem>().send(component->port(port), message);
+    component->universe->system<TextSystem>().send(component->port(port), message);
   });
 }
 
 void Debugger::update() {
-  while (auto s = component->universe->get<TextSystem>().receive(component->port(port))) {
+  while (auto s = component->universe->system<TextSystem>().receive(component->port(port))) {
     std::istringstream iss(*s);
 
     std::vector<std::string> tokens {
@@ -32,15 +32,15 @@ void Debugger::update() {
           auto res = commands[tokens[0]].callback({ ++tokens.begin(), tokens.end() });
 
           if (res) {
-            component->universe->get<TextSystem>().send(component->port(port), *res);
+            component->universe->system<TextSystem>().send(component->port(port), *res);
           }
         }
         else {
-          component->universe->get<TextSystem>().send(component->port(port), fmt::format("Unknown command '{}'", tokens[0]));
+          component->universe->system<TextSystem>().send(component->port(port), fmt::format("Unknown command '{}'", tokens[0]));
         }
       }
       catch (std::runtime_error& e) {
-        component->universe->get<TextSystem>().send(component->port(port), e.what());
+        component->universe->system<TextSystem>().send(component->port(port), e.what());
       }
     }
   }

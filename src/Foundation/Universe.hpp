@@ -16,7 +16,7 @@ struct Universe {
   ~Universe();
 
   template <typename T>
-  T& get() {
+  T& system() {
     for (System* s : systems) {
       if (auto t = dynamic_cast<T*>(s)) {
         return *t;

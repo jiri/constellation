@@ -63,14 +63,14 @@ struct Monitor : public Component {
   void update() override {
     Component::update();
 
-    if (auto data = universe->get<VideoSystem>().receive(port("video"))) {
+    if (auto data = universe->system<VideoSystem>().receive(port("video"))) {
       color = *data;
     }
     else {
       color = glm::vec3 { 0.0f, 0.0f, 0.0f };
     }
 
-    while (auto msg = this->universe->get<TextSystem>().receive(port("data"))) {
+    while (auto msg = this->universe->system<TextSystem>().receive(port("data"))) {
       message += *msg + "\n";
     }
   }
@@ -134,7 +134,7 @@ struct Camera : public Component {
   void update() override {
     Component::update();
 
-    universe->get<VideoSystem>().send(port("video"), color);
+    universe->system<VideoSystem>().send(port("video"), color);
   }
 
   void render() override {
@@ -174,7 +174,7 @@ struct Generator : public Component {
     Component::update();
 
     noise = (randomFloat() - 0.5f) * 10.0f;
-    this->universe->get<EnergySystem>().produce(port("energy"), power + noise);
+    this->universe->system<EnergySystem>().produce(port("energy"), power + noise);
     history.push_back(power + noise);
   }
 
@@ -224,7 +224,7 @@ struct Lamp : public Component {
   void update() override {
     Component::update();
 
-    float energy = this->universe->get<EnergySystem>().consume(port("energy"), 10.0f);
+    float energy = this->universe->system<EnergySystem>().consume(port("energy"), 10.0f);
     satisfaction = energy / 10.0f;
   }
 
@@ -256,7 +256,7 @@ struct Terminal : public Component {
   using Component::Component;
 
   void update() override {
-    while (auto s = this->universe->get<TextSystem>().receive(port("debug"))) {
+    while (auto s = this->universe->system<TextSystem>().receive(port("debug"))) {
       messages.push_back(*s);
       newMessage = true;
     }
@@ -280,7 +280,7 @@ struct Terminal : public Component {
     ImGui::PushItemWidth(-1);
     if (ImGui::InputText("##input", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
       this->messages.push_back(fmt::format("> {}", buf));
-      this->universe->get<TextSystem>().send(port("debug"), buf);
+      this->universe->system<TextSystem>().send(port("debug"), buf);
       ImGui::SetKeyboardFocusHere();
       buf[0] = '\0';
     }
