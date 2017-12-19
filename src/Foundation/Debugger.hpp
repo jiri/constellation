@@ -36,7 +36,10 @@ public:
     auto lambda = [f](const std::vector<std::string>& ps) -> std::optional<std::string> {
       auto args = parseTuple<typename function_traits<F>::argument_tuple_type>(ps);
 
-      if constexpr (!std::is_same<typename function_traits<F>::result_type, void>::value) {
+      if constexpr (std::is_same<typename function_traits<F>::result_type, std::string>::value) {
+        return std::apply(f, args);
+      }
+      else if constexpr (!std::is_same<typename function_traits<F>::result_type, void>::value) {
         typename function_traits<F>::result_type r = std::apply(f, args);
         return fmt::format("{}", r);
       } else {
