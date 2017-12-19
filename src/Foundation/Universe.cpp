@@ -2,8 +2,10 @@
 
 #include <fstream>
 #include <stdexcept>
+#include <thread>
 
 #include <json.hpp>
+
 #include <Foundation/Infrastructures/Manual.hpp>
 
 Universe::Universe(std::vector<Component*> components,
@@ -27,19 +29,28 @@ Universe::~Universe() {
 }
 
 void Universe::tick() {
+  /* Compute delta time */
+  // TODO: Make this per-instance
   static std::chrono::time_point oldTime = std::chrono::system_clock::now();
   std::chrono::time_point newTime = std::chrono::system_clock::now();
   std::chrono::system_clock::duration delta = newTime - oldTime;
   oldTime = newTime;
 
+  /* Update components */
   for (auto& component : this->components) {
     component->update();
   }
 
+  /* Update systems */
+  std::vector<std::thread> systemThreads;
   for (auto& system : this->systems) {
-    system->timePassed(delta);
+    systemThreads.emplace_back(&System::timePassed, system, delta);
+  }
+  for (auto& t : systemThreads) {
+    t.join();
   }
 
+  /* Update infrastructures */
   for (auto& infrastructure : this->infrastructures) {
     infrastructure->update();
   }
