@@ -439,10 +439,8 @@ void DrawGraph(Universe& universe) {
     ImColor active { 1.0f, 1.0f, 1.0f, 1.0f };
     ImColor inactive { 1.0f, 1.0f, 1.0f, 0.5f };
 
-    window->DrawList->AddLine(offset + ImVec2 { fPos.x, fPos.y },
-                              offset + ImVec2 { mPos.x, mPos.y }, active, 1.0f);
-    window->DrawList->AddLine(offset + ImVec2 { mPos.x, mPos.y },
-                              offset + ImVec2 { tPos.x, tPos.y }, inactive, 1.0f);
+    window->DrawList->AddLine(offset + fPos, offset + mPos, active, 1.0f);
+    window->DrawList->AddLine(offset + mPos, offset + tPos, inactive, 1.0f);
   }
 
   static Component* active = nullptr;
@@ -454,13 +452,12 @@ void DrawGraph(Universe& universe) {
 
   /* Draw components */
   for (auto* c : universe.components) {
-    auto pos = ImVec2 { c->position.x, c->position.y };
-    window->DrawList->AddCircleFilled(offset + pos, 4.0f, white);
+    window->DrawList->AddCircleFilled(offset + c->position, 4.0f, white);
 
     ImVec2 labelSize = ImGui::CalcTextSize(c->name().c_str());
     ImVec2 labelPadding { 8.0f, 4.0f };
     ImColor labelColor { 0.0f, 0.0f, 0.0f, 0.5f };
-    ImVec2 labelPos = offset + pos - labelSize * 0.5f - labelPadding + ImVec2 { 0.0f, 32.0f };
+    ImVec2 labelPos = offset + c->position - labelSize * 0.5f - labelPadding + ImVec2 { 0.0f, 32.0f };
 
     window->DrawList->AddRectFilled(labelPos, labelPos + labelSize + labelPadding * 2.0f, labelColor, 2.0f);
     window->DrawList->AddText(labelPos + labelPadding, white, c->name().c_str());
@@ -481,7 +478,7 @@ void DrawGraph(Universe& universe) {
       }
     }
 
-    ImGui::SetCursorScreenPos(offset + pos - ImVec2 { 6.0f, 6.0f });
+    ImGui::SetCursorScreenPos(offset + c->position - ImVec2 { 6.0f, 6.0f });
     ImGui::InvisibleButton("##handle", { 12.0f, 12.0f });
 
     if (ImGui::IsItemClicked(0)) {
@@ -502,8 +499,8 @@ void DrawGraph(Universe& universe) {
   }
 
   for (auto& cable : wiring.cables) {
-    ImVec2 aPos = offset + ImVec2 { cable->a.position.x, cable->a.position.y };
-    ImVec2 bPos = offset + ImVec2 { cable->b.position.x, cable->b.position.y };
+    ImVec2 aPos = offset + cable->a.position;
+    ImVec2 bPos = offset + cable->b.position;
 
     window->DrawList->AddLine(aPos, bPos, red, 2.0f);
     window->DrawList->AddCircleFilled(aPos, 2.0f, white);
