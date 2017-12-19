@@ -5,7 +5,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 # Common libraries
 find_package(fmt REQUIRED)
-find_package(glfw3 REQUIRED)
+find_package(SDL2 REQUIRED)
 find_package(glm REQUIRED)
 
 add_subdirectory(libraries/gsl)
@@ -16,12 +16,12 @@ add_subdirectory(libraries/json)
 include_directories(SYSTEM src/)
 include_directories(
         ${fmt_INCLUDE_DIRS}
-        ${glfw3_INCLUDE_DIRS}
+        ${SDL2_INCLUDE_DIRS}
         ${GLM_LIBRARIES}
 )
 link_libraries(
         fmt
-        glfw
+        sdl2
         GSL
         glad
         imgui

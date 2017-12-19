@@ -8,14 +8,13 @@
 #include <fmt/format.h>
 #include <gsl/gsl>
 
-#define GLFW_INCLUDE_NONE
-#include <GLFW/glfw3.h>
+#include <SDL2/SDL.h>
 #include <glad.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <imgui_impl_glfw_gl3.h>
+#include <imgui_impl_sdl_gl3.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -580,36 +579,31 @@ void SystemUI(Universe& universe) {
 }
 
 int main() {
-  glfwSetErrorCallback([](int, const char* message) {
-    fmt::print("{}\n", message);
-  });
+  SDL_Init(SDL_INIT_EVERYTHING);
+  auto quitSdl = gsl::finally([] { SDL_Quit(); });
 
-  glfwInit();
-  auto terminateGlfw = gsl::finally([] { glfwTerminate(); });
+  SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 3);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 2);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_CORE);
+  SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
 
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-
-  GLFWwindow* window = glfwCreateWindow(800, 600, "", nullptr, nullptr);
-  glfwMakeContextCurrent(window);
+  SDL_Window* window = SDL_CreateWindow("",
+                                        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
+                                        800, 600, SDL_WINDOW_OPENGL);
+  SDL_GLContext context = SDL_GL_CreateContext(window);
 
   if(!gladLoadGL()) {
     printf("Something went wrong!\n");
     exit(-1);
   }
 
-  glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int w, int h) {
-    glViewport(0, 0, w, h);
-  });
-
   /* Enable VSync */
-  glfwSwapInterval(1);
+  SDL_GL_SetSwapInterval(1);
 
   /* Initialise ImGui */
-  ImGui_ImplGlfwGL3_Init(window, true);
-  auto shutdownImgui = gsl::finally([] { ImGui_ImplGlfwGL3_Shutdown(); });
+  ImGui_ImplSdlGL3_Init(window);
+  auto shutdownImgui = gsl::finally([] { ImGui_ImplSdlGL3_Shutdown(); });
 
   /* Components */
   Universe universe {
@@ -639,9 +633,17 @@ int main() {
   universe.load("connections.json");
 
   /* Main loop */
-  while (!glfwWindowShouldClose(window)) {
-    glfwPollEvents();
-    ImGui_ImplGlfwGL3_NewFrame();
+  bool done = false;
+  while (!done) {
+    SDL_Event e;
+    while (SDL_PollEvent(&e)) {
+      if (e.type == SDL_QUIT) {
+        done = true;
+      }
+      ImGui_ImplSdlGL3_ProcessEvent(&e);
+    }
+
+    ImGui_ImplSdlGL3_NewFrame(window);
 
     /* Rendering */
     glClearColor(0.17f, 0.24f, 0.31f, 1.0f);
@@ -655,7 +657,7 @@ int main() {
     SystemUI(universe);
 
     ImGui::Render();
-    glfwSwapBuffers(window);
+    SDL_GL_SwapWindow(window);
   }
 
   universe.save("connections.json");
