@@ -9,9 +9,10 @@
 class Universe;
 
 struct System {
-  System(Universe* u, std::string_view name)
+  System(Universe* u, std::string_view name, uint32_t ups = 20)
     : universe { u }
     , name { name }
+    , ups { ups }
   { }
 
   virtual ~System() = default;
@@ -29,7 +30,7 @@ struct System {
   std::string name;
   bool active = true;
 
-  uint32_t ups = 20;
+  uint32_t ups;
   float actualUps = 0.0f;
   std::chrono::system_clock::duration deltaCounter { 0 };
   std::chrono::system_clock::duration upsTimeCounter { 0 };
