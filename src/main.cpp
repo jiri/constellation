@@ -282,6 +282,7 @@ struct Terminal : public Component {
 
     ImGui::PushItemWidth(-1);
     if (ImGui::InputText("##input", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
+      this->messages.push_back(fmt::format("> {}", buf));
       this->universe->get<TextSystem>().send(&port("debug"), buf);
       ImGui::SetKeyboardFocusHere();
       buf[0] = '\0';
