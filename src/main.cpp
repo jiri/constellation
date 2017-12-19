@@ -256,23 +256,15 @@ struct Lamp : public Component {
 size_t Lamp::counter = 0;
 
 struct Terminal : public Component {
-  explicit Terminal(Universe* w)
-    : Component(w)
-  {
-    addPort("port", new Socket(Capabilities {
-        .picture = { false, 0.0f },
-        .energy = { false, 0.0f },
-        .text = { true },
-    }));
-  }
+  using Component::Component;
 
   void update() override {
-    Component::update();
-
-    while (auto s = this->universe->get<TextSystem>().receive(&port("port"))) {
+    while (auto s = this->universe->get<TextSystem>().receive(&port("debug"))) {
       messages.push_back(*s);
       newMessage = true;
     }
+
+    Component::update();
   }
 
   void render() override {
@@ -290,7 +282,7 @@ struct Terminal : public Component {
 
     ImGui::PushItemWidth(-1);
     if (ImGui::InputText("##input", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-      this->universe->get<TextSystem>().send(&port("port"), buf);
+      this->universe->get<TextSystem>().send(&port("debug"), buf);
       ImGui::SetKeyboardFocusHere();
       buf[0] = '\0';
     }
