@@ -23,12 +23,10 @@
 #include <Util/Random.hpp>
 
 #include <Foundation/Universe.hpp>
-#include <Foundation/Debugger.hpp>
 #include <Foundation/Components/CPU.hpp>
 #include <Foundation/Systems/Picture.hpp>
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
-#include <Foundation/Infrastructures/Capabilities.hpp>
 #include <Foundation/Infrastructures/Wiring.hpp>
 #include <Foundation/Infrastructures/Wireless.hpp>
 #include <Foundation/Infrastructures/Manual.hpp>
