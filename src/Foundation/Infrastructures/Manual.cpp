@@ -1,10 +1,12 @@
 #include <Foundation/Infrastructures/Manual.hpp>
 
 #include <regex>
+#include <fstream>
 
 #include <imgui.h>
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <json.hpp>
 
 #include <Foundation/Universe.hpp>
 
@@ -52,4 +54,53 @@ void Manual::update() {
   ImGui::PopItemWidth();
   ImGui::End();
   ImGui::PopStyleColor();
+}
+
+void Manual::save(const fs::path& path) {
+  json cs;
+
+  for (auto& connection : this->universe->connections) {
+    if (connection.author != this) {
+      continue;
+    }
+
+    json c = json {
+        {
+            "a", {
+                     { "component", connection.from->component->name() },
+                     { "port", connection.from->name() },
+                 },
+        },
+        {
+            "b", {
+                     { "component", connection.to->component->name() },
+                     { "port", connection.to->name() },
+                 },
+        },
+    };
+
+    cs.push_back(c);
+  }
+
+  std::ofstream outf { path };
+  outf << cs << std::endl;
+}
+
+void Manual::load(const fs::path& path) {
+  if (!fs::exists(path)) {
+    return;
+  }
+
+  std::ifstream inf { path };
+
+  json connections;
+  inf >> connections;
+
+  for (auto& connection : connections) {
+    Port* a = this->universe->lookupPort(connection["a"]["component"], connection["a"]["port"]);
+    Port* b = this->universe->lookupPort(connection["b"]["component"], connection["b"]["port"]);
+
+    this->connect(a, b, Capabilities{});
+    this->connect(b, a, Capabilities{});
+  }
 }

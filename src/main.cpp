@@ -624,7 +624,7 @@ int main() {
       },
   };
 
-  universe.load("connections.json");
+  universe.infrastructure<Manual>().load("connections.json");
 
   /* Main loop */
   bool done = false;
@@ -654,7 +654,7 @@ int main() {
     SDL_GL_SwapWindow(window);
   }
 
-  universe.save("connections.json");
+  universe.infrastructure<Manual>().save("connections.json");
 
   return 0;
 }

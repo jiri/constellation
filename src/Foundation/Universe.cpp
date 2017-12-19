@@ -1,10 +1,7 @@
 #include <Foundation/Universe.hpp>
 
-#include <fstream>
 #include <stdexcept>
 #include <thread>
-
-#include <json.hpp>
 
 #include <Foundation/Infrastructures/Manual.hpp>
 
@@ -76,57 +73,4 @@ Port* Universe::lookupPort(const std::string& componentName, const std::string& 
   throw std::runtime_error {
       fmt::format("Component '{}' doesn't have port '{}'", componentName, portName)
   };
-}
-
-void Universe::save(const fs::path& path) {
-  json cs;
-
-  Manual& manual = this->infrastructure<Manual>();
-
-  for (auto& connection : connections) {
-    if (connection.author != &manual) {
-      continue;
-    }
-
-    json c = json {
-        {
-            "a", {
-                { "component", connection.from->component->name() },
-                { "port", connection.from->name() },
-            },
-        },
-        {
-            "b", {
-                { "component", connection.to->component->name() },
-                { "port", connection.to->name() },
-            },
-        },
-    };
-
-    cs.push_back(c);
-  }
-
-  std::ofstream outf { path };
-  outf << cs << std::endl;
-}
-
-void Universe::load(const fs::path& path) {
-  if (!fs::exists(path)) {
-    return;
-  }
-
-  Manual& manual = this->infrastructure<Manual>();
-
-  std::ifstream inf { path };
-
-  json connections;
-  inf >> connections;
-
-  for (auto& connection : connections) {
-    Port* a = lookupPort(connection["a"]["component"], connection["a"]["port"]);
-    Port* b = lookupPort(connection["b"]["component"], connection["b"]["port"]);
-
-    manual.connect(a, b, Capabilities{});
-    manual.connect(b, a, Capabilities{});
-  }
 }

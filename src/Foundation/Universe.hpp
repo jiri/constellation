@@ -1,8 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
 
 #include <fmt/format.h>
 
@@ -44,9 +42,6 @@ struct Universe {
 
   void tick();
   void render();
-
-  void save(const fs::path& path);
-  void load(const fs::path& path);
 
   std::vector<Infrastructure*> infrastructures;
   std::vector<Component*> components;
