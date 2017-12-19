@@ -132,8 +132,8 @@ void CPU::execute(const CPU::ByteCode& code) {
   shouldRun = false;
 }
 
-#define HI_BYTE(a) (((a) >> 8) & 0xFF)
-#define LO_BYTE(a) ((a) & 0xFF)
+#define HI_BYTE(a) (uint8_t(((a) >> 8) & 0xFF))
+#define LO_BYTE(a) (uint8_t((a) & 0xFF))
 
 CPU::ByteCode CPU::compile(const std::string& program) {
   ByteCode code;
