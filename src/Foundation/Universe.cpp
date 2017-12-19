@@ -27,8 +27,9 @@ Universe::~Universe() {
 
 void Universe::tick() {
   /* Compute delta time */
-  // TODO: Make this per-instance
-  static std::chrono::time_point oldTime = std::chrono::system_clock::now();
+  if (this->oldTime == std::chrono::system_clock::time_point::min()) {
+    this->oldTime = std::chrono::system_clock::now();
+  }
   std::chrono::time_point newTime = std::chrono::system_clock::now();
   std::chrono::system_clock::duration delta = newTime - oldTime;
   oldTime = newTime;

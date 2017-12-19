@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <chrono>
 
 #include <fmt/format.h>
 
@@ -47,4 +48,7 @@ struct Universe {
   std::vector<Component*> components;
   std::vector<System*> systems;
   std::vector<Connection> connections;
+
+private:
+  std::chrono::system_clock::time_point oldTime = std::chrono::system_clock::time_point::min();
 };
