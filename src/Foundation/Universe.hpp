@@ -39,10 +39,10 @@ struct Universe {
     };
   }
 
-  Port* lookupPort(const std::string& component, const std::string& port);
-
   void tick();
   void render();
+
+  Port* lookupPort(const std::string& component, const std::string& port);
 
   std::vector<Infrastructure*> infrastructures;
   std::vector<Component*> components;

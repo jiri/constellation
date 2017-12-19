@@ -11,7 +11,7 @@ Universe::Universe(std::vector<Component*> components,
   : components { std::move(components) }
   , systems { std::move(systems) }
   , infrastructures { std::move(infrastructures) }
-{}
+{ }
 
 Universe::~Universe() {
   for (Infrastructure* infrastructure : infrastructures) {
