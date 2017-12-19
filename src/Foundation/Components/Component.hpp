@@ -21,7 +21,7 @@ struct Component {
   virtual std::string name() const = 0;
   virtual std::string defaultPort() const = 0;
 
-  Port& port(const std::string& id);
+  Port* port(const std::string& id);
   std::string nameOf(const Port* p);
 
   virtual std::vector<std::pair<float, Port*>> redistributeEnergy(Port *port) { return {}; };

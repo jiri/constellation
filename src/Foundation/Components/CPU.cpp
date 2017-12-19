@@ -104,7 +104,7 @@ void CPU::execute(const CPU::ByteCode& code) {
 
       /* I/O */
       case WRITE:
-        this->universe->get<TextSystem>().send(&port("out"), fmt::format("{}", pop()));
+        this->universe->get<TextSystem>().send(port("out"), fmt::format("{}", pop()));
         break;
 
       case READ:
@@ -112,7 +112,7 @@ void CPU::execute(const CPU::ByteCode& code) {
           std::optional<std::string> msg;
           state = AWAITING_INPUT;
           do {
-            msg = this->universe->get<TextSystem>().receive(&port("in"));
+            msg = this->universe->get<TextSystem>().receive(port("in"));
           } while (shouldRun && !msg);
           state = NORMAL;
           std::istringstream(*msg) >> a;

@@ -33,13 +33,13 @@ void Component::addPort(const std::string& name, Port* p) {
   ports.emplace(name, p);
 }
 
-Port& Component::port(const std::string& id) {
+Port* Component::port(const std::string& id) {
   if (ports.count(id) == 0) {
     throw std::runtime_error {
         fmt::format("Invalid port '{}:{}'", name(), id)
     };
   }
-  return *ports.at(id);
+  return ports.at(id).get();
 }
 
 std::string Component::nameOf(const Port* p) {
