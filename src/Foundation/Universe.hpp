@@ -31,6 +31,7 @@ struct Universe {
   Port* lookupPort(const std::string& component, const std::string& port);
 
   void tick();
+  void render();
 
   void save(const fs::path& path);
   void load(const fs::path& path);

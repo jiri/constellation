@@ -656,6 +656,7 @@ int main() {
 
     /* Game tick */
     universe.tick();
+    universe.render();
 
     DrawGraph(universe);
     SystemUI(universe);

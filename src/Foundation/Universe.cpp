@@ -40,12 +40,14 @@ void Universe::tick() {
     system->timePassed(delta);
   }
 
-  for (auto& component : this->components) {
-    component->render();
-  }
-
   for (auto& infrastructure : this->infrastructures) {
     infrastructure->update();
+  }
+}
+
+void Universe::render() {
+  for (auto& component : this->components) {
+    component->render();
   }
 }
 
