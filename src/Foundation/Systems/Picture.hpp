@@ -10,7 +10,7 @@
 class VideoSystem : public System {
   using Buffer = std::optional<glm::vec3>;
 public:
-  VideoSystem(Universe* u)
+  explicit VideoSystem(Universe* u)
     : System { u, "Video" }
   {
     this->ups = 60;
