@@ -77,6 +77,7 @@ set(SOURCE_FILES
         src/main.cpp
         src/Util/Random.hpp
         src/Util/Parse.hpp
+        src/Util/Filesystem.hpp
 )
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
