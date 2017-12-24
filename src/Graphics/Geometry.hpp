@@ -14,7 +14,7 @@ class Geometry {
 public:
   explicit Geometry(std::vector<Vertex> vs)
     : vertices { std::move(vs) }
-    , indices(vs.size())
+    , indices(vertices.size())
   {
     std::iota(indices.begin(), indices.end(), 0);
   }
