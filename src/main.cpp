@@ -57,7 +57,7 @@ public:
     }));
 
     debugger.addCommand("clear", [this] {
-      message = "";
+      messages.clear();
     });
   }
 
@@ -72,7 +72,7 @@ public:
     }
 
     while (auto msg = this->universe->system<TextSystem>().receive(port("data"))) {
-      message += *msg + "\n";
+      messages.push_back(*msg);
     }
   }
 
@@ -80,7 +80,9 @@ public:
     ImGui::PushStyleColor(ImGuiCol_WindowBg, (ImU32)ImColor(color.r, color.g, color.b));
     ImGui::SetNextWindowContentSize({ 128, 128 });
     ImGui::Begin("Monitor", nullptr, ImGuiWindowFlags_NoResize);
-    ImGui::Text("%s", message.c_str());
+    for (auto& msg : messages) {
+      ImGui::Text("%s", msg.c_str());
+    }
     ImGui::End();
     ImGui::PopStyleColor();
   }
@@ -94,7 +96,7 @@ public:
   }
 
   glm::vec3 color;
-  std::string message;
+  std::vector<std::string> messages;
 };
 
 class Camera : public Component {
