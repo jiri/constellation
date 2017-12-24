@@ -319,15 +319,15 @@ public:
     }));
 
     addPort("b", new Socket(Capabilities {
-            .picture = { false, 0.0f },
-            .energy = { true, 20.0f },
-            .text = { false },
+        .picture = { false, 0.0f },
+        .energy = { true, 20.0f },
+        .text = { false },
     }));
 
     addPort("c", new Socket(Capabilities {
-            .picture = { false, 0.0f },
-            .energy = { true, 20.0f },
-            .text = { false },
+        .picture = { false, 0.0f },
+        .energy = { true, 20.0f },
+        .text = { false },
     }));
   }
 
