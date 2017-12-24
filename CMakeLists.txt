@@ -78,6 +78,7 @@ set(SOURCE_FILES
         src/Util/Random.hpp
         src/Util/Parse.hpp
         src/Util/Filesystem.hpp
+        src/Util/FunctionTraits.hpp
 )
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 
