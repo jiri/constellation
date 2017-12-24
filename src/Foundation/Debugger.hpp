@@ -42,7 +42,8 @@ public:
       else if constexpr (!std::is_same<typename function_traits<F>::result_type, void>::value) {
         typename function_traits<F>::result_type r = std::apply(f, args);
         return fmt::format("{}", r);
-      } else {
+      }
+      else {
         std::apply(f, args);
         return std::nullopt;
       }
