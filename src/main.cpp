@@ -252,11 +252,9 @@ public:
 
   float satisfaction = 0.0f;
 
-  static size_t counter;
+  static inline size_t counter = 0;
   size_t id = 0;
 };
-
-size_t Lamp::counter = 0;
 
 class Terminal : public Component {
 public:
