@@ -580,15 +580,19 @@ int main() {
   SDL_Window* window = SDL_CreateWindow("",
                                         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                         800, 600, SDL_WINDOW_OPENGL);
-  SDL_GLContext context = SDL_GL_CreateContext(window);
+  auto destroyWindow = gsl::finally([window] { SDL_DestroyWindow(window); });
 
+  SDL_GLContext context = SDL_GL_CreateContext(window);
+  auto deleteContext = gsl::finally([context] { SDL_GL_DeleteContext(context); });
+
+  /* Enable VSync */
+  SDL_GL_SetSwapInterval(1);
+
+  /* Load OpenGL */
   if(!gladLoadGL()) {
     printf("Something went wrong!\n");
     exit(-1);
   }
-
-  /* Enable VSync */
-  SDL_GL_SetSwapInterval(1);
 
   /* Initialise ImGui */
   ImGui_ImplSdlGL3_Init(window);
