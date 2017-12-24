@@ -33,7 +33,8 @@
 
 #include <json.hpp>
 
-struct Monitor : public Component {
+class Monitor : public Component {
+public:
   explicit Monitor(Universe* w)
     : Component(w)
   {
@@ -96,7 +97,8 @@ struct Monitor : public Component {
   std::string message;
 };
 
-struct Camera : public Component {
+class Camera : public Component {
+public:
   explicit Camera(Universe* w)
     : Component(w)
   {
@@ -158,7 +160,8 @@ struct Camera : public Component {
   glm::vec3 color;
 };
 
-struct Generator : public Component {
+class Generator : public Component {
+public:
   explicit Generator(Universe* w)
     : Component(w)
     , history(256, 0)
@@ -209,7 +212,8 @@ struct Generator : public Component {
   std::vector<float> history;
 };
 
-struct Lamp : public Component {
+class Lamp : public Component {
+public:
   explicit Lamp(Universe* w)
     : Component(w)
     , id { ++counter }
@@ -252,7 +256,8 @@ struct Lamp : public Component {
 
 size_t Lamp::counter = 0;
 
-struct Terminal : public Component {
+class Terminal : public Component {
+public:
   using Component::Component;
 
   void update() override {
@@ -347,7 +352,7 @@ public:
   }
 };
 
-struct Switch : public Component {
+class Switch : public Component {
 public:
   explicit Switch(Universe* u)
     : Component(u)
