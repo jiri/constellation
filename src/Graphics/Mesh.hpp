@@ -7,7 +7,7 @@
 
 class Mesh {
 public:
-  Mesh(const Geometry& g);
+  explicit Mesh(const Geometry& g);
 
 private:
   GLuint vao;
