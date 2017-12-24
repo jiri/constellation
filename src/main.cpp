@@ -17,7 +17,6 @@
 #include <imgui_impl_sdl_gl3.h>
 
 #include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 #include <Graphics/Program.hpp>
 #include <Util/Random.hpp>
