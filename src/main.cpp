@@ -19,6 +19,11 @@
 #include <glm/glm.hpp>
 
 #include <Graphics/Program.hpp>
+#include <Graphics/Geometry.hpp>
+#include <Graphics/Mesh.hpp>
+#include <Graphics/Camera.hpp>
+#include <Graphics/OrbitControls.hpp>
+
 #include <Util/Random.hpp>
 
 #include <Foundation/Universe.hpp>
@@ -631,6 +636,12 @@ int main() {
 
   universe.infrastructure<Manual>().load("connections.json");
 
+  /* Graphics */
+  GCamera camera { "Main camera", glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f } };
+  OrbitControls controls { camera, glm::vec3 { 0.0f, 0.0f, 0.0f }, 10.0f };
+  Program program { "shd/basic.vert", "shd/basic.frag" };
+  Mesh cube { Geometry::CUBE };
+
   /* Main loop */
   bool done = false;
   while (!done) {
@@ -639,6 +650,7 @@ int main() {
       if (e.type == SDL_QUIT) {
         done = true;
       }
+      controls.processEvent(e);
       ImGui_ImplSdlGL3_ProcessEvent(&e);
     }
 
@@ -654,6 +666,11 @@ int main() {
 
     DrawGraph(universe);
     SystemUI(universe);
+
+    controls.update();
+
+    /* Draw meshes */
+    cube.draw(camera, program);
 
     ImGui::Render();
     SDL_GL_SwapWindow(window);

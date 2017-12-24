@@ -38,6 +38,10 @@ set(GRAPHICS_SOURCE_FILES
         src/Graphics/Geometry.cpp
         src/Graphics/Mesh.hpp
         src/Graphics/Mesh.cpp
+        src/Graphics/Camera.hpp
+        src/Graphics/Camera.cpp
+        src/Graphics/OrbitControls.hpp
+        src/Graphics/OrbitControls.cpp
 )
 add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
 

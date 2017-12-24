@@ -1,6 +1,13 @@
 #include <Graphics/Mesh.hpp>
 
-Mesh::Mesh(const Geometry& g) {
+#include <glm/gtc/type_ptr.hpp>
+
+Mesh::Mesh(const Geometry& g)
+  : vao { 0 }
+  , vbo { 0 }
+  , ebo { 0 }
+  , numIndices { g.indices.size() }
+{
   glGenVertexArrays(1, &vao);
   glGenBuffers(1, &vbo);
   glGenBuffers(1, &ebo);
@@ -19,4 +26,16 @@ Mesh::Mesh(const Geometry& g) {
   glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void*)offsetof(Vertex, normal));
 
   glBindVertexArray(0);
+}
+
+void Mesh::draw(const GCamera& c, const Program& p) {
+  glUseProgram(p);
+
+  glUniformMatrix4fv(glGetUniformLocation(p, "camera"), 1, GL_FALSE, glm::value_ptr(c.matrix()));
+
+  glBindVertexArray(vao);
+  glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, nullptr);
+  glBindVertexArray(0);
+
+  glUseProgram(0);
 }
