@@ -34,6 +34,7 @@ void EnergySystem::update() {
     std::queue<std::pair<float, Port*>> queue;
     queue.emplace(sendBuffers[p], p);
 
+    // TODO: This loops indefinitely when circuit is not complete
     while (!queue.empty()) {
       float e = queue.front().first;
       Port* p = queue.front().second;
