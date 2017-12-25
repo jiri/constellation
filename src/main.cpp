@@ -648,7 +648,7 @@ int main() {
   GCamera camera { "Main camera", glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f } };
   OrbitControls controls { camera, glm::vec3 { 0.0f, 0.0f, 0.0f }, 10.0f };
   Program program { "shd/basic.vert", "shd/basic.frag" };
-  Mesh cube { Geometry::CUBE };
+  Mesh cube { Geometry::load("res/teapot.obj") };
 
   /* Main loop */
   bool done = false;
