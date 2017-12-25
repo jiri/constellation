@@ -19,7 +19,9 @@ struct Component {
   virtual void render() = 0;
 
   virtual std::string name() const = 0;
-  virtual std::string defaultPort() const = 0;
+  virtual std::string defaultPort() const {
+    return "debug";
+  }
 
   Port* port(const std::string& id);
   std::string nameOf(const Port* p);

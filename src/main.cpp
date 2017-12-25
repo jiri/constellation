@@ -303,10 +303,6 @@ public:
     return "terminal";
   }
 
-  std::string defaultPort() const override {
-    return "port";
-  }
-
   bool newMessage = false;
   char buf[256] {};
   std::list<std::string> messages;
