@@ -588,6 +588,7 @@ int main() {
   SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG);
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
   SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+  SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 32);
 
   SDL_DisplayMode displayMode {};
   SDL_GetCurrentDisplayMode(0, &displayMode);
@@ -609,6 +610,8 @@ int main() {
     printf("Something went wrong!\n");
     exit(-1);
   }
+
+  glEnable(GL_DEPTH_TEST);
 
   /* Initialise ImGui */
   ImGui_ImplSdlGL3_Init(window);
@@ -663,7 +666,7 @@ int main() {
 
     /* Rendering */
     glClearColor(0.17f, 0.24f, 0.31f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     /* Game tick */
     universe.tick();
