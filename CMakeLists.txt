@@ -104,3 +104,13 @@ add_custom_target(
         COMMENT "Linking shaders" VERBATIM
 )
 add_dependencies(${PROJECT_NAME} link_shaders)
+
+# Link resources
+add_custom_target(
+        link_resources
+        ${CMAKE_COMMAND} -E create_symlink
+        ${CMAKE_CURRENT_SOURCE_DIR}/res
+        ${CMAKE_CURRENT_BINARY_DIR}/res
+        COMMENT "Linking resources" VERBATIM
+)
+add_dependencies(${PROJECT_NAME} link_resources)
