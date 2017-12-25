@@ -12,6 +12,7 @@ add_subdirectory(libraries/gsl)
 add_subdirectory(libraries/glad)
 add_subdirectory(libraries/imgui)
 add_subdirectory(libraries/json)
+add_subdirectory(libraries/tinyobjloader)
 
 include_directories(SYSTEM src/)
 include_directories(
@@ -27,6 +28,7 @@ link_libraries(
         imgui
         glm
         json
+        tinyobjloader
         c++experimental
 )
 
