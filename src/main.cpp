@@ -17,6 +17,7 @@
 #include <imgui_impl_sdl_gl3.h>
 
 #include <glm/glm.hpp>
+#include <glm/gtc/constants.hpp>
 
 #include <Graphics/Program.hpp>
 #include <Graphics/Geometry.hpp>
