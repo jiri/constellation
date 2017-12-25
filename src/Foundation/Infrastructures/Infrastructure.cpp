@@ -23,7 +23,7 @@ void Infrastructure::connect(Port* from, Port* to, Capabilities capabilities) {
 
 void Infrastructure::disconnect(Port* from, Port* to) {
   auto pred = [&](const Connection& c) {
-    return c.from == from && c.to == to;
+    return c.author == this && c.from == from && c.to == to;
   };
 
   auto pos = std::remove_if(universe->connections.begin(), universe->connections.end(), pred);
