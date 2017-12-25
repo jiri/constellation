@@ -5,6 +5,8 @@
 
 #include <glm/glm.hpp>
 
+#include <Util/Filesystem.hpp>
+
 struct Vertex {
   glm::vec3 position;
   glm::vec3 normal;
@@ -23,6 +25,8 @@ public:
     : vertices { std::move(vs) }
     , indices { std::move(is) }
   { }
+
+  static Geometry load(fs::path filename);
 
   Geometry scale(float scale) const;
 
