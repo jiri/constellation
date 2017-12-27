@@ -7,6 +7,7 @@
 #include <fmt/format.h>
 
 #include <Foundation/Components/Component.hpp>
+#include <Foundation/Infrastructures/Wiring.hpp>
 
 class Universe;
 
@@ -23,13 +24,13 @@ struct CPU : public Component {
   CPU(Universe* u)
     : Component(u)
   {
-    addPort("in", new Port(Capabilities {
+    addPort("in", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));
 
-    addPort("out", new Port(Capabilities {
+    addPort("out", new Socket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
