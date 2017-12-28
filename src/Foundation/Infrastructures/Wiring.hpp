@@ -45,7 +45,7 @@ class Wiring : public Infrastructure {
   friend void DrawGraph(Universe& universe);
 public:
   using Infrastructure::Infrastructure;
-  ~Wiring();
+  virtual ~Wiring();
 
   void update() override;
 
