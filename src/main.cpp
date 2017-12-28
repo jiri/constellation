@@ -29,7 +29,7 @@
 
 #include <Foundation/Universe.hpp>
 #include <Foundation/Components/CPU.hpp>
-#include <Foundation/Systems/Picture.hpp>
+#include <Foundation/Systems/Video.hpp>
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
 #include <Foundation/Infrastructures/Wiring.hpp>

@@ -1,4 +1,4 @@
-#include <Foundation/Systems/Picture.hpp>
+#include <Foundation/Systems/Video.hpp>
 
 #include <Util/Random.hpp>
 
