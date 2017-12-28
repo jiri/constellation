@@ -60,7 +60,7 @@ void Universe::render() {
   }
 }
 
-Port* Universe::lookupPort(const std::string& componentName, const std::string& portName) {
+Endpoint* Universe::lookupPort(const std::string& componentName, const std::string& portName) {
   for (Component* c : this->components) {
     if (c->name() == componentName) {
       for (auto& pair : c->ports) {

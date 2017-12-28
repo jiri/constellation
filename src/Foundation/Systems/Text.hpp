@@ -19,9 +19,9 @@ struct TextSystem : public System {
   bool filter(const Connection& edge) const override;
   void swap(Connection& edge) override;
 
-  void send(Port* port, const std::string& m);
-  std::optional<std::string> receive(Port* port);
+  void send(Endpoint* port, const std::string& m);
+  std::optional<std::string> receive(Endpoint* port);
 
-  std::unordered_map<Port*, Buffer> sendBuffers;
-  std::unordered_map<Port*, Buffer> recvBuffers;
+  std::unordered_map<Endpoint*, Buffer> sendBuffers;
+  std::unordered_map<Endpoint*, Buffer> recvBuffers;
 };

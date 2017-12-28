@@ -42,7 +42,7 @@ struct Universe {
   void tick();
   void render();
 
-  Port* lookupPort(const std::string& component, const std::string& port);
+  Endpoint* lookupPort(const std::string& component, const std::string& port);
 
   std::vector<Infrastructure*> infrastructures;
   std::vector<Component*> components;

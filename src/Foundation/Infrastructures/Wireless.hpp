@@ -2,10 +2,10 @@
 
 #include <Foundation/Infrastructures/Infrastructure.hpp>
 
-class Antenna : public Port {
+class Antenna : public Endpoint {
 public:
   Antenna(float r, float f, Capabilities c)
-    : Port { c }
+    : Endpoint { c }
     , radius { r }
     , frequency { f }
   { }

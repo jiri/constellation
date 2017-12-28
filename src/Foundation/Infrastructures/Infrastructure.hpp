@@ -10,13 +10,13 @@
 class Component;
 class Universe;
 
-class Port {
+class Endpoint {
 public:
-  explicit Port(Capabilities c)
+  explicit Endpoint(Capabilities c)
     : capabilities { c }
   { }
 
-  virtual ~Port() = default;
+  virtual ~Endpoint() = default;
 
   std::string name() const;
 
@@ -30,15 +30,15 @@ public:
 class Infrastructure;
 
 struct Connection {
-  Connection(Port* f, Port* t, Capabilities c, Infrastructure* author)
+  Connection(Endpoint* f, Endpoint* t, Capabilities c, Infrastructure* author)
     : from { f }
     , to { t }
     , capabilities { c }
     , author { author }
   { }
 
-  Port* from;
-  Port* to;
+  Endpoint* from;
+  Endpoint* to;
   Capabilities capabilities;
   Infrastructure* author;
 };
@@ -53,11 +53,11 @@ public:
 
   virtual void update() = 0;
 
-  void connect(Port* from, Port* to, Capabilities capabilities);
-  void disconnect(Port* from, Port* to);
+  void connect(Endpoint* from, Endpoint* to, Capabilities capabilities);
+  void disconnect(Endpoint* from, Endpoint* to);
 
 protected:
   Universe* universe;
 
-  Connection* connection(Port* from, Port* to);
+  Connection* connection(Endpoint* from, Endpoint* to);
 };

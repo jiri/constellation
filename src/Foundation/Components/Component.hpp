@@ -23,18 +23,18 @@ struct Component {
     return "debug";
   }
 
-  Port* port(const std::string& id);
-  std::string nameOf(const Port* p);
+  Endpoint* port(const std::string& id);
+  std::string nameOf(const Endpoint* p);
 
-  virtual std::vector<std::pair<float, Port*>> redistributeEnergy(Port *port) { return {}; };
+  virtual std::vector<std::pair<float, Endpoint*>> redistributeEnergy(Endpoint *port) { return {}; };
 
   Universe* universe = nullptr;
-  std::map<std::string, std::unique_ptr<Port>> ports;
+  std::map<std::string, std::unique_ptr<Endpoint>> ports;
 
   glm::vec2 position;
 
 protected:
-  void addPort(const std::string& name, Port* p);
+  void addPort(const std::string& name, Endpoint* p);
 
   Debugger debugger;
 };

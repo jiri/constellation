@@ -15,11 +15,11 @@ void VideoSystem::swap(Connection& edge) {
   }
 }
 
-void VideoSystem::send(Port* port, const glm::vec3& v) {
+void VideoSystem::send(Endpoint* port, const glm::vec3& v) {
   buffers[port] = v;
 }
 
-std::optional<glm::vec3> VideoSystem::receive(Port* port) {
+std::optional<glm::vec3> VideoSystem::receive(Endpoint* port) {
   std::optional<glm::vec3> res = buffers[port];
   buffers[port] = std::nullopt;
   return res;

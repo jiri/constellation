@@ -17,8 +17,8 @@ public:
   bool filter(const Connection& edge) const override;
   void swap(Connection& edge) override;
 
-  void send(Port* port, const glm::vec3& v);
-  std::optional<glm::vec3> receive(Port* port);
+  void send(Endpoint* port, const glm::vec3& v);
+  std::optional<glm::vec3> receive(Endpoint* port);
 
-  std::unordered_map<Port*, Buffer> buffers;
+  std::unordered_map<Endpoint*, Buffer> buffers;
 };

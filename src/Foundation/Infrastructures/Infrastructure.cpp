@@ -2,15 +2,15 @@
 
 #include <Foundation/Universe.hpp>
 
-std::string Port::name() const {
+std::string Endpoint::name() const {
   return component->nameOf(this);
 }
 
-glm::vec2 Port::globalPosition() const {
+glm::vec2 Endpoint::globalPosition() const {
   return component->position + this->position;
 }
 
-void Infrastructure::connect(Port* from, Port* to, Capabilities capabilities) {
+void Infrastructure::connect(Endpoint* from, Endpoint* to, Capabilities capabilities) {
   Capabilities newCapabilities = from->capabilities * capabilities * to->capabilities;
 
   if (Connection* c = connection(from, to)) {
@@ -21,7 +21,7 @@ void Infrastructure::connect(Port* from, Port* to, Capabilities capabilities) {
   }
 }
 
-void Infrastructure::disconnect(Port* from, Port* to) {
+void Infrastructure::disconnect(Endpoint* from, Endpoint* to) {
   auto pred = [&](const Connection& c) {
     return c.author == this && c.from == from && c.to == to;
   };
@@ -30,7 +30,7 @@ void Infrastructure::disconnect(Port* from, Port* to) {
   universe->connections.erase(pos, universe->connections.end());
 }
 
-Connection* Infrastructure::connection(Port* from, Port* to) {
+Connection* Infrastructure::connection(Endpoint* from, Endpoint* to) {
   for (Connection& c : universe->connections) {
     if (c.from == from && c.to == to) {
       return &c;

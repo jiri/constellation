@@ -334,8 +334,8 @@ public:
 
   void render() override { }
 
-  std::vector<std::pair<float, Port*>> redistributeEnergy(Port* p) override {
-    std::vector<std::pair<float, Port*>> neighbours;
+  std::vector<std::pair<float, Endpoint*>> redistributeEnergy(Endpoint* p) override {
+    std::vector<std::pair<float, Endpoint*>> neighbours;
 
     if (p != port("a")) { neighbours.emplace_back(0.5f, port("a")); }
     if (p != port("b")) { neighbours.emplace_back(0.5f, port("b")); }
@@ -381,8 +381,8 @@ public:
     ImGui::End();
   }
 
-  std::vector<std::pair<float, Port*>> redistributeEnergy(Port* p) override {
-    std::vector<std::pair<float, Port*>> neighbours;
+  std::vector<std::pair<float, Endpoint*>> redistributeEnergy(Endpoint* p) override {
+    std::vector<std::pair<float, Endpoint*>> neighbours;
 
     if (toggle) {
       if (p != port("a")) { neighbours.emplace_back(1.0f, port("a")); }
@@ -430,7 +430,7 @@ void DrawGraph(Universe& universe) {
       for (auto& pair : component->ports) {
         i++;
         float d = 2.0f * glm::pi<float>() * float(i) / float(component->ports.size());
-        Port* p = pair.second.get();
+        Endpoint* p = pair.second.get();
         p->position = glm::vec2 { glm::sin(d), glm::cos(d) } * 12.0f;
       }
     }
@@ -470,7 +470,7 @@ void DrawGraph(Universe& universe) {
 
     /* Draw ports */
     for (auto& pair : c->ports) {
-      Port* p = pair.second.get();
+      Endpoint* p = pair.second.get();
       ImVec2 ppos { p->globalPosition().x, p->globalPosition().y };
 
       window->DrawList->AddCircleFilled(offset + ppos, 2.0f, p->name() == "debug" ? red : white);

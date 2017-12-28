@@ -8,11 +8,11 @@ void TextSystem::swap(Connection& edge) {
   std::swap(sendBuffers[edge.from], recvBuffers[edge.to]);
 }
 
-void TextSystem::send(Port* port, const std::string& m) {
+void TextSystem::send(Endpoint* port, const std::string& m) {
   sendBuffers[port].messages.push(m);
 }
 
-std::optional<std::string> TextSystem::receive(Port* port) {
+std::optional<std::string> TextSystem::receive(Endpoint* port) {
   if (recvBuffers[port].messages.empty()) {
     return std::nullopt;
   }

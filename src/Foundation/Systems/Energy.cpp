@@ -12,11 +12,11 @@ bool EnergySystem::filter(const Connection& edge) const {
 void EnergySystem::swap(Connection& edge) {
 }
 
-void EnergySystem::produce(Port* port, float energy) {
+void EnergySystem::produce(Endpoint* port, float energy) {
   sendBuffers[port] += energy;
 }
 
-float EnergySystem::consume(Port* port, float req) {
+float EnergySystem::consume(Endpoint* port, float req) {
   float res = std::min(recvBuffers[port], req);
   recvBuffers[port] -= res;
   return res;
@@ -24,20 +24,20 @@ float EnergySystem::consume(Port* port, float req) {
 
 void EnergySystem::update() {
   for (auto& pair : recvBuffers) {
-    Port* p = pair.first;
+    Endpoint* p = pair.first;
     recvBuffers[p] = 0;
   }
 
   for (auto& pair : sendBuffers) {
-    Port* p = pair.first;
+    Endpoint* p = pair.first;
 
-    std::queue<std::pair<float, Port*>> queue;
+    std::queue<std::pair<float, Endpoint*>> queue;
     queue.emplace(sendBuffers[p], p);
 
     // TODO: This loops indefinitely when circuit is not complete
     while (!queue.empty()) {
       float e = queue.front().first;
-      Port* p = queue.front().second;
+      Endpoint* p = queue.front().second;
 
       for (Connection& c : universe->connections) {
         if (c.from == p) {
@@ -46,7 +46,7 @@ void EnergySystem::update() {
         }
       }
 
-      std::vector<std::pair<float, Port*>> neighbours = p->component->redistributeEnergy(p);
+      std::vector<std::pair<float, Endpoint*>> neighbours = p->component->redistributeEnergy(p);
 
       if (neighbours.empty()) {
         recvBuffers[p] += e;

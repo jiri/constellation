@@ -16,9 +16,9 @@ public:
 
   void update() override;
 
-  void produce(Port* port, float energy);
-  float consume(Port* port, float req);
+  void produce(Endpoint* port, float energy);
+  float consume(Endpoint* port, float req);
 
-  std::unordered_map<Port*, Buffer> sendBuffers;
-  std::unordered_map<Port*, Buffer> recvBuffers;
+  std::unordered_map<Endpoint*, Buffer> sendBuffers;
+  std::unordered_map<Endpoint*, Buffer> recvBuffers;
 };

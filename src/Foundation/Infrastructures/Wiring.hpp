@@ -11,9 +11,9 @@ public:
   virtual ~Node() = default;
 };
 
-class Socket : public Port, public Node {
+class Socket : public Endpoint, public Node {
 public:
-  using Port::Port;
+  using Endpoint::Endpoint;
 };
 
 class Cable;

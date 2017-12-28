@@ -28,12 +28,12 @@ Component::~Component() {
   universe->connections.erase(std::remove_if(beg, end, pred), end);
 }
 
-void Component::addPort(const std::string& name, Port* p) {
+void Component::addPort(const std::string& name, Endpoint* p) {
   p->component = this;
   ports.emplace(name, p);
 }
 
-Port* Component::port(const std::string& id) {
+Endpoint* Component::port(const std::string& id) {
   if (ports.count(id) == 0) {
     throw std::runtime_error {
         fmt::format("Invalid port '{}:{}'", name(), id)
@@ -42,7 +42,7 @@ Port* Component::port(const std::string& id) {
   return ports.at(id).get();
 }
 
-std::string Component::nameOf(const Port* p) {
+std::string Component::nameOf(const Endpoint* p) {
   for (auto& pair : ports) {
     if (pair.second.get() == p) {
       return pair.first;
