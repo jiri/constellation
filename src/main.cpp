@@ -28,13 +28,13 @@
 #include <Util/Random.hpp>
 
 #include <Foundation/Universe.hpp>
-#include <Foundation/Components/CPU.hpp>
-#include <Foundation/Systems/Video.hpp>
-#include <Foundation/Systems/Energy.hpp>
-#include <Foundation/Systems/Text.hpp>
 #include <Foundation/Infrastructures/Wiring.hpp>
 #include <Foundation/Infrastructures/Wireless.hpp>
 #include <Foundation/Infrastructures/Manual.hpp>
+#include <Foundation/Systems/Video.hpp>
+#include <Foundation/Systems/Energy.hpp>
+#include <Foundation/Systems/Text.hpp>
+#include <Foundation/Components/CPU.hpp>
 
 #include <json.hpp>
 
