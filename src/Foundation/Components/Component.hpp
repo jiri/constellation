@@ -12,7 +12,7 @@
 class Universe;
 
 struct Component {
-  explicit Component(Universe* world);
+  explicit Component(Universe* u);
   virtual ~Component();
 
   virtual void update();
