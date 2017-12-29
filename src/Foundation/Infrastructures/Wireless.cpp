@@ -21,7 +21,7 @@ void Wireless::update() {
           float distance = glm::distance(a->globalPosition(), b->globalPosition());
           if (distance <= a->radius) {
             Capabilities caps {
-                .picture = { true, std::fabs(a->frequency - b->frequency) },
+                .video = { true, std::fabs(a->frequency - b->frequency) },
                 .energy = { false, 0.0f },
                 .text = { false },
             };

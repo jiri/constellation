@@ -5,8 +5,8 @@
 Capabilities Capabilities::combine(const Capabilities& a, const Capabilities& b) {
   return {
       {
-          a.picture.enabled && b.picture.enabled,
-          a.picture.errorRate + b.picture.errorRate,
+          a.video.enabled && b.video.enabled,
+          a.video.errorRate + b.video.errorRate,
       },
       {
           a.energy.enabled && b.energy.enabled,

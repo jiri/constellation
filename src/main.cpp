@@ -44,19 +44,19 @@ public:
     : Component(w)
   {
     this->addPort("video", new Antenna(200.0f, 42.0f, Capabilities {
-        .picture = { true, 0.0f },
+        .video = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { false },
     }));
 
     this->addPort("data", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));
 
     this->addPort("energy", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
     }));
@@ -110,13 +110,13 @@ public:
     : Component(w)
   {
     addPort("video", new Antenna(100.0f, 40.0f, Capabilities {
-        .picture = { true, 0.0f },
+        .video = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { false },
     }));
 
     addPort("energy", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
     }));
@@ -174,7 +174,7 @@ public:
     , history(256, 0)
   {
     addPort("energy", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { true, 100.0f },
         .text = { true }
     }));
@@ -226,7 +226,7 @@ public:
     , id { ++counter }
   {
     addPort("energy", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { true },
     }));
@@ -314,19 +314,19 @@ public:
     : Component(u)
   {
     addPort("a", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
     }));
 
     addPort("b", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
     }));
 
     addPort("c", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
     }));
@@ -359,13 +359,13 @@ public:
     : Component(u)
   {
     addPort("a", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
     }));
 
     addPort("b", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
     }));

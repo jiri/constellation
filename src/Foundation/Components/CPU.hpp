@@ -24,13 +24,13 @@ struct CPU : public Component {
     : Component(u)
   {
     addPort("in", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));
 
     addPort("out", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
-        .picture = { false, 0.0f },
+        .video = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));

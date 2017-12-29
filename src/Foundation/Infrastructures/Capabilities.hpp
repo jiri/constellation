@@ -6,7 +6,7 @@ struct Capabilities {
   struct {
     bool enabled = true;
     float errorRate = 0.0f;
-  } picture;
+  } video;
 
   struct {
     bool enabled = true;

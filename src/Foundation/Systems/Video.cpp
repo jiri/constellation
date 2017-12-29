@@ -3,11 +3,11 @@
 #include <Util/Random.hpp>
 
 bool VideoSystem::filter(const Connection& edge) const {
-  return edge.capabilities.picture.enabled;
+  return edge.capabilities.video.enabled;
 }
 
 void VideoSystem::swap(Connection& edge) {
-  if (randomFloat() < edge.capabilities.picture.errorRate) {
+  if (randomFloat() < edge.capabilities.video.errorRate) {
     buffers[edge.to] = randomColor();
   }
   else {
