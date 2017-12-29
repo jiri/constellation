@@ -10,9 +10,6 @@
 #include <Foundation/Systems/System.hpp>
 
 struct Universe {
-  Universe(std::vector<Component*> components,
-           std::vector<System*> systems,
-           std::vector<Infrastructure*> infrastructures);
   ~Universe();
 
   template <typename T>
@@ -47,6 +44,7 @@ struct Universe {
   std::vector<Infrastructure*> infrastructures;
   std::vector<Component*> components;
   std::vector<System*> systems;
+
   std::vector<Connection> connections;
 
 private:

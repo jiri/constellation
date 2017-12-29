@@ -614,28 +614,30 @@ int main() {
   auto shutdownImgui = gsl::finally([] { ImGui_ImplSdlGL3_Shutdown(); });
 
   /* Components */
-  Universe universe {
-      {
-          new Monitor { &universe },
-          new Camera { &universe },
-          new Generator { &universe },
-          new Lamp { &universe },
-          new Lamp { &universe },
-          new CPU { &universe },
-          new Terminal { &universe },
-          new Splitter { &universe },
-          new Switch { &universe },
-      },
-      {
-          new VideoSystem { &universe },
-          new EnergySystem { &universe },
-          new TextSystem { &universe },
-      },
-      {
-          new Wireless { &universe },
-          new Manual { &universe },
-          new Wiring { &universe },
-      },
+  Universe universe;
+
+  universe.infrastructures = {
+      new Wireless { &universe },
+      new Manual { &universe },
+      new Wiring { &universe },
+  };
+
+  universe.systems = {
+      new VideoSystem { &universe },
+      new EnergySystem { &universe },
+      new TextSystem { &universe },
+  };
+
+  universe.components = {
+      new Monitor { &universe },
+      new Camera { &universe },
+      new Generator { &universe },
+      new Lamp { &universe },
+      new Lamp { &universe },
+      new CPU { &universe },
+      new Terminal { &universe },
+      new Splitter { &universe },
+      new Switch { &universe },
   };
 
   universe.infrastructure<Manual>().load("connections.json");

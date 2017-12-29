@@ -5,14 +5,6 @@
 
 #include <Foundation/Infrastructures/Manual.hpp>
 
-Universe::Universe(std::vector<Component*> components,
-                   std::vector<System*> systems,
-                   std::vector<Infrastructure*> infrastructures)
-  : components { std::move(components) }
-  , systems { std::move(systems) }
-  , infrastructures { std::move(infrastructures) }
-{ }
-
 Universe::~Universe() {
   for (Infrastructure* infrastructure : infrastructures) {
     delete infrastructure;
