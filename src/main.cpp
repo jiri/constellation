@@ -130,12 +130,12 @@ public:
     });
 
     debugger.addCommand("set_freq", [this](float f) {
-      auto* a = dynamic_cast<Antenna*>(ports.at("video").get());
+      auto* a = dynamic_cast<Antenna*>(port("video"));
       a->frequency = f;
     });
 
     debugger.addCommand("get_freq", [this]() {
-      auto* a = dynamic_cast<Antenna*>(ports.at("video").get());
+      auto* a = dynamic_cast<Antenna*>(port("video"));
       return fmt::format("{}", a->frequency);
     });
   }
@@ -147,7 +147,7 @@ public:
   }
 
   void render() override {
-    auto* a = dynamic_cast<Antenna*>(ports.at("video").get());
+    auto* a = dynamic_cast<Antenna*>(port("video"));
 
     ImGui::SetNextWindowSize({ 256, 0 });
     ImGui::Begin("Camera");
