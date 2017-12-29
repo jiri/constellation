@@ -1,60 +1,128 @@
 #pragma once
 
-#include <list>
+#include <set>
 
 #include <Foundation/Infrastructures/Infrastructure.hpp>
 
 class Wiring;
 
-class Node {
+class Connector {
 public:
-  virtual ~Node() = default;
+  virtual ~Connector() = default;
+
+  virtual void merge(Connector* other) = 0;
+  virtual void split(Connector* other) = 0;
+  virtual glm::vec2& position() = 0;
+
+  bool magnetic = false;
+  Connector* other = nullptr;
 };
 
-class Socket : public Endpoint, public Node {
+class CableConnector : public Connector {
 public:
-  using Endpoint::Endpoint;
-};
-
-class Cable;
-
-class Connector : public Node {
-public:
-  Connector(Cable* c, glm::vec2 pos)
-    : cable { c }
-    , position { pos }
+  CableConnector(glm::vec2 pos)
+    : cablePosition { new glm::vec2 { pos } }
   { }
 
-  Cable* cable;
-  glm::vec2 position;
+  virtual ~CableConnector() {
+    if (this->owner) {
+      delete this->cablePosition;
+    }
+  }
+
+  void merge(Connector* other) override;
+  void split(Connector* other) override;
+
+  glm::vec2& position() override {
+    return *cablePosition;
+  }
+
+private:
+  glm::vec2* cablePosition;
+  bool owner = false;
+};
+
+class EndpointConnector : public Connector {
+  friend class Wiring;
+public:
+  explicit EndpointConnector(Endpoint* e);
+
+  void merge(Connector* other) override;
+  void split(Connector* other) override;
+
+  glm::vec2& position() override {
+    fakePosition = endpoint->globalPosition();
+    return fakePosition;
+  }
+
+private:
+  Endpoint* endpoint;
+  glm::vec2 fakePosition;
 };
 
 class Cable {
+  friend class Wiring;
 public:
-  Cable(Wiring* w, glm::vec2 aPos, glm::vec2 bPos, Capabilities caps);
-  ~Cable();
+  CableConnector a;
+  CableConnector b;
 
-  Wiring* wiring;
-  Connector a;
-  Connector b;
-  Capabilities capabilities;
+private:
+  Cable(glm::vec2 aPos, glm::vec2 bPos);
 };
 
+class Socket : public Endpoint {
+  friend class Wiring;
+public:
+  EndpointConnector connector;
+
+private:
+  explicit Socket(Capabilities c);
+};
+
+class WiringConnection {
+public:
+  /* Ensures that a < b */
+  WiringConnection(Connector* a, Connector* b, bool internal);
+
+  Connector* a = nullptr;
+  Connector* b = nullptr;
+  bool internal = false;
+};
+
+static bool operator<(const WiringConnection& a, const WiringConnection& b) {
+  if (a.a == b.a) {
+    if (a.b == b.b) {
+      return false;
+    }
+    else {
+      return a.b < b.b;
+    }
+  }
+  else {
+    return a.a < b.a;
+  }
+}
+
 class Wiring : public Infrastructure {
-  friend class Cable;
   friend void DrawGraph(Universe& universe);
 public:
   using Infrastructure::Infrastructure;
-  virtual ~Wiring();
+  ~Wiring() final;
 
   void update() override;
 
+  bool occupied(Connector* c) const;
+
+  Socket* createSocket(Capabilities c);
+  Cable* createCable(glm::vec2 aPos, glm::vec2 bPos);
+
 private:
-  std::vector<std::pair<Node*, Node*>> connections;
+  std::set<WiringConnection> connections;
   std::vector<Cable*> cables;
+  std::set<Connector*> connectors;
 
-  Socket* findOther(Socket* socket);
+  void join(Connector* a, Connector* b, bool internal = false);
+  void separate(Connector* a, Connector* b, bool internal = false);
 
-  void join(Node* a, Node* b);
-  void separate(Node* a, Node* b);
+  EndpointConnector* findOther(EndpointConnector* connector);
 };

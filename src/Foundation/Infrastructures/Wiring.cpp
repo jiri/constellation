@@ -1,40 +1,30 @@
 #include <Foundation/Infrastructures/Wiring.hpp>
 
+#include <algorithm>
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui.h>
 #include <imgui_internal.h>
 
 #include <Foundation/Universe.hpp>
-
-Cable::Cable(Wiring* w, glm::vec2 aPos, glm::vec2 bPos, Capabilities caps)
-  : wiring { w }
-  , capabilities { caps }
-  , a { this, aPos }
-  , b { this, bPos }
-{
-  wiring->join(&a, &b);
-}
-
-Cable::~Cable() {
-  wiring->separate(&a, &b);
-}
+#include <Foundation/Components/Component.hpp>
 
 Wiring::~Wiring() {
-  for (auto* cable : cables) {
+  for (auto* cable : this->cables) {
     delete cable;
   }
 }
 
-Socket* Wiring::findOther(Socket* socket) {
-  Node* prev = socket;
-  Node* next = nullptr;
+EndpointConnector* Wiring::findOther(EndpointConnector* connector) {
+  Connector* prev = connector;
+  Connector* next = nullptr;
 
-  for (auto& connection : connections) {
-    if (connection.first == socket) {
-      next = connection.second;
+  for (const WiringConnection& connection : this->connections) {
+    if (connection.a == connector) {
+      next = connection.b;
     }
-    if (connection.second == socket) {
-      next = connection.first;
+    else if (connection.b == connector) {
+      next = connection.a;
     }
   }
 
@@ -42,123 +32,62 @@ Socket* Wiring::findOther(Socket* socket) {
   do {
     stepMade = false;
     for (auto& connection : connections) {
-      if (connection.first == next || connection.second == next) {
-        if (connection.first == prev || connection.second == prev) {
+      if (connection.a == next || connection.b == next) {
+        if (connection.a == prev || connection.b == prev) {
           continue;
         }
-        else if (connection.first == next) {
+        else if (connection.a == next) {
           prev = next;
-          next = connection.second;
+          next = connection.b;
           stepMade = true;
         }
-        else if (connection.second == next) {
+        else if (connection.b == next) {
           prev = next;
-          next = connection.first;
+          next = connection.a;
           stepMade = true;
         }
       }
     }
   } while (stepMade);
 
-  return dynamic_cast<Socket*>(next);
+  return dynamic_cast<EndpointConnector*>(next);
 }
 
 void Wiring::update() {
   /* Update connections */
-  for (auto& c : universe->components) {
-    for (auto& pair : c->ports) {
-      if (auto* s = dynamic_cast<Socket*>(pair.second.get())) {
-        Socket* other = findOther(s);
-        if (other) {
-          connect(s, other, Capabilities{});
-        }
+  for (auto* connector : this->connectors) {
+    if (auto* from = dynamic_cast<EndpointConnector*>(connector)) {
+      if (auto* to = this->findOther(from)) {
+        this->connect(from->endpoint, to->endpoint, Capabilities{});
       }
     }
   }
 
-  for (auto& c : universe->connections) {
-    auto* as = dynamic_cast<Socket*>(c.from);
-    auto* bs = dynamic_cast<Socket*>(c.to);
+  /* Disconnect broken connections */
+  for (auto& connection : this->universe->connections) {
+    if (connection.author == this) {
+      auto* as = dynamic_cast<Socket*>(connection.from);
+      auto* bs = dynamic_cast<Socket*>(connection.to);
 
-    if (as && bs && (findOther(as) != bs || findOther(bs) != as)) {
-      disconnect(as, bs);
+      if (as && bs && (findOther(&as->connector) != &bs->connector || findOther(&bs->connector) != &as->connector)) {
+        disconnect(as, bs);
+      }
     }
   }
 
-  /* Connect close cables */
-  for (auto* a : cables) {
-    for (auto* b : cables) {
+  /* Connect close connectors */
+  for (Connector* a : this->connectors) {
+    for (Connector* b : this->connectors) {
       if (a == b) {
         continue;
       }
 
-      if (glm::distance(a->a.position, b->a.position) < 4.0f) {
-        join(&a->a, &b->a);
-      }
-      else if (glm::distance(a->a.position, b->a.position) > 30.0f) {
-        separate(&a->a, &b->a);
-      }
+      auto eitherMagnetic = a->magnetic || b->magnetic;
+      auto bothFree = !this->occupied(a) && !this->occupied(b);
+      auto bothClose = glm::distance(a->position(), b->position()) < 6.0f;
 
-      if (glm::distance(a->a.position, b->b.position) < 4.0f) {
-        join(&a->a, &b->b);
-      }
-      else if (glm::distance(a->a.position, b->b.position) > 30.0f) {
-        separate(&a->a, &b->b);
-      }
-
-      if (glm::distance(a->b.position, b->a.position) < 4.0f) {
-        join(&a->b, &b->a);
-      }
-      else if (glm::distance(a->b.position, b->a.position) > 30.0f) {
-        separate(&a->b, &b->a);
-      }
-
-      if (glm::distance(a->b.position, b->b.position) < 4.0f) {
-        join(&a->b, &b->b);
-      }
-      else if (glm::distance(a->b.position, b->b.position) > 30.0f) {
-        separate(&a->b, &b->b);
-      }
-    }
-  }
-
-  static std::unordered_map<Connector*, glm::vec2> oldPositions;
-
-  /* Keep connectors together */
-  for (auto& c : connections) {
-    auto* a = dynamic_cast<Connector*>(c.first);
-    auto* b = dynamic_cast<Connector*>(c.second);
-    auto* as = dynamic_cast<Socket*>(c.first);
-    auto* bs = dynamic_cast<Socket*>(c.second);
-
-    if (a && b && a->cable != b->cable) {
-      if (oldPositions[a] != a->position) {
-        b->position = a->position;
-        oldPositions[a] = a->position;
-        oldPositions[b] = b->position;
-      }
-      if (oldPositions[b] != b->position) {
-        a->position = b->position;
-        oldPositions[a] = a->position;
-        oldPositions[b] = b->position;
-      }
-    }
-
-    if (a && bs) {
-      if (glm::distance(a->position, bs->globalPosition()) > 10.0f) {
-        separate(a, bs);
-      }
-      else {
-        a->position = bs->globalPosition();
-      }
-    }
-
-    if (as && b) {
-      if (glm::distance(a->position, bs->globalPosition()) > 10.0f) {
-        separate(as, b);
-      }
-      else {
-        b->position = as->globalPosition();
+      if (eitherMagnetic && bothFree && bothClose) {
+        this->join(a, b);
       }
     }
   }
@@ -166,28 +95,144 @@ void Wiring::update() {
   ImGui::Begin("Switchboard");
 
   if (ImGui::Button("Add Cable")) {
-    cables.emplace_back(new Cable { this, glm::vec2 { 0.0f, 0.0f }, glm::vec2 { 50.0f, 0.0f }, Capabilities{} });
+    cables.emplace_back(this->createCable(glm::vec2 { 0.0f, 0.0f }, glm::vec2 { 50.0f, 0.0f }));
   }
 
   ImGui::End();
 }
 
-void Wiring::join(Node* a, Node* b) {
-  auto pred = [&](const std::pair<Node*, Node*>& p) {
-    return (p.first == a && p.second == b) || (p.first == b && p.second == a);
+bool Wiring::occupied(Connector* c) const {
+  auto pred = [&](const WiringConnection& conn) {
+    return (conn.a == c || conn.b == c) && !conn.internal;
   };
 
-  auto it = std::find_if(connections.begin(), connections.end(), pred);
-  if (it == connections.end()) {
-    connections.emplace_back(a, b);
+  return std::find_if(this->connections.begin(), this->connections.end(), pred) != this->connections.end();
+}
+
+void Wiring::join(Connector* a, Connector* b, bool internal) {
+  WiringConnection connection { a, b, internal };
+
+  if (this->connections.count(connection) != 0) {
+    throw std::runtime_error { "Attempting to join already connected ports" };
+  }
+
+  this->connections.emplace(connection);
+
+  if (!internal) {
+    a->merge(b);
   }
 }
 
-void Wiring::separate(Node* a, Node* b) {
-  auto pred = [&](const std::pair<Node*, Node*>& p) {
-    return (p.first == a && p.second == b) || (p.first == b && p.second == a);
-  };
+void Wiring::separate(Connector* a, Connector* b, bool internal) {
+  WiringConnection connection { a, b, internal };
 
-  auto it = std::remove_if(connections.begin(), connections.end(), pred);
-  connections.erase(it, connections.end());
+  if (this->connections.count(connection) == 0) {
+    throw std::runtime_error { "Attempting to separate unconnected ports" };
+  }
+
+  this->connections.erase(connection);
+
+  if (!internal) {
+    a->split(b);
+  }
 }
+
+Socket* Wiring::createSocket(Capabilities c) {
+  auto* ptr = new Socket { c };
+  this->connectors.emplace(&ptr->connector);
+  return ptr;
+}
+
+Cable* Wiring::createCable(glm::vec2 aPos, glm::vec2 bPos) {
+  auto* ptr = new Cable { aPos, bPos };
+  this->join(&ptr->a, &ptr->b, true);
+  this->connectors.emplace(&ptr->a);
+  this->connectors.emplace(&ptr->b);
+  return ptr;
+}
+
+void CableConnector::merge(Connector* other) {
+  if (auto* c = dynamic_cast<CableConnector*>(other)) {
+    auto* newPosition = new glm::vec2 { 0.5f * (*this->cablePosition + *c->cablePosition) };
+
+    delete this->cablePosition;
+    this->cablePosition = newPosition;
+    this->owner = true;
+
+    delete c->cablePosition;
+    c->cablePosition = newPosition;
+    c->owner = false;
+  }
+  else if (auto* e = dynamic_cast<EndpointConnector*>(other)) {
+    delete this->cablePosition;
+    this->cablePosition = &e->position();
+    this->owner = false;
+  }
+
+  this->other = other;
+  other->other = this;
+}
+
+void CableConnector::split(Connector* other) {
+  const glm::vec2 offset { 10.0f, 10.0f };
+
+  if (auto* c = dynamic_cast<CableConnector*>(other)) {
+    glm::vec2 oldPos = this->position();
+
+    delete this->cablePosition;
+
+    this->cablePosition = new glm::vec2 { oldPos + offset };
+    this->owner = true;
+    c->cablePosition = new glm::vec2 { oldPos - offset };
+    c->owner = true;
+  }
+  else if (auto* e = dynamic_cast<EndpointConnector*>(other)) {
+    this->cablePosition = new glm::vec2 { e->position() + offset };
+    this->owner = true;
+  }
+
+  this->other = nullptr;
+  other->other = nullptr;
+}
+
+void EndpointConnector::merge(Connector* other) {
+  if (auto* c = dynamic_cast<CableConnector*>(other)) {
+    c->merge(this);
+  }
+  else if (auto* e = dynamic_cast<EndpointConnector*>(other)) {
+    throw std::runtime_error { "Attempting to merge two endpoints" };
+  }
+}
+
+void EndpointConnector::split(Connector* other) {
+  if (auto* c = dynamic_cast<CableConnector*>(other)) {
+    c->split(this);
+  }
+  else if (auto* e = dynamic_cast<EndpointConnector*>(other)) {
+    throw std::runtime_error { "Attempting to split two endpoints" };
+  }
+}
+
+EndpointConnector::EndpointConnector(Endpoint* e)
+  : endpoint { e }
+{ }
+
+Cable::Cable(glm::vec2 aPos, glm::vec2 bPos)
+  : a { aPos }
+  , b { bPos }
+{ }
+
+WiringConnection::WiringConnection(Connector* a, Connector* b, bool internal)
+  : a { a }
+  , b { b }
+  , internal { internal }
+{
+  if (this->a > this->b) {
+    std::swap(this->a, this->b);
+  }
+}
+
+Socket::Socket(Capabilities c)
+  : Endpoint { c }
+  , connector { this }
+{ }

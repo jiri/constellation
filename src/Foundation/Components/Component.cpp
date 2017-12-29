@@ -11,7 +11,7 @@ Component::Component(Universe* u)
   : universe { u }
   , debugger { this, "debug" }
 {
-  addPort("debug", new Socket(Capabilities {
+  addPort("debug", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
       .picture = { false, 0.0f },
       .energy = { false, 0.0f },
       .text = { true },

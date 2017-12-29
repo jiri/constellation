@@ -49,13 +49,13 @@ public:
         .text = { false },
     }));
 
-    addPort("data", new Socket(Capabilities {
+    this->addPort("data", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { false, 0.0f },
         .text = { true },
     }));
 
-    addPort("energy", new Socket(Capabilities {
+    this->addPort("energy", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
@@ -115,7 +115,7 @@ public:
         .text = { false },
     }));
 
-    addPort("energy", new Socket(Capabilities {
+    addPort("energy", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { false },
@@ -173,7 +173,7 @@ public:
     : Component(w)
     , history(256, 0)
   {
-    addPort("energy", new Socket(Capabilities {
+    addPort("energy", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 100.0f },
         .text = { true }
@@ -225,7 +225,7 @@ public:
     : Component(w)
     , id { ++counter }
   {
-    addPort("energy", new Socket(Capabilities {
+    addPort("energy", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 10.0f },
         .text = { true },
@@ -313,19 +313,19 @@ public:
   explicit Splitter(Universe* u)
     : Component(u)
   {
-    addPort("a", new Socket(Capabilities {
+    addPort("a", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
     }));
 
-    addPort("b", new Socket(Capabilities {
+    addPort("b", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
     }));
 
-    addPort("c", new Socket(Capabilities {
+    addPort("c", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
@@ -358,13 +358,13 @@ public:
   explicit Switch(Universe* u)
     : Component(u)
   {
-    addPort("a", new Socket(Capabilities {
+    addPort("a", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
     }));
 
-    addPort("b", new Socket(Capabilities {
+    addPort("b", this->universe->infrastructure<Wiring>().createSocket(Capabilities {
         .picture = { false, 0.0f },
         .energy = { true, 20.0f },
         .text = { false },
@@ -500,13 +500,14 @@ void DrawGraph(Universe& universe) {
   auto& wiring = universe.infrastructure<Wiring>();
 
   static Connector* activeC = nullptr;
-  if (!ImGui::IsMouseDown(0)) {
+  if (!ImGui::IsMouseDown(0) && activeC != nullptr) {
+    activeC->magnetic = false;
     activeC = nullptr;
   }
 
   for (auto& cable : wiring.cables) {
-    ImVec2 aPos = offset + cable->a.position;
-    ImVec2 bPos = offset + cable->b.position;
+    ImVec2 aPos = offset + cable->a.position();
+    ImVec2 bPos = offset + cable->b.position();
 
     window->DrawList->AddLine(aPos, bPos, red, 2.0f);
     window->DrawList->AddCircleFilled(aPos, 2.0f, white);
@@ -515,9 +516,12 @@ void DrawGraph(Universe& universe) {
     ImGui::InvisibleButton("##a", { 6.0f, 6.0f });
     if (ImGui::IsItemClicked(0)) {
       activeC = &cable->a;
+      activeC->magnetic = true;
     }
     if (ImGui::IsItemClicked(1)) {
-      cable->a.position -= glm::vec2 { 0.0f, 20.0f };
+      if (cable->a.other) {
+        wiring.separate(&cable->a, cable->a.other);
+      }
     }
 
     window->DrawList->AddCircleFilled(bPos, 2.0f, white);
@@ -526,28 +530,16 @@ void DrawGraph(Universe& universe) {
     ImGui::InvisibleButton("##b", { 6.0f, 6.0f });
     if (ImGui::IsItemClicked(0)) {
       activeC = &cable->b;
+      activeC->magnetic = true;
     }
     if (ImGui::IsItemClicked(1)) {
-      cable->b.position -= glm::vec2 { 0.0f, 20.0f };
-    }
-
-    if (activeC == &cable->a) {
-      cable->a.position += glm::vec2 { ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y };
-
-      for (auto& pair : socketPositions) {
-        if (glm::distance(cable->a.position, pair.first) < 4.0f) {
-          wiring.join(&cable->a, pair.second);
-        }
+      if (cable->b.other) {
+        wiring.separate(&cable->b, cable->b.other);
       }
     }
-    if (activeC == &cable->b) {
-      cable->b.position += glm::vec2 { ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y };
 
-      for (auto& pair : socketPositions) {
-        if (glm::distance(cable->b.position, pair.first) < 4.0f) {
-          wiring.join(&cable->b, pair.second);
-        }
-      }
+    if (activeC == &cable->a || activeC == &cable->b) {
+      activeC->position() += glm::vec2 { ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y };
     }
   }
 
