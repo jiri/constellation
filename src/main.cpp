@@ -43,7 +43,7 @@ public:
   explicit Monitor(Universe* w)
     : Component(w)
   {
-    addPort("video", new Antenna(200.0f, 42.0f, Capabilities {
+    this->addPort("video", new Antenna(200.0f, 42.0f, Capabilities {
         .picture = { true, 0.0f },
         .energy = { false, 0.0f },
         .text = { false },
@@ -61,7 +61,7 @@ public:
         .text = { false },
     }));
 
-    debugger.addCommand("clear", [this] {
+    this->debugger.addCommand("clear", [this] {
       messages.clear();
     });
   }
@@ -69,15 +69,15 @@ public:
   void update() override {
     Component::update();
 
-    if (auto data = universe->system<VideoSystem>().receive(port("video"))) {
-      color = *data;
+    if (auto data = this->universe->system<VideoSystem>().receive(port("video"))) {
+      this->color = *data;
     }
     else {
-      color = glm::vec3 { 0.0f, 0.0f, 0.0f };
+      this->color = glm::vec3 { 0.0f, 0.0f, 0.0f };
     }
 
     while (auto msg = this->universe->system<TextSystem>().receive(port("data"))) {
-      messages.push_back(*msg);
+      this->messages.push_back(*msg);
     }
   }
 
