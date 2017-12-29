@@ -6,10 +6,9 @@
 
 #include <fmt/format.h>
 
+#include <Foundation/Universe.hpp>
 #include <Foundation/Components/Component.hpp>
 #include <Foundation/Infrastructures/Wiring.hpp>
-
-class Universe;
 
 struct CPU : public Component {
   using ByteCode = std::vector<uint8_t>;
