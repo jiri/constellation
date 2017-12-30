@@ -9,7 +9,7 @@
 
 class Mesh {
 public:
-  explicit Mesh(const Geometry& g);
+  Mesh(const Geometry& g);
 
   void draw(const GCamera& c, const Program& p);
 
