@@ -404,6 +404,28 @@ public:
   bool toggle = true;
 };
 
+class Door : public Component {
+public:
+  explicit Door(Universe* u)
+    : Component(u)
+  {
+    debugger.addCommand("toggle", [this] { isOpen = !isOpen; });
+    debugger.addCommand("open", [this] { isOpen = true; });
+    debugger.addCommand("close", [this] { isOpen = false; });
+  }
+
+  void render() override { }
+
+  std::string name() const override {
+    return "door";
+  }
+
+  bool isOpen = false;
+
+  Mesh open = Geometry::load("res/door-open.obj");
+  Mesh close = Geometry::load("res/door-closed.obj");
+};
+
 void DrawGraph(Universe& universe) {
   static ImVec2 scrolling = ImVec2(0.0f, 0.0f);
 
@@ -621,6 +643,8 @@ int main() {
       new TextSystem { &universe },
   };
 
+  Door* door = nullptr;
+
   universe.components = {
       new Monitor { &universe },
       new Camera { &universe },
@@ -631,6 +655,7 @@ int main() {
       new Terminal { &universe },
       new Splitter { &universe },
       new Switch { &universe },
+      door = new Door { &universe },
   };
 
   universe.infrastructure<Manual>().load("connections.json");
@@ -639,7 +664,6 @@ int main() {
   GCamera camera { "Main camera", glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f } };
   OrbitControls controls { camera, glm::vec3 { 0.0f, 0.0f, 0.0f }, 10.0f };
   Program program { "shd/basic.vert", "shd/basic.frag" };
-  Mesh cube { Geometry::load("res/teapot.obj") };
 
   /* Main loop */
   bool done = false;
@@ -669,7 +693,7 @@ int main() {
     controls.update();
 
     /* Draw meshes */
-    cube.draw(camera, program);
+    (door->isOpen ? door->open : door->close).draw(camera, program);
 
     ImGui::Render();
     SDL_GL_SwapWindow(window);
