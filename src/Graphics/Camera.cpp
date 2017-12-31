@@ -4,13 +4,12 @@
 
 #include <SDL2/SDL.h>
 
-GCamera::GCamera(std::string name, const glm::vec3 &p, const glm::vec3 &f)
-  : name { std::move(name) }
-  , position { p }
+gl::Camera::Camera(const glm::vec3 &p, const glm::vec3 &f)
+  : position { p }
   , front { f }
 { }
 
-glm::mat4 GCamera::matrix() const {
+glm::mat4 gl::Camera::matrix() const {
   SDL_Window* window = SDL_GL_GetCurrentWindow();
   int w = 0;
   int h = 0;

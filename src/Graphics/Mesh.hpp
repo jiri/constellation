@@ -11,7 +11,7 @@ class Mesh {
 public:
   Mesh(const Geometry& g);
 
-  void draw(const GCamera& c, const Program& p);
+  void draw(const gl::Camera& c, const Program& p);
 
 private:
   GLuint vao;

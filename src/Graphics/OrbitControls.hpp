@@ -7,7 +7,7 @@
 
 class OrbitControls {
 public:
-  OrbitControls(GCamera &c, glm::vec3 target, float radius);
+  OrbitControls(gl::Camera &c, glm::vec3 target, float radius);
 
   void processEvent(SDL_Event& e);
   void update();
@@ -21,7 +21,7 @@ private:
 
   float radius;
 
-  GCamera* camera;
+  gl::Camera* camera;
 
   float pitch = 0.0f;
   float yaw = 0.0f;

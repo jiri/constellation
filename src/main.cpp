@@ -605,7 +605,7 @@ int main() {
   universe.infrastructure<Manual>().load("connections.json");
 
   /* Graphics */
-  GCamera camera { "Main camera", glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f } };
+  gl::Camera camera { glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f } };
   OrbitControls controls { camera, glm::vec3 { 0.0f, 0.0f, 0.0f }, 10.0f };
   Program program { "shd/basic.vert", "shd/basic.frag" };
 

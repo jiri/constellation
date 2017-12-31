@@ -4,7 +4,7 @@
 
 #include <imgui.h>
 
-OrbitControls::OrbitControls(GCamera &c, glm::vec3 target, float radius)
+OrbitControls::OrbitControls(gl::Camera &c, glm::vec3 target, float radius)
   : target { target }
   , radius { radius }
   , camera { &c }
