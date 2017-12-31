@@ -5,18 +5,6 @@
 
 #include <Foundation/Infrastructures/Manual.hpp>
 
-Universe::~Universe() {
-  for (Infrastructure* infrastructure : infrastructures) {
-    delete infrastructure;
-  }
-  for (Component* component : components) {
-    delete component;
-  }
-  for (System* system : systems) {
-    delete system;
-  }
-}
-
 void Universe::tick() {
   /* Compute delta time */
   if (this->oldTime == std::chrono::system_clock::time_point::min()) {
@@ -34,7 +22,7 @@ void Universe::tick() {
   /* Update systems */
   std::vector<std::thread> systemThreads;
   for (auto& system : this->systems) {
-    systemThreads.emplace_back(&System::timePassed, system, delta);
+    systemThreads.emplace_back(&System::timePassed, system.get(), delta);
   }
   for (auto& t : systemThreads) {
     t.join();
@@ -53,7 +41,7 @@ void Universe::render() {
 }
 
 Endpoint* Universe::lookupPort(const std::string& componentName, const std::string& portName) {
-  for (Component* c : this->components) {
+  for (auto& c : this->components) {
     if (c->name() == componentName) {
       for (auto& pair : c->ports) {
         auto& name = pair.first;

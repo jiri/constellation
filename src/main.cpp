@@ -395,7 +395,7 @@ void DrawGraph(Universe& universe) {
 
   /* Generate component positions */
   // TODO: Save & load this
-  for (auto* component : universe.components) {
+  for (auto& component : universe.components) {
     if (component->position == glm::vec2 { 0.0f, 0.0f }) {
       glm::vec2 size { window->Size.x, window->Size.y };
       glm::vec2 padding = 0.1f * size;
@@ -432,7 +432,7 @@ void DrawGraph(Universe& universe) {
   std::vector<std::pair<glm::vec2, Socket*>> socketPositions;
 
   /* Draw components */
-  for (auto* c : universe.components) {
+  for (auto& c : universe.components) {
     window->DrawList->AddCircleFilled(offset + c->position, 4.0f, white);
 
     ImVec2 labelSize = ImGui::CalcTextSize(c->name().c_str());
@@ -463,10 +463,10 @@ void DrawGraph(Universe& universe) {
     ImGui::InvisibleButton("##handle", { 12.0f, 12.0f });
 
     if (ImGui::IsItemClicked(0)) {
-      active = c;
+      active = c.get();
     }
 
-    if (active == c) {
+    if (active == c.get()) {
       c->position += glm::vec2 { ImGui::GetIO().MouseDelta.x, ImGui::GetIO().MouseDelta.y };
     }
   }
@@ -530,7 +530,7 @@ void DrawGraph(Universe& universe) {
 void SystemUI(Universe& universe) {
   ImGui::Begin("Systems");
 
-  for (System* system : universe.systems) {
+  for (auto& system : universe.systems) {
     if (ImGui::TreeNode(system->name.c_str())) {
       system->UI();
       ImGui::TreePop();
@@ -583,32 +583,24 @@ int main() {
   /* Components */
   Universe universe;
 
-  universe.infrastructures = {
-      new Wireless { &universe },
-      new Manual { &universe },
-      new Wiring { &universe },
-  };
+  universe.add<Wireless>();
+  universe.add<Manual>();
+  universe.add<Wiring>();
 
-  universe.systems = {
-      new VideoSystem { &universe },
-      new EnergySystem { &universe },
-      new TextSystem { &universe },
-  };
+  universe.add<VideoSystem>();
+  universe.add<EnergySystem>();
+  universe.add<TextSystem>();
 
-  Door* door = nullptr;
-
-  universe.components = {
-      new Monitor { &universe },
-      new Camera { &universe },
-      new Generator { &universe },
-      new Lamp { &universe },
-      new Lamp { &universe },
-      new CPU { &universe },
-      new Terminal { &universe },
-      new Splitter { &universe },
-      new Switch { &universe },
-      door = new Door { &universe },
-  };
+  universe.add<Monitor>();
+  universe.add<Camera>();
+  universe.add<Generator>();
+  universe.add<Lamp>();
+  universe.add<Lamp>();
+  universe.add<CPU>();
+  universe.add<Terminal>();
+  universe.add<Splitter>();
+  universe.add<Switch>();
+  Door* door = universe.add<Door>();
 
   universe.infrastructure<Manual>().load("connections.json");
 

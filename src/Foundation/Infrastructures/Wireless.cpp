@@ -3,8 +3,8 @@
 #include <Foundation/Universe.hpp>
 
 void Wireless::update() {
-  for (Component* componentA : universe->components) {
-    for (Component* componentB : universe->components) {
+  for (auto& componentA : this->universe->components) {
+    for (auto& componentB : this->universe->components) {
       if (componentA == componentB) {
         continue;
       }

@@ -10,12 +10,10 @@
 #include <Foundation/Systems/System.hpp>
 
 struct Universe {
-  ~Universe();
-
   template <typename T>
   T& system() {
-    for (System* s : systems) {
-      if (auto t = dynamic_cast<T*>(s)) {
+    for (auto& s : systems) {
+      if (auto t = dynamic_cast<T*>(s.get())) {
         return *t;
       }
     }
@@ -26,8 +24,8 @@ struct Universe {
 
   template <typename T>
   T& infrastructure() {
-    for (Infrastructure* i : infrastructures) {
-      if (auto t = dynamic_cast<T*>(i)) {
+    for (auto& i : infrastructures) {
+      if (auto t = dynamic_cast<T*>(i.get())) {
         return *t;
       }
     }
@@ -36,14 +34,34 @@ struct Universe {
     };
   }
 
+  template <typename T, typename... Args>
+  T* add(Args&&... args) {
+    auto* ptr = new T { this, std::forward<Args>(args)... };
+
+    if constexpr (std::is_base_of_v<Infrastructure, T>) {
+      this->infrastructures.emplace_back(ptr);
+    }
+    else if constexpr (std::is_base_of_v<System, T>) {
+      this->systems.emplace_back(ptr);
+    }
+    else if constexpr (std::is_base_of_v<Component, T>) {
+      this->components.emplace_back(ptr);
+    }
+    else {
+      throw std::domain_error { "Universe doesn't support adding this type" };
+    }
+
+    return ptr;
+  }
+
   void tick();
   void render();
 
   Endpoint* lookupPort(const std::string& component, const std::string& port);
 
-  std::vector<Infrastructure*> infrastructures;
-  std::vector<Component*> components;
-  std::vector<System*> systems;
+  std::vector<std::unique_ptr<Infrastructure>> infrastructures;
+  std::vector<std::unique_ptr<Component>> components;
+  std::vector<std::unique_ptr<System>> systems;
 
   std::vector<Connection> connections;
 
