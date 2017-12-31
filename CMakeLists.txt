@@ -67,6 +67,8 @@ set(FOUNDATION_SOURCE_FILES
         src/Foundation/Components/Component.cpp
         src/Foundation/Components/CPU.hpp
         src/Foundation/Components/CPU.cpp
+        src/Foundation/Components/Terminal.hpp
+        src/Foundation/Components/Terminal.cpp
         src/Foundation/Systems/Energy.hpp
         src/Foundation/Systems/Energy.cpp
         src/Foundation/Systems/Video.hpp

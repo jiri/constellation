@@ -3,7 +3,6 @@
 #include <regex>
 #include <experimental/filesystem>
 #include <fstream>
-#include <list>
 
 #include <fmt/format.h>
 #include <gsl/gsl>
@@ -35,6 +34,7 @@
 #include <Foundation/Systems/Energy.hpp>
 #include <Foundation/Systems/Text.hpp>
 #include <Foundation/Components/CPU.hpp>
+#include <Foundation/Components/Terminal.hpp>
 
 #include <json.hpp>
 
@@ -259,54 +259,6 @@ public:
 
   static inline size_t counter = 0;
   size_t id = 0;
-};
-
-class Terminal : public Component {
-public:
-  using Component::Component;
-
-  void update() override {
-    while (auto s = this->universe->system<TextSystem>().receive(port("debug"))) {
-      messages.push_back(*s);
-      newMessage = true;
-    }
-
-    Component::update();
-  }
-
-  void render() override {
-    ImGui::Begin("Terminal");
-
-    ImGui::BeginChild("##text", { 0, -ImGui::GetItemsLineHeightWithSpacing() });
-    for (auto& msg : messages) {
-      ImGui::Text("%s", msg.c_str());
-    }
-    if (newMessage) {
-      ImGui::SetScrollHere();
-      newMessage = false;
-    }
-    ImGui::EndChild();
-
-    ImGui::PushItemWidth(-1);
-    if (ImGui::InputText("##input", buf, 256, ImGuiInputTextFlags_EnterReturnsTrue)) {
-      this->messages.push_back(fmt::format("> {}", buf));
-      this->newMessage = true;
-      this->universe->system<TextSystem>().send(port("debug"), buf);
-      ImGui::SetKeyboardFocusHere();
-      buf[0] = '\0';
-    }
-    ImGui::PopItemWidth();
-
-    ImGui::End();
-  }
-
-  std::string name() const override {
-    return "terminal";
-  }
-
-  bool newMessage = false;
-  char buf[256] {};
-  std::list<std::string> messages;
 };
 
 class Splitter : public Component {
