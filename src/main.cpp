@@ -605,8 +605,7 @@ int main() {
   universe.infrastructure<Manual>().load("connections.json");
 
   /* Graphics */
-  gl::Camera camera { glm::vec3 { 0.0f, 0.0f, 0.0f }, glm::vec3 { 0.0f, 0.0f, 0.0f } };
-  OrbitControls controls { camera, glm::vec3 { 0.0f, 0.0f, 0.0f }, 10.0f };
+  gl::Camera camera { std::make_unique<OrbitControls>(glm::vec3 { 0.0f }, 10.0f) };
   Program program { "shd/basic.vert", "shd/basic.frag" };
 
   /* Main loop */
@@ -617,7 +616,7 @@ int main() {
       if (e.type == SDL_QUIT) {
         done = true;
       }
-      controls.processEvent(e);
+      camera.processEvent(e);
       ImGui_ImplSdlGL3_ProcessEvent(&e);
     }
 
@@ -634,7 +633,7 @@ int main() {
     DrawGraph(universe);
     SystemUI(universe);
 
-    controls.update();
+    camera.update();
 
     /* Draw meshes */
     (door->isOpen ? door->open : door->close).draw(camera, program);

@@ -4,10 +4,19 @@
 
 #include <SDL2/SDL.h>
 
-gl::Camera::Camera(const glm::vec3 &p, const glm::vec3 &f)
+gl::Camera::Camera(glm::vec3 p, glm::vec3 f, std::unique_ptr<gl::CameraControls> c)
   : position { p }
   , front { f }
-{ }
+  , controls { std::move(c) }
+{
+  this->update();
+}
+
+gl::Camera::Camera(std::unique_ptr<gl::CameraControls> c)
+  : controls { std::move(c) }
+{
+  this->update();
+}
 
 glm::mat4 gl::Camera::matrix() const {
   SDL_Window* window = SDL_GL_GetCurrentWindow();
@@ -17,4 +26,16 @@ glm::mat4 gl::Camera::matrix() const {
 
   return glm::perspective(glm::radians(75.0f), float(w) / float(h), 0.01f, 100.0f)
          * glm::lookAt(position, position + front, up);
+}
+
+void gl::Camera::processEvent(SDL_Event& e) {
+  if (this->controls) {
+    this->controls->processEvent(e);
+  }
+}
+
+void gl::Camera::update() {
+  if (this->controls) {
+    this->controls->update(this->position, this->front);
+  }
 }

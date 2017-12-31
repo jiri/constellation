@@ -4,10 +4,9 @@
 
 #include <imgui.h>
 
-OrbitControls::OrbitControls(gl::Camera &c, glm::vec3 target, float radius)
+OrbitControls::OrbitControls(glm::vec3 target, float radius)
   : target { target }
   , radius { radius }
-  , camera { &c }
 { }
 
 void OrbitControls::processEvent(SDL_Event &e) {
@@ -32,7 +31,7 @@ void OrbitControls::processEvent(SDL_Event &e) {
   }
 }
 
-void OrbitControls::update() {
+void OrbitControls::update(glm::vec3& position, glm::vec3& front) {
   if (!ImGui::GetIO().WantCaptureMouse) {
     /* Process input */
     yaw    += 0.005f * dx;
@@ -47,8 +46,8 @@ void OrbitControls::update() {
   radius = glm::clamp(radius, 1.0f + eps, 50.0f - eps);
 
   glm::vec3 direction { cos(pitch) * cos(yaw), sin(pitch), cos(pitch) * sin(-yaw) };
-  camera->position = target + radius * direction;
-  camera->front = glm::normalize(target - camera->position);
+  position = target + radius * direction;
+  front = glm::normalize(target - position);
 
   /* Reset state */
   dx = 0.0f;
