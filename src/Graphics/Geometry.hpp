@@ -26,7 +26,7 @@ public:
     , indices { std::move(is) }
   { }
 
-  static Geometry load(fs::path filename);
+  static Geometry load(const fs::path& filename);
 
   Geometry scale(float scale) const;
 

@@ -51,7 +51,7 @@ const Geometry Geometry::CUBE {
     },
 };
 
-Geometry Geometry::load(fs::path filename) {
+Geometry Geometry::load(const fs::path& filename) {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
   std::vector<tinyobj::material_t> materials;
