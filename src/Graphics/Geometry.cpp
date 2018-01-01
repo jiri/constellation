@@ -59,14 +59,8 @@ Geometry Geometry::load(const fs::path& filename) {
 
   bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, filename.c_str());
 
-  // TODO: Proper error handling
-  if (!err.empty()) {
-    fmt::print(stderr, "{}\n", err);
-  }
-
-  if (!ret) {
-    /* Err may contain an error or warning message */
-    throw err;
+  if (!ret || !err.empty()) {
+    throw std::runtime_error { err };
   }
 
   std::vector<Vertex> vertices;
