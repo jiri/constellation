@@ -57,7 +57,7 @@ Geometry Geometry::load(const fs::path& filename) {
   std::vector<tinyobj::material_t> materials;
   std::string err;
 
-  bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, filename.c_str());
+  bool ret = tinyobj::LoadObj(&attrib, &shapes, &materials, &err, filename.c_str(), (filename.parent_path() / "/").c_str());
 
   if (!ret || !err.empty()) {
     throw std::runtime_error { err };
