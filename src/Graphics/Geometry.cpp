@@ -7,47 +7,47 @@
 
 const Geometry Geometry::CUBE {
     {
-        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f } },
-        Vertex { glm::vec3 {  0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f } },
-        Vertex { glm::vec3 {  0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f } },
-        Vertex { glm::vec3 {  0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f } },
-        Vertex { glm::vec3 { -0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f } },
-        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f } },
+        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f,  0.0f, -1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
 
-        Vertex { glm::vec3 { -0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f } },
-        Vertex { glm::vec3 {  0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f } },
-        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f } },
-        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f } },
-        Vertex { glm::vec3 { -0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f } },
-        Vertex { glm::vec3 { -0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f } },
+        Vertex { glm::vec3 { -0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f,  0.0f,  1.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
 
-        Vertex { glm::vec3 { -0.5f,  0.5f,  0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 { -0.5f,  0.5f, -0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 { -0.5f, -0.5f,  0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 { -0.5f,  0.5f,  0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f } },
+        Vertex { glm::vec3 { -0.5f,  0.5f,  0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f,  0.5f, -0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f, -0.5f,  0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f,  0.5f,  0.5f }, glm::vec3 { -1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
 
-        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f,  0.5f, -0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f, -0.5f, -0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f, -0.5f, -0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f, -0.5f,  0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f } },
+        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f,  0.5f, -0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f, -0.5f, -0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f, -0.5f, -0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f, -0.5f,  0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  1.0f,  0.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
 
-        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f } },
-        Vertex { glm::vec3 { -0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f } },
-        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f } },
+        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f, -0.5f,  0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f, -0.5f, -0.5f }, glm::vec3 {  0.0f, -1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
 
-        Vertex { glm::vec3 { -0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f } },
-        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f } },
-        Vertex { glm::vec3 { -0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f } },
-        Vertex { glm::vec3 { -0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f } },
+        Vertex { glm::vec3 { -0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 {  0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f,  0.5f,  0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
+        Vertex { glm::vec3 { -0.5f,  0.5f, -0.5f }, glm::vec3 {  0.0f,  1.0f,  0.0f }, glm::vec2 { 0.0f, 0.0f }, 0 },
     },
 };
 
@@ -65,26 +65,38 @@ Geometry Geometry::load(const fs::path& filename) {
 
   std::vector<Vertex> vertices;
 
-  for (const auto &shape : shapes) {
-    for (const auto& index : shape.mesh.indices) {
-      Vertex vert {
-          glm::vec3 {
-              attrib.vertices[3 * index.vertex_index + 0],
-              attrib.vertices[3 * index.vertex_index + 1],
-              attrib.vertices[3 * index.vertex_index + 2],
-          },
-          glm::vec3 {
-              attrib.normals[3 * index.normal_index + 0],
-              attrib.normals[3 * index.normal_index + 1],
-              attrib.normals[3 * index.normal_index + 2],
-          },
-//          glm::vec2 {
-//              attrib.texcoords[2 * index.texcoord_index + 0],
-//              attrib.texcoords[2 * index.texcoord_index + 1],
-//          },
-      };
+  for (const auto& shape : shapes) {
+    size_t index_offset = 0;
 
-      vertices.push_back(vert);
+    for (size_t f = 0; f < shape.mesh.num_face_vertices.size(); f++) {
+      int fv = shape.mesh.num_face_vertices[f];
+
+      /* Loop over vertices in the face */
+      for (size_t v = 0; v < fv; v++) {
+        tinyobj::index_t idx = shape.mesh.indices[index_offset + v];
+
+        Vertex vert {
+            glm::vec3 {
+                attrib.vertices[3 * idx.vertex_index + 0],
+                attrib.vertices[3 * idx.vertex_index + 1],
+                attrib.vertices[3 * idx.vertex_index + 2],
+            },
+            glm::vec3 {
+                attrib.normals[3 * idx.normal_index + 0],
+                attrib.normals[3 * idx.normal_index + 1],
+                attrib.normals[3 * idx.normal_index + 2],
+            },
+            glm::vec2 {
+                attrib.texcoords.empty() ? 0.0f : attrib.texcoords[2 * idx.texcoord_index + 0],
+                attrib.texcoords.empty() ? 0.0f : attrib.texcoords[2 * idx.texcoord_index + 1],
+            },
+            static_cast<float>(shape.mesh.material_ids[f]),
+        };
+
+        vertices.push_back(vert);
+      }
+
+      index_offset += fv;
     }
   }
 
