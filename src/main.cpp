@@ -607,6 +607,9 @@ int main() {
   /* Graphics */
   gl::Camera camera { std::make_unique<OrbitControls>(glm::vec3 { 0.0f }, 10.0f) };
   Program program { "shd/basic.vert", "shd/basic.frag" };
+  Program monitorProgram { "shd/basic.vert", "shd/monitor.frag" };
+
+  Mesh monitor { Geometry::load("res/monitor.obj") };
 
   /* Main loop */
   bool done = false;
@@ -636,7 +639,8 @@ int main() {
     camera.update();
 
     /* Draw meshes */
-    (door->isOpen ? door->open : door->close).draw(camera, program);
+//    (door->isOpen ? door->open : door->close).draw(camera, program);
+    monitor.draw(camera, monitorProgram);
 
     ImGui::Render();
     SDL_GL_SwapWindow(window);
