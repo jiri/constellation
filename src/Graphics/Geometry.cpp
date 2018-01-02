@@ -90,7 +90,7 @@ Geometry Geometry::load(const fs::path& filename) {
                 attrib.texcoords.empty() ? 0.0f : attrib.texcoords[2 * idx.texcoord_index + 0],
                 attrib.texcoords.empty() ? 0.0f : attrib.texcoords[2 * idx.texcoord_index + 1],
             },
-            static_cast<float>(shape.mesh.material_ids[f]),
+            shape.mesh.material_ids[f],
         };
 
         vertices.push_back(vert);
