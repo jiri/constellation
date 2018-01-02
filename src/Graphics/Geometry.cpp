@@ -105,8 +105,12 @@ Geometry Geometry::load(const fs::path& filename) {
 
 Geometry Geometry::scale(float scale) const {
   std::vector<Vertex> vs;
-  for (Vertex& v : vs) {
-    v.position *= scale;
+
+  for (const Vertex& v : this->vertices) {
+    Vertex vert { v };
+    vert.position *= scale;
+    vs.push_back(vert);
   }
+
   return { vs, indices };
 }
