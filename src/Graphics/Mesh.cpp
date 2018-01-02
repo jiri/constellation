@@ -32,14 +32,8 @@ Mesh::Mesh(const Geometry& g)
   glBindVertexArray(0);
 }
 
-void Mesh::draw(const gl::Camera& c, const Program& p) {
-  glUseProgram(p);
-
-  glUniformMatrix4fv(glGetUniformLocation(p, "camera"), 1, GL_FALSE, glm::value_ptr(c.matrix()));
-
+void Mesh::draw() const {
   glBindVertexArray(vao);
-  glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, nullptr);
+  glDrawElements(GL_TRIANGLES, this->numIndices, GL_UNSIGNED_INT, nullptr);
   glBindVertexArray(0);
-
-  glUseProgram(0);
 }

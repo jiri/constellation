@@ -17,8 +17,10 @@
 
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
 #include <Graphics/Program.hpp>
+#include <Graphics/Framebuffer.hpp>
 #include <Graphics/Geometry.hpp>
 #include <Graphics/Mesh.hpp>
 #include <Graphics/Camera.hpp>
@@ -609,7 +611,10 @@ int main() {
   Program program { "shd/basic.vert", "shd/basic.frag" };
   Program monitorProgram { "shd/basic.vert", "shd/monitor.frag" };
 
-  Mesh monitor { Geometry::load("res/monitor.obj") };
+  Mesh monitor { Geometry::load("res/monitor.obj").scale(4.0f) };
+  Mesh cube { Geometry::CUBE };
+
+  Framebuffer framebuffer { 640, 480 };
 
   /* Main loop */
   bool done = false;
@@ -625,6 +630,8 @@ int main() {
 
     ImGui_ImplSdlGL3_NewFrame(window);
 
+    camera.update();
+
     /* Rendering */
     glClearColor(0.17f, 0.24f, 0.31f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -636,11 +643,31 @@ int main() {
     DrawGraph(universe);
     SystemUI(universe);
 
-    camera.update();
-
     /* Draw meshes */
-//    (door->isOpen ? door->open : door->close).draw(camera, program);
-    monitor.draw(camera, monitorProgram);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+    framebuffer.setViewPort();
+
+    glClearColor(0.24f, 0.17f, 0.31f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glUseProgram(program);
+    glUniformMatrix4fv(glGetUniformLocation(program, "camera"), 1, GL_FALSE, glm::value_ptr(camera.matrix()));
+    cube.draw();
+    glUseProgram(0);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    int w;
+    int h;
+    SDL_GL_GetDrawableSize(window, &w, &h);
+    glViewport(0, 0, w, h);
+
+    glUseProgram(monitorProgram);
+    glUniformMatrix4fv(glGetUniformLocation(monitorProgram, "camera"), 1, GL_FALSE, glm::value_ptr(camera.matrix()));
+    glUniform1ui(glGetUniformLocation(monitorProgram, "image"), framebuffer.texture());
+
+    monitor.draw();
+
+    glUseProgram(0);
 
     ImGui::Render();
     SDL_GL_SwapWindow(window);

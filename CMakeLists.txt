@@ -44,6 +44,8 @@ set(GRAPHICS_SOURCE_FILES
         src/Graphics/Camera.cpp
         src/Graphics/OrbitControls.hpp
         src/Graphics/OrbitControls.cpp
+        src/Graphics/Framebuffer.hpp
+        src/Graphics/Framebuffer.cpp
 )
 add_library(${PROJECT_NAME}_Graphics ${GRAPHICS_SOURCE_FILES})
 

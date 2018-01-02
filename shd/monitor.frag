@@ -1,5 +1,7 @@
 #version 330 core
 
+uniform sampler2D image;
+
 in vec3 vNormal;
 in vec2 vUV;
 in float vMaterialId;
@@ -11,6 +13,6 @@ void main() {
         color = vec4(0.3, 0.3, 0.3, 1.0);
     }
     else {
-        color = vec4(vUV, 0.0, 1.0);
+        color = texture(image, vUV);
     }
 }
