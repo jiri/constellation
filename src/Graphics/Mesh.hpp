@@ -11,6 +11,9 @@ class Mesh {
 public:
   Mesh(const Geometry& g);
 
+  Mesh(const Mesh&) = delete;
+  Mesh(Mesh&&) = default;
+
   void draw() const;
 
 private:

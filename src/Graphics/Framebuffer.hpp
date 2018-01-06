@@ -5,6 +5,8 @@
 class Framebuffer {
 public:
   Framebuffer(uint32_t width, uint32_t height);
+  Framebuffer(const Framebuffer&) = delete;
+  Framebuffer(Framebuffer&&) = default;
   ~Framebuffer();
 
   void setViewPort() const;
